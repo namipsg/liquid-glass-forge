@@ -147,3 +147,17 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local research, execution notes and unpublished working material
+/private/
+/.private/
+/work/
+/outputs/
+*.private.md
+*.private.json
+
+# Local tooling and browser-test output
+.DS_Store
+playwright-report/
+test-results/
+blob-report/
