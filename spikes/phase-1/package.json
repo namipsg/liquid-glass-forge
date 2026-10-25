@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.34.5",
   "scripts": {
     "serve": "node server.mjs",
-    "test:unit": "node --test cpu.test.mjs",
+    "test:unit": "node --test cpu.test.mjs admission.test.mjs",
     "test:browser": "playwright test",
     "benchmark": "node benchmark.mjs"
   },

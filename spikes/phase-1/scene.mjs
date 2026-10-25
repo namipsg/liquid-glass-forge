@@ -1,4 +1,4 @@
-import { prepareSource, renderCpu } from './cpu.mjs';
+import { prepareSource, renderCpu, cpuStorage } from './cpu.mjs';
 import { createWebGLRenderer } from './webgl.mjs';
 
 const now = () => performance.now();
@@ -51,6 +51,7 @@ export async function benchmark(source, { backend, count = 1, width = 320, heigh
     }
     const setupMs = now() - setupStart;
     const options = { width, height, radius: Math.min(width, height) / 5, bevel: Math.min(width, height) / 6, strength: 18 };
+    const commands = canvases.map(target => ({ target, options: { ...options } }));
     const batchesMs = [], frameIntervalsMs = [], rawFrames = [];
     const kernelMs = [], presentationMs = [], completionAgeMs = [], oldestSurfaceAgeMs = [];
     let previousFrame;
@@ -59,7 +60,12 @@ export async function benchmark(source, { backend, count = 1, width = 320, heigh
       const start = now();
       let kernel = 0, presentation = 0;
       const completedAt = [];
-      for (let surface = 0; surface < count; surface++) {
+      let gpuBatch = null;
+      if (backend === 'webgl') {
+        commands.forEach((command, surface) => { command.options.strength = 12 + ((i + surface) % 20) / 5; });
+        gpuBatch = renderer.renderBatch(commands);
+        completedAt.push(...gpuBatch.completedAt);
+      } else for (let surface = 0; surface < count; surface++) {
         // Changing optical state defeats a no-op result/cache shortcut.
         options.strength = 12 + ((i + surface) % 20) / 5;
         if (backend === 'cpu') {
@@ -69,7 +75,7 @@ export async function benchmark(source, { backend, count = 1, width = 320, heigh
           const copyStart = now();
           contexts[surface].putImageData(imageData[surface], 0, 0);
           presentation += now() - copyStart;
-        } else renderer.render(options, canvases[surface]);
+        }
         completedAt.push(now());
       }
       const elapsed = now() - start;
@@ -82,21 +88,25 @@ export async function benchmark(source, { backend, count = 1, width = 320, heigh
         completionAgeMs.push(completionAge); oldestSurfaceAgeMs.push(oldestSurfaceAge);
         rawFrames.push({ frame: i - warmup, timestamp, batchMs: elapsed, intervalMs: previousFrame === undefined ? null : timestamp - previousFrame,
           completionAgeMs: completionAge, oldestSurfaceAgeMs: oldestSurfaceAge, completedAt,
-          cpuKernelMs: backend === 'cpu' ? kernel : null, cpuPresentationMs: backend === 'cpu' ? presentation : null });
+          cpuKernelMs: backend === 'cpu' ? kernel : null, cpuPresentationMs: backend === 'cpu' ? presentation : null,
+          gpuDrawAndBlitMs: gpuBatch?.drawAndBlitMs ?? null, gpuSnapshotMs: gpuBatch?.snapshotMs ?? null, gpuTargetCopyMs: gpuBatch?.targetCopyMs ?? null });
       }
       previousFrame = timestamp;
     }
     const gpuBeforeDestroy = renderer?.inspect() ?? null;
+    const cpuOwned = cpuStorage();
     return {
       backend, count, width, height, frames, warmup, setupMs,
       source: { width: source.width, height: source.height, updatePolicy: 'decoded once, static pixels; optical strength changes each frame' },
-      timedWork: backend === 'cpu' ? 'JS optics and Canvas2D putImageData for entire batch' : 'WebGL commands, FBO blit and synchronous Canvas2D copies for entire batch; not a GPU timer',
+      timedWork: backend === 'cpu' ? 'JS optics and Canvas2D putImageData for entire batch' : 'WebGL atlas commands, one FBO blit, one synchronous GPU snapshot and all Canvas2D tile copies; not a GPU timer',
       batchMs: summary(batchesMs), frameIntervalMs: summary(frameIntervalsMs), rawFrames,
       completionAgeMs: summary(completionAgeMs), oldestSurfaceAgeMs: summary(oldestSurfaceAgeMs),
       cpuKernelMs: backend === 'cpu' ? summary(kernelMs) : null,
       cpuPresentationMs: backend === 'cpu' ? summary(presentationMs) : null,
       ageDefinition: 'Time from the rAF optical revision timestamp to the last synchronous Canvas2D copy. Oldest-surface age is first-to-last copy skew at batch completion. Neither measures physical display scanout. Static source has no producer revision/latency measurement.',
-      estimatedOwnedBytes: gpuBeforeDestroy?.estimatedOwnedBytes ?? prepared.data.byteLength + outputs.reduce((sum, array) => sum + array.byteLength, 0),
+      estimatedOwnedBytes: gpuBeforeDestroy?.estimatedOwnedBytes ?? prepared.data.byteLength + outputs.reduce((sum, array) => sum + array.byteLength, 0) + cpuOwned.encodingTableBytes + cpuOwned.geometryBytes,
+      sharedEncodingTableBytes: backend === 'cpu' ? cpuOwned.encodingTableBytes : 0,
+      sharedGeometryBytes: backend === 'cpu' ? cpuOwned.geometryBytes : 0,
       targetCanvasBytesLowerBound: count * width * height * 4,
       inputBytes: source.data.byteLength,
       allocationNote: 'Explicit array/texture/drawing-buffer storage estimate only; target canvases and borrowed input shown separately. Excludes browser/driver/compositor overhead and transient allocations; not measured process or GPU memory.',
@@ -114,8 +124,10 @@ async function boot() {
   const { source, acquisitionMs } = await loadImageSource('/fixture.svg');
   const cpuCanvas = document.querySelector('#cpu');
   const cpuOptions = { width: 320, height: 180, radius: 36, bevel: 28, strength: 18 };
+  const cpuStart = now();
   const prepared = prepareSource(source);
   cpuCanvas.getContext('2d').putImageData(new ImageData(renderCpu(prepared, cpuOptions), 320, 180), 0, 0);
+  const cpuFirstFrameMs = now() - cpuStart;
   let gpuStatus = 'disabled for forced CPU mode';
   let gpuRenderer = null;
   if (new URLSearchParams(location.search).get('mode') !== 'cpu') {
@@ -135,7 +147,7 @@ async function boot() {
       return { ok: false, code: error.code ?? error.name, error: error.message };
     }
   };
-  window.phase1 = { source, cpuCanvas, cpuOptions, acquisitionMs, gpuRenderer, renderGpu, benchmark: options => benchmark(source, options) };
+  window.phase1 = { source, cpuCanvas, cpuOptions, acquisitionMs, cpuFirstFrameMs, gpuRenderer, renderGpu, benchmark: options => benchmark(source, options) };
   window.phase1Ready = true;
   document.querySelector('#status').textContent = `Local image decoded and read in ${acquisitionMs.toFixed(2)} ms. CPU frame painted. WebGL: ${gpuStatus}`;
   const button = document.querySelector('#benchmark');

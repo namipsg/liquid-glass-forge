@@ -4,6 +4,7 @@
 import { chromium } from '@playwright/test';
 import { mkdir, writeFile, chmod } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { evaluateAdmission } from './admission.mjs';
 import { fileURLToPath } from 'node:url';
 
 const options = {
@@ -247,9 +248,11 @@ try {
   adapter = await attach();
   receipt.capabilities = adapter.capabilities;
   await boot();
-  receipt.environment = await adapter.run(() => ({ userAgent: navigator.userAgent, platform: navigator.platform,
+  receipt.environment = await adapter.run(async () => ({ userAgent: navigator.userAgent, platform: navigator.platform,
+    clientHints: await navigator.userAgentData?.getHighEntropyValues(['model', 'platformVersion']) ?? null,
     dpr: devicePixelRatio, width: innerWidth, height: innerHeight, visibility: document.visibilityState,
-    acquisitionMs: window.phase1.acquisitionMs, source: { width: window.phase1.source.width, height: window.phase1.source.height },
+    acquisitionMs: window.phase1.acquisitionMs, cpuFirstFrameMs: window.phase1.cpuFirstFrameMs,
+    source: { width: window.phase1.source.width, height: window.phase1.source.height },
     forcedCpuPreview: window.phase1.gpuRenderer === null }));
   // Safari WebDriver cannot install a pre-navigation script. Its boot WebGL
   // request count remains explicitly missing; the direct CPU path is checked.
@@ -268,6 +271,13 @@ try {
   record('parity', parity, parity.every(r => r.max <= 3 && r.mean <= .5 && r.backend === 'webgl' && r.sourceUnchanged));
   const shared = await adapter.run(sharedCheck);
   record('sharedSurfaceAndCleanup', shared, shared.requests === 1 && shared.preserved && shared.opaqueAlpha === 255 && shared.transparent && shared.width === 3 && shared.height === 5 && shared.active.renderCount === 3 && shared.dead.destroyed && shared.dead.estimatedOwnedBytes === 0 && Object.values(shared.dead.resources).every(n => n === 0) && shared.destroyedCode === 'DESTROYED');
+  const batched = await adapter.run(async () => (await import('/batch-check.mjs')).checkBatch());
+  record('atlasBatch', batched, batched.parity.every(p => p.max <= 3 && p.mean <= .5)
+    && ['idle', 'preserved', 'cleared', 'sourceUnchanged', 'duplicateRejected', 'budgetRejected'].every(key => batched[key])
+    && batched.requests === 1 && batched.batch.gpuSnapshots === 1 && batched.batch.targets === 4
+    && batched.active.renderCount === 6 && batched.active.batchCount === 2
+    && batched.active.resources.contexts === 1 && batched.active.resources.textures === 3
+    && batched.dead.estimatedOwnedBytes === 0 && Object.values(batched.dead.resources).every(value => value === 0));
   const source = await adapter.run(sourceCheck);
   record('sourceRestrictions', source, source.taintError === 'SecurityError' && source.uploadError === 'SecurityError' && source.domError === 'TypeError' && source.approvedLength === 256 && source.approvedAlpha > 0);
   receipt.graphics = await adapter.run(async () => {
@@ -279,7 +289,7 @@ try {
         unmaskedRenderer: debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : null, resources: renderer.inspect() };
     } finally { renderer.destroy(); }
   });
-  if (process.env.PHASE1_BENCHMARK === '1') {
+  if (process.env.PHASE1_BENCHMARK === '1' || process.env.PHASE1_ADMISSION === '1') {
     const repeats = Number(process.env.PHASE1_REPEATS ?? 2);
     if (!Number.isInteger(repeats) || repeats < 1 || repeats > 3) throw new Error('PHASE1_REPEATS must be 1..3');
     for (let index = 0; index < repeats; index++) {
@@ -296,6 +306,8 @@ try {
     }
     receipt.benchmarkCleanup = await adapter.run(() => ({ remainingTargets: document.querySelector('#measurements').children.length, visibility: document.visibilityState }));
     record('benchmarkCleanup', receipt.benchmarkCleanup, receipt.benchmarkCleanup.remainingTargets === 0);
+    receipt.admission = evaluateAdmission(receipt.benchmarks);
+    if (process.env.PHASE1_ADMISSION === '1') record('performanceAdmission', receipt.admission, receipt.admission.pass);
   }
   const screenshots = resolve(root, 'private/phase-1/screenshots');
   await mkdir(screenshots, { recursive: true, mode: 0o700 });

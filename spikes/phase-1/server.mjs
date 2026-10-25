@@ -8,7 +8,7 @@ const root = fileURLToPath(new URL('.', import.meta.url));
 const files = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/index.html', ['index.html', 'text/html; charset=utf-8']],
-  ...['cpu.mjs', 'webgl.mjs', 'scene.mjs'].map(name => [`/${name}`, [name, 'text/javascript; charset=utf-8']]),
+  ...['cpu.mjs', 'webgl.mjs', 'scene.mjs', 'batch-check.mjs'].map(name => [`/${name}`, [name, 'text/javascript; charset=utf-8']]),
   ['/fixture.svg', ['fixture.svg', 'image/svg+xml']],
 ]);
 

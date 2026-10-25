@@ -122,3 +122,29 @@ test('validates dimensions, finite effect values, rectangles, and buffer sizes',
   prepared.data[0] = NaN;
   assert.throws(() => renderCpu(prepared, options), /finite/);
 });
+
+test('encoding matches analytical byte decisions between table buckets and near thresholds', () => {
+  const values = Array.from({ length: 4100 }, (_, i) => i / 4099);
+  for (let byte = 1; byte <= 255; byte++) {
+    const encoded = (byte - .5) / 255;
+    const threshold = encoded <= .04045 ? encoded / 12.92 : ((encoded + .055) / 1.055) ** 2.4;
+    values.push(threshold - 1e-8, threshold, threshold + 1e-8);
+  }
+  for (const value of values) {
+    const linear = Math.fround(value);
+    const prepared = { width: 1, height: 1, data: new Float32Array([linear, linear, linear, 1]) };
+    const expected = Math.round((linear <= .0031308 ? 12.92 * linear : 1.055 * linear ** (1 / 2.4) - .055) * 255);
+    const actual = renderCpu(prepared, { width: 1, height: 1, radius: 0, strength: 0 });
+    assert.equal(actual[0], expected, `linear ${linear}`);
+  }
+});
+
+test('cached geometry and the opaque fast path observe source alpha changes', () => {
+  const prepared = source(2, 2, [255, 0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 255]);
+  const settings = { width: 2, height: 2, radius: 0, strength: 0 };
+  assert.deepEqual(pixel(renderCpu(prepared, settings), 2, 0, 0), [255, 0, 0, 255]);
+  prepared.data.set([0, 0, 0, 0]);
+  assert.deepEqual(pixel(renderCpu(prepared, settings), 2, 0, 0), [0, 0, 0, 0]);
+  prepared.data.set([.5, 0, 0, .5]);
+  assert.deepEqual(pixel(renderCpu(prepared, settings), 2, 0, 0), [255, 0, 0, 128]);
+});

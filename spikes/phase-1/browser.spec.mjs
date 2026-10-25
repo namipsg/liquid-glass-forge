@@ -147,7 +147,7 @@ test('one shared context preserves idle tiles, resizes outputs, and replaces opa
   expect(result.transparent).toBe(true);
   expect([result.width, result.height]).toEqual([3, 5]);
   expect(result.active.renderCount).toBe(3);
-  expect(result.active.resources).toEqual({ contexts: 1, textures: 2, sourceTextures: 1, outputTextures: 1, framebuffers: 1, programs: 1, shaders: 0, buffers: 0, vertexArrays: 0 });
+  expect(result.active.resources).toEqual({ contexts: 1, textures: 3, sourceTextures: 1, outputTextures: 1, encodingTextures: 1, framebuffers: 1, programs: 1, shaders: 0, buffers: 0, vertexArrays: 0 });
   expect(Object.values(result.dead.resources).every(value => value === 0)).toBe(true);
   expect(result.dead.estimatedOwnedBytes).toBe(0);
   expect(result.dead.destroyed).toBe(true);
@@ -271,6 +271,27 @@ test('benchmark receipts include actual work, bounded samples, ages and target c
   expect(result.webgl.gpu.backend).toBe('webgl');
   expect(result.webgl.gpu.resources.contexts).toBe(1);
   expect(result.webgl.gpu.renderCount).toBe(6);
+});
+
+test('atlas batching preserves independent tiles, alpha, state and bounded resources', async ({ page }) => {
+  await boot(page);
+  const result = await page.evaluate(async () => (await import('/batch-check.mjs')).checkBatch());
+  for (const parity of result.parity) {
+    expect(parity.max, JSON.stringify(result)).toBeLessThanOrEqual(MAX_CHANNEL_DELTA);
+    expect(parity.mean, JSON.stringify(result)).toBeLessThanOrEqual(MAX_MEAN_DELTA);
+  }
+  for (const key of ['idle', 'preserved', 'cleared', 'sourceUnchanged', 'duplicateRejected', 'budgetRejected']) expect(result[key], key).toBe(true);
+  expect(result.requests).toBe(1);
+  expect(result.batch.gpuSnapshots).toBe(1);
+  expect(result.batch.targets).toBe(4);
+  expect(result.active.renderCount).toBe(6);
+  expect(result.active.batchCount).toBe(2);
+  expect(result.active.resources.contexts).toBe(1);
+  expect(result.active.resources.textures).toBe(3);
+  expect(result.active.presentationResources.snapshotCanvases).toBe(1);
+  expect(result.dead.estimatedOwnedBytes).toBe(0);
+  expect(Object.values(result.dead.resources).every(value => value === 0)).toBe(true);
+  expect(result.dead.presentationResources.snapshotCanvases).toBe(0);
 });
 
 test('CSS material retains real DOM content with JavaScript disabled', async ({ browser, baseURL }) => {
