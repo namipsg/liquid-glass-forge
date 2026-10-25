@@ -2,7 +2,7 @@
 
 An independent Liquid Glass project for the web, with planned CPU and WebGL rendering, vanilla JavaScript, React, Vue and Angular integrations.
 
-**Status: design and planning.** This repository currently contains the proposal and roadmap. There is no installable library, validated performance baseline or published compatibility guarantee yet. Package names below describe proposed boundaries.
+**Status: experimental feasibility work.** A [standalone CPU/WebGL spike](spikes/phase-1/README.md) accompanies the proposal and roadmap. There is no installable library or published compatibility guarantee yet. Package names below describe proposed boundaries.
 
 ## Planned foundation
 
@@ -22,6 +22,7 @@ Future work includes Sileo-inspired React/SVG animation, Apple-inspired componen
 | [Architecture](docs/ARCHITECTURE.md) | Proposed packages and technical contracts |
 | [Quality requirements](docs/QUALITY.md) | Tests, platform evidence and release gates |
 | [Foundation roadmap](docs/ROADMAP.md) | Delivery sequence and completion criteria |
+| [Phase 1 experiment](docs/PHASE-1.md) | Reproduction, measured scope and admission decisions |
 | [Future development](docs/FUTURE.md) | Motion, components and native exploration |
 | [Attribution](docs/ATTRIBUTION.md) | Design inspiration and source references |
 | [Contributing](CONTRIBUTING.md) | How to propose changes during planning |

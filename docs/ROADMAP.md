@@ -1,6 +1,6 @@
 # Foundation roadmap
 
-**Status: proposed sequence.** All phases are planned. No release date or compatibility guarantee is implied.
+**Status: phase 1 in progress.** A [CPU/WebGL feasibility spike](PHASE-1.md) exists; its admission gates remain open. Later phases are planned. No release date or compatibility guarantee is implied.
 
 ## Delivery phases
 

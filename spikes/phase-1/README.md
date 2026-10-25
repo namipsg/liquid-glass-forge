@@ -1,0 +1,64 @@
+# Phase 1: CPU/WebGL feasibility
+
+This standalone experiment tests JavaScript pixel refraction and a shared WebGL2 presentation path. It is not an installable library or the final optical model. See [scope and decisions](../../docs/PHASE-1.md).
+
+## Run locally
+
+Use Node.js 20.19 or later and pnpm 10.34.5. From the repository root:
+
+```sh
+pnpm --dir spikes/phase-1 install --frozen-lockfile --ignore-scripts
+pnpm --dir spikes/phase-1 exec playwright install chromium firefox webkit
+pnpm --dir spikes/phase-1 test:unit
+pnpm --dir spikes/phase-1 test:browser
+pnpm --dir spikes/phase-1 serve
+```
+
+Open `http://127.0.0.1:4173/` for CPU, WebGL and a separate live-DOM CSS material. Use `/?mode=cpu` to prevent any WebGL context request. The test server also uses port 4174 for CORS fixtures and serves only explicitly listed public spike assets.
+
+Chrome must be installed separately for the `chrome` test project. The bundled WebKit lane is not actual Safari, and a mobile viewport is not a physical-device test.
+
+Stop the development server before running the benchmark command:
+
+```sh
+pnpm --dir spikes/phase-1 benchmark --headed chrome
+pnpm --dir spikes/phase-1 benchmark firefox webkit
+```
+
+The default benchmark runs Chrome, Firefox and WebKit without visible browser windows. Select a browser explicitly and use `--headed` for a visible isolated session. Keep other rendering workloads idle while measuring. Browser tests and raw benchmark JSON/screenshots go to the repository's ignored `private/phase-1/results/` directory. Do not commit those artifacts.
+
+## What is exercised
+
+- CPU source preparation copies straight sRGB RGBA8 into linear-premultiplied Float32 storage. The JS kernel renders rounded-mask edge displacement using bilinear sampling, then converts to straight sRGB RGBA8 for Canvas2D.
+- WebGL2 implements the same small model. One source texture and one persistent output texture/FBO are reused across targets. The GL context and output use straight alpha. Each draw blits to the default framebuffer and synchronously replaces its Canvas2D target before yielding. Fresh targets request `willReadFrequently: true` to keep readback stable; actual target attributes and the copy cost are recorded. The context does not preserve its drawing buffer.
+- Tests compare presented pixels with frozen maximum channel error **3/255** and mean absolute channel error **0.5/255**. They also cover independent analytical CPU fixtures, orientation, crops, alpha, forced CPU isolation, idle target persistence, resize, transparent replacement, teardown, context loss and real CORS restrictions.
+- The default measured workloads are one 320×180 CPU output and four 640×360 WebGL outputs, each styled as 320×180 CSS pixels. These are explicit backing resolutions, independent of the browser's current device pixel ratio.
+
+Benchmarks decode a static 640×360 image once, warm up 15 frames, then retain 90 samples while changing optical strength each frame. They report setup/acquisition separately, whole-batch duration including Canvas2D copies, rAF cadence, revision-to-copy completion age, first-to-last target copy skew, and explicit storage estimates. CPU kernel/copy times are also separated. WebGL batch timing includes command submission and synchronous snapshot calls; it is not a GPU timer. None of these metrics measures physical display scanout or live-source freshness.
+
+The renderers reject dimensions above four million pixels. That defensive allocation limit is not a supported workload. There is no blur, dispersion, highlight pass, worker, source-update provider, DOM capture, automatic backend selection or context restoration here. Those belong to later phases.
+
+## Actual Safari and USB Android
+
+Start the fixture server in a separate terminal:
+
+```sh
+PHASE1_PORT=4183 node spikes/phase-1/server.mjs
+```
+
+For Safari, enable **Allow remote automation** in Safari's Developer settings, start `safaridriver -p 4447`, then run:
+
+```sh
+PHASE1_DEVICE=safari PHASE1_BENCHMARK=1 node spikes/phase-1/device-check.mjs
+```
+
+For one attached Android device with USB debugging authorized, open Chrome on that device and connect its DevTools socket:
+
+```sh
+adb reverse tcp:4183 tcp:4183
+adb reverse tcp:4184 tcp:4184
+adb forward tcp:9225 localabstract:chrome_devtools_remote
+PHASE1_DEVICE=android PHASE1_BENCHMARK=1 node spikes/phase-1/device-check.mjs
+```
+
+The companion opens its own test tab/session, runs pixel/source/lifecycle checks, retains two benchmark runs, and exits unsuccessfully if a conformance check fails. A successful benchmark call does not imply admission to its target update rate. Safari's pre-navigation CPU context spy is explicitly unavailable through this WebDriver harness; its direct CPU path is checked after navigation. Restore temporary Safari settings and remove the three ADB mappings when finished. Raw receipts remain local under the ignored directory.
