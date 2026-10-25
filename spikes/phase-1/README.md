@@ -25,7 +25,7 @@ pnpm --dir spikes/phase-1 benchmark --headed --admission chrome firefox webkit
 pnpm --dir spikes/phase-1 benchmark firefox webkit
 ```
 
-The default benchmark runs Chrome, Firefox and WebKit without visible browser windows. `--admission` runs both original workloads twice and returns failure when a fixed gate is missed; a fast GPU batch alone does not override slow frame cadence. Select a browser explicitly and use `--headed` for a visible isolated session. Keep other rendering workloads idle while measuring. Browser tests and raw benchmark JSON/screenshots go to the repository's ignored `private/phase-1/results/` directory. Do not commit those artifacts.
+The default benchmark runs Chrome, Firefox and WebKit without visible browser windows. `--admission` runs both original workloads twice and returns failure when a fixed gate is missed; a fast GPU batch alone does not override slow frame cadence. Select a browser explicitly and use `--headed` for a visible isolated session. Keep the desktop unlocked, the test window in front and other rendering workloads idle while measuring; record those conditions with the results. Browser tests and raw benchmark JSON/screenshots go to the repository's ignored `private/phase-1/results/` directory. Do not commit those artifacts.
 
 ## What is exercised
 
