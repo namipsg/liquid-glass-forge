@@ -23,8 +23,9 @@ export async function loadImageSource(url) {
   return { source: { width: canvas.width, height: canvas.height, data }, acquisitionMs: now() - begin };
 }
 
-export async function benchmark(source, { backend, count = 1, width = 320, height = 180, frames = 90, warmup = 15 } = {}) {
+export async function benchmark(source, { backend, count = 1, width = 320, height = 180, frames = 90, warmup = 15, presentation = 'canvas' } = {}) {
   if (!['cpu', 'webgl'].includes(backend)) throw new Error('Explicit cpu or webgl backend required');
+  if (!['canvas', 'bitmap'].includes(presentation)) throw new Error('presentation must be canvas or bitmap');
   for (const [name, value, max] of [['count', count, 16], ['frames', frames, 600], ['warmup', warmup, 120]]) {
     if (!Number.isInteger(value) || value < (name === 'warmup' ? 0 : 1) || value > max) throw new Error(`Invalid ${name}`);
   }
@@ -36,7 +37,7 @@ export async function benchmark(source, { backend, count = 1, width = 320, heigh
   let prepared;
   try {
     if (backend === 'cpu') prepared = prepareSource(source);
-    else renderer = createWebGLRenderer(source);
+    else renderer = createWebGLRenderer(source, { presentation });
     for (let i = 0; i < count; i++) {
       const target = document.createElement('canvas');
       target.width = width; target.height = height;
@@ -89,16 +90,16 @@ export async function benchmark(source, { backend, count = 1, width = 320, heigh
         rawFrames.push({ frame: i - warmup, timestamp, batchMs: elapsed, intervalMs: previousFrame === undefined ? null : timestamp - previousFrame,
           completionAgeMs: completionAge, oldestSurfaceAgeMs: oldestSurfaceAge, completedAt,
           cpuKernelMs: backend === 'cpu' ? kernel : null, cpuPresentationMs: backend === 'cpu' ? presentation : null,
-          gpuDrawAndBlitMs: gpuBatch?.drawAndBlitMs ?? null, gpuSnapshotMs: gpuBatch?.snapshotMs ?? null, gpuTargetCopyMs: gpuBatch?.targetCopyMs ?? null });
+          gpuDrawAndBlitMs: gpuBatch?.drawAndBlitMs ?? null, gpuBitmapTransferMs: gpuBatch?.bitmapTransferMs ?? null, gpuSnapshotMs: gpuBatch?.snapshotMs ?? null, gpuTargetCopyMs: gpuBatch?.targetCopyMs ?? null });
       }
       previousFrame = timestamp;
     }
     const gpuBeforeDestroy = renderer?.inspect() ?? null;
     const cpuOwned = cpuStorage();
     return {
-      backend, count, width, height, frames, warmup, setupMs,
+      backend, count, width, height, frames, warmup, setupMs, presentation: backend === 'webgl' ? presentation : 'put-image-data',
       source: { width: source.width, height: source.height, updatePolicy: 'decoded once, static pixels; optical strength changes each frame' },
-      timedWork: backend === 'cpu' ? 'JS optics and Canvas2D putImageData for entire batch' : 'WebGL atlas commands, one FBO blit, one synchronous GPU snapshot and all Canvas2D tile copies; not a GPU timer',
+      timedWork: backend === 'cpu' ? 'JS optics and Canvas2D putImageData for entire batch' : 'WebGL atlas commands, optional FBO blit, one synchronous GPU snapshot, optional bitmap transfer and all Canvas2D tile copies; not a GPU timer',
       batchMs: summary(batchesMs), frameIntervalMs: summary(frameIntervalsMs), rawFrames,
       completionAgeMs: summary(completionAgeMs), oldestSurfaceAgeMs: summary(oldestSurfaceAgeMs),
       cpuKernelMs: backend === 'cpu' ? summary(kernelMs) : null,
@@ -111,7 +112,11 @@ export async function benchmark(source, { backend, count = 1, width = 320, heigh
       inputBytes: source.data.byteLength,
       allocationNote: 'Explicit array/texture/drawing-buffer storage estimate only; target canvases and borrowed input shown separately. Excludes browser/driver/compositor overhead and transient allocations; not measured process or GPU memory.',
       gpu: gpuBeforeDestroy,
-      environment: { userAgent: navigator.userAgent, devicePixelRatio, visibility: document.visibilityState, hardwareConcurrency: navigator.hardwareConcurrency },
+      environment: { userAgent: navigator.userAgent, devicePixelRatio, visibility: document.visibilityState,
+        focused: document.hasFocus(), crossOriginIsolated,
+        viewport: { width: innerWidth, height: innerHeight },
+        window: { x: screenX, y: screenY, width: outerWidth, height: outerHeight },
+        screen: { width: screen.width, height: screen.height }, hardwareConcurrency: navigator.hardwareConcurrency },
       note: 'No physical-device or browser-support guarantee. Source decode/readback and renderer setup are outside timed batches and reported separately.',
     };
   } finally {
@@ -121,6 +126,9 @@ export async function benchmark(source, { backend, count = 1, width = 320, heigh
 }
 
 async function boot() {
+  const params = new URLSearchParams(location.search);
+  const presentation = params.get('presentation') ?? 'canvas';
+  if (!['canvas', 'bitmap'].includes(presentation)) throw new Error('presentation must be canvas or bitmap');
   const { source, acquisitionMs } = await loadImageSource('/fixture.svg');
   const cpuCanvas = document.querySelector('#cpu');
   const cpuOptions = { width: 320, height: 180, radius: 36, bevel: 28, strength: 18 };
@@ -130,8 +138,8 @@ async function boot() {
   const cpuFirstFrameMs = now() - cpuStart;
   let gpuStatus = 'disabled for forced CPU mode';
   let gpuRenderer = null;
-  if (new URLSearchParams(location.search).get('mode') !== 'cpu') {
-    gpuRenderer = createWebGLRenderer(source);
+  if (params.get('mode') !== 'cpu') {
+    gpuRenderer = createWebGLRenderer(source, { presentation });
     gpuRenderer.render(cpuOptions, document.querySelector('#gpu'));
     gpuStatus = JSON.stringify(gpuRenderer.inspect().attributes);
     addEventListener('pagehide', () => gpuRenderer.destroy(), { once: true });
@@ -147,7 +155,7 @@ async function boot() {
       return { ok: false, code: error.code ?? error.name, error: error.message };
     }
   };
-  window.phase1 = { source, cpuCanvas, cpuOptions, acquisitionMs, cpuFirstFrameMs, gpuRenderer, renderGpu, benchmark: options => benchmark(source, options) };
+  window.phase1 = { source, cpuCanvas, cpuOptions, acquisitionMs, cpuFirstFrameMs, gpuRenderer, renderGpu, benchmark: options => benchmark(source, { presentation, ...options }) };
   window.phase1Ready = true;
   document.querySelector('#status').textContent = `Local image decoded and read in ${acquisitionMs.toFixed(2)} ms. CPU frame painted. WebGL: ${gpuStatus}`;
   const button = document.querySelector('#benchmark');

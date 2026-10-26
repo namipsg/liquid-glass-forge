@@ -294,6 +294,83 @@ test('atlas batching preserves independent tiles, alpha, state and bounded resou
   expect(result.dead.presentationResources.snapshotCanvases).toBe(0);
 });
 
+test('canvas presentation works without OffscreenCanvas and preserves frozen parity', async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(window, 'OffscreenCanvas', { value: undefined, configurable: true }));
+  await boot(page);
+  const unsupported = await page.evaluate(async () => {
+    const { createWebGLRenderer } = await import('/webgl.mjs');
+    let renderer;
+    try { renderer = createWebGLRenderer(window.phase1.source, { presentation: 'bitmap' }); return null; }
+    catch (error) { return error.code; }
+    finally { renderer?.destroy(); }
+  });
+  expect(unsupported).toBe('BITMAP_UNAVAILABLE');
+  const result = await page.evaluate(async () => (await import('/batch-check.mjs')).checkBatch());
+  expect(result.active.presentationSource).toBe('canvas');
+  for (const parity of result.parity) {
+    expect(parity.max).toBeLessThanOrEqual(MAX_CHANNEL_DELTA);
+    expect(parity.mean).toBeLessThanOrEqual(MAX_MEAN_DELTA);
+  }
+  expect(result.idle && result.preserved && result.cleared).toBe(true);
+  expect(result.active.presentationResources.liveBitmaps).toBe(0);
+  expect(result.dead.estimatedOwnedBytes).toBe(0);
+});
+
+test('bitmap atlas presentation preserves frozen parity and closes every frame handle', async ({ page }) => {
+  await boot(page);
+  const result = await page.evaluate(async () => (await import('/batch-check.mjs')).checkBatch({ presentation: 'bitmap' }));
+  expect(result.active.presentationSource).toBe('transferred-image-bitmap');
+  expect(result.active.resources).toMatchObject({ textures: 2, outputTextures: 0, framebuffers: 0 });
+  for (const parity of result.parity) {
+    expect(parity.max).toBeLessThanOrEqual(MAX_CHANNEL_DELTA);
+    expect(parity.mean).toBeLessThanOrEqual(MAX_MEAN_DELTA);
+  }
+  for (const key of ['idle', 'preserved', 'cleared', 'sourceUnchanged', 'duplicateRejected', 'budgetRejected']) expect(result[key], key).toBe(true);
+  expect(result.active.presentationResources).toMatchObject({ liveBitmaps: 0, bitmapsCreated: 2, bitmapsClosed: 2 });
+  expect(result.dead.estimatedOwnedBytes).toBe(0);
+});
+
+test('transferred bitmaps close after copy errors and same-size target state is reset', async ({ page }) => {
+  await boot(page);
+  const result = await page.evaluate(async () => {
+    const { createWebGLRenderer } = await import('/webgl.mjs');
+    const { prepareSource, renderCpu } = await import('/cpu.mjs');
+    const source = { width: 2, height: 2, data: new Uint8ClampedArray(Array(4).fill([230, 40, 70, 128]).flat()) };
+    const renderer = createWebGLRenderer(source, { presentation: 'bitmap' });
+    const target = document.createElement('canvas'), reference = document.createElement('canvas');
+    const context = target.getContext('2d', { willReadFrequently: true });
+    const settings = { width: 8, height: 6, radius: 0, strength: 0 };
+    const close = ImageBitmap.prototype.close, draw = context.drawImage, closedWidths = [];
+    ImageBitmap.prototype.close = function () { close.call(this); closedWidths.push(this.width); };
+    let failure;
+    try {
+      context.drawImage = () => { throw new Error('Injected tile-copy failure'); };
+      try { renderer.render(settings, target); } catch (error) { failure = error.message; }
+      const afterFailure = renderer.inspect();
+      context.drawImage = draw;
+      context.beginPath(); context.rect(0, 0, 1, 1); context.clip();
+      context.translate(3, 2); context.globalAlpha = .1; context.filter = 'blur(2px)';
+      renderer.render(settings, target);
+      reference.width = settings.width; reference.height = settings.height;
+      reference.getContext('2d').putImageData(new ImageData(renderCpu(prepareSource(source), settings), settings.width, settings.height), 0, 0);
+      const actual = context.getImageData(0, 0, settings.width, settings.height).data;
+      const expected = reference.getContext('2d').getImageData(0, 0, settings.width, settings.height).data;
+      const differences = actual.map((value, index) => Math.abs(value - expected[index]));
+      return { failure, afterFailure, recovered: renderer.inspect(), closedWidths,
+        max: Math.max(...differences), mean: differences.reduce((sum, value) => sum + value, 0) / differences.length };
+    } finally {
+      ImageBitmap.prototype.close = close; context.drawImage = draw; renderer.destroy();
+    }
+  });
+  expect(result.failure).toBe('Injected tile-copy failure');
+  expect(result.recovered.presentationSource).toBe('transferred-image-bitmap');
+  expect(result.afterFailure.presentationResources).toMatchObject({ liveBitmaps: 0, bitmapsCreated: 1, bitmapsClosed: 1 });
+  expect(result.recovered.presentationResources).toMatchObject({ liveBitmaps: 0, bitmapsCreated: 2, bitmapsClosed: 2 });
+  expect(result.closedWidths).toEqual([0, 0]);
+  expect(result.max).toBeLessThanOrEqual(MAX_CHANNEL_DELTA);
+  expect(result.mean).toBeLessThanOrEqual(MAX_MEAN_DELTA);
+});
+
 test('CSS material retains real DOM content with JavaScript disabled', async ({ browser, baseURL }) => {
   const page = await browser.newPage({ javaScriptEnabled: false, baseURL });
   try {

@@ -1,4 +1,4 @@
-// Original Phase 1 spike: one shared context, one persistent output attachment.
+// Phase 1 spike: shared atlas with explicit canvas and bitmap presentation experiments.
 // Importing this module does not access the DOM or allocate browser resources.
 const MAX_PIXELS = 4_000_000;
 const MAX_EFFECT = 1_000_000;
@@ -128,7 +128,7 @@ void main() {
 }`;
 
 /** Source is borrowed straight-alpha sRGB RGBA8, with row zero at the top. */
-export function createWebGLRenderer(sourceRGBA8) {
+export function createWebGLRenderer(sourceRGBA8, options = {}) {
   if (!sourceRGBA8 || typeof sourceRGBA8 !== 'object') throw new TypeError('source is required');
   const { width: sourceWidth, height: sourceHeight, data } = sourceRGBA8;
   dimensions(sourceWidth, sourceHeight, 'source');
@@ -139,8 +139,16 @@ export function createWebGLRenderer(sourceRGBA8) {
   if (typeof document === 'undefined') {
     throw new WebGLRendererError('DOM_UNAVAILABLE', 'WebGL renderer creation requires a document');
   }
+  if (!options || typeof options !== 'object') throw new TypeError('renderer options must be an object');
+  const presentation = options.presentation ?? 'canvas';
+  if (!['canvas', 'bitmap'].includes(presentation)) throw new RangeError('presentation must be canvas or bitmap');
+  const transferableSnapshot = presentation === 'bitmap';
+  if (transferableSnapshot && !(typeof OffscreenCanvas === 'function'
+    && typeof OffscreenCanvas.prototype.transferToImageBitmap === 'function')) {
+    throw new WebGLRendererError('BITMAP_UNAVAILABLE', 'Bitmap presentation requires OffscreenCanvas transfer support');
+  }
   const storageProfile = canvasStorageProfile();
-  const snapshot = document.createElement('canvas');
+  const snapshot = transferableSnapshot ? new OffscreenCanvas(1, 1) : document.createElement('canvas');
   snapshot.width = snapshot.height = 1;
   const snapshotContext = snapshot.getContext('2d', { alpha: true, willReadFrequently: true });
   if (!snapshotContext) throw new WebGLRendererError('TARGET_UNAVAILABLE', 'Canvas2D snapshot unavailable');
@@ -166,8 +174,8 @@ export function createWebGLRenderer(sourceRGBA8) {
   let renderCount = 0;
   let sourceTexture = null;
   let outputTexture = null;
-  let encodingTexture = null;
   let framebuffer = null;
+  let encodingTexture = null;
   let program = null;
   let uniforms;
   let attributes;
@@ -176,6 +184,9 @@ export function createWebGLRenderer(sourceRGBA8) {
   let lastTargetAttributes = null;
   let batchCount = 0;
   let lastBatch = null;
+  let liveBitmaps = 0;
+  let bitmapsCreated = 0;
+  let bitmapsClosed = 0;
   const onLost = () => { lost = true; }; // Phase 1 deliberately does not recover.
   canvas.addEventListener('webglcontextlost', onLost);
 
@@ -260,28 +271,30 @@ export function createWebGLRenderer(sourceRGBA8) {
       || nextWidth > maxViewport[0] || nextHeight > maxViewport[1]) {
       throw new WebGLRendererError('SIZE_UNSUPPORTED', 'Output dimensions exceed this WebGL context limits');
     }
-    let nextTexture = null;
-    let nextFramebuffer = null;
-    try {
-      nextTexture = create('Texture', textures);
-      configureTexture(nextTexture);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, nextWidth, nextHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-      nextFramebuffer = create('Framebuffer', framebuffers);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, nextFramebuffer);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, nextTexture, 0);
-      checkGl('Output allocation');
-      if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
-        throw new WebGLRendererError('FRAMEBUFFER_INCOMPLETE', 'Persistent output framebuffer is incomplete');
+    if (!transferableSnapshot) {
+      let nextTexture = null;
+      let nextFramebuffer = null;
+      try {
+        nextTexture = create('Texture', textures);
+        configureTexture(nextTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, nextWidth, nextHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        nextFramebuffer = create('Framebuffer', framebuffers);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, nextFramebuffer);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, nextTexture, 0);
+        checkGl('Output allocation');
+        if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
+          throw new WebGLRendererError('FRAMEBUFFER_INCOMPLETE', 'Persistent output framebuffer is incomplete');
+        }
+      } catch (error) {
+        removeTexture(nextTexture);
+        removeFramebuffer(nextFramebuffer);
+        throw error;
       }
-    } catch (error) {
-      removeTexture(nextTexture);
-      removeFramebuffer(nextFramebuffer);
-      throw error;
+      removeTexture(outputTexture);
+      removeFramebuffer(framebuffer);
+      outputTexture = nextTexture;
+      framebuffer = nextFramebuffer;
     }
-    removeTexture(outputTexture);
-    removeFramebuffer(framebuffer);
-    outputTexture = nextTexture;
-    framebuffer = nextFramebuffer;
     width = nextWidth;
     height = nextHeight;
     canvas.width = width;
@@ -414,10 +427,12 @@ export function createWebGLRenderer(sourceRGBA8) {
       gl.uniform1f(uniforms.Strength, tile.strength);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     });
-    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
-    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-    gl.blitFramebuffer(0, 0, width, height, 0, 0, width, height, gl.COLOR_BUFFER_BIT, gl.NEAREST);
-    checkGl('Batch draw and blit');
+    if (framebuffer) {
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
+      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+      gl.blitFramebuffer(0, 0, width, height, 0, 0, width, height, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+    }
+    checkGl('Batch draw and optional blit');
     const drawnAt = performance.now();
     if (snapshot.width !== width) snapshot.width = width;
     if (snapshot.height !== height) snapshot.height = height;
@@ -425,24 +440,31 @@ export function createWebGLRenderer(sourceRGBA8) {
     snapshotContext.imageSmoothingEnabled = false;
     snapshotContext.drawImage(canvas, 0, 0); // Exactly one GPU snapshot per batch.
     const snapshotAt = performance.now();
+    const bitmap = transferableSnapshot ? snapshot.transferToImageBitmap() : null;
+    if (bitmap) { liveBitmaps++; bitmapsCreated++; }
+    const transferredAt = performance.now();
     const completedAt = [];
-    for (const tile of tiles) {
-      if (tile.targetCanvas.width !== tile.width) tile.targetCanvas.width = tile.width;
-      if (tile.targetCanvas.height !== tile.height) tile.targetCanvas.height = tile.height;
-      // reset clears clipping/compositing state while reusing backing storage.
-      if (typeof tile.target.reset === 'function') tile.target.reset();
-      else tile.targetCanvas.width = tile.width;
-      tile.target.globalCompositeOperation = 'copy';
-      tile.target.imageSmoothingEnabled = false;
-      tile.target.drawImage(snapshot, tile.x, tile.y, tile.width, tile.height, 0, 0, tile.width, tile.height);
-      completedAt.push(performance.now());
+    try {
+      for (const tile of tiles) {
+        if (tile.targetCanvas.width !== tile.width) tile.targetCanvas.width = tile.width;
+        if (tile.targetCanvas.height !== tile.height) tile.targetCanvas.height = tile.height;
+        // reset clears clipping/compositing state while reusing backing storage.
+        if (typeof tile.target.reset === 'function') tile.target.reset();
+        else tile.targetCanvas.width = tile.width;
+        tile.target.globalCompositeOperation = 'copy';
+        tile.target.imageSmoothingEnabled = false;
+        tile.target.drawImage(bitmap ?? snapshot, tile.x, tile.y, tile.width, tile.height, 0, 0, tile.width, tile.height);
+        completedAt.push(performance.now());
+      }
+    } finally {
+      if (bitmap) { bitmap.close(); liveBitmaps--; bitmapsClosed++; }
     }
     assertLive();
     renderCount += tiles.length;
     batchCount++;
     lastBatch = { targets: tiles.length, gpuSnapshots: 1, atlasWidth: width, atlasHeight: height,
       drawAndBlitMs: drawnAt - begin, snapshotMs: snapshotAt - drawnAt,
-      targetCopyMs: completedAt.at(-1) - snapshotAt, completedAt };
+      bitmapTransferMs: transferredAt - snapshotAt, targetCopyMs: completedAt.at(-1) - transferredAt, completedAt };
     return { ...lastBatch, completedAt: [...completedAt] };
   }
 
@@ -459,6 +481,7 @@ export function createWebGLRenderer(sourceRGBA8) {
       const outputBytes = outputTexture ? width * height * 4 : 0;
       const drawingBufferBytes = destroyed ? 0 : canvas.width * canvas.height * 4;
       const snapshotBytes = destroyed ? 0 : snapshot.width * snapshot.height * 4;
+      const bitmapCapacityBytes = transferableSnapshot ? snapshotBytes : 0;
       const encodingBytes = encodingTexture ? ENCODING_BYTES : 0;
       return {
         backend: 'webgl', contextType: 'webgl2', destroyed, contextLost: lost || gl.isContextLost(),
@@ -475,9 +498,11 @@ export function createWebGLRenderer(sourceRGBA8) {
           framebuffers: framebuffers.size, programs: programs.size,
           shaders: shaders.size, buffers: 0, vertexArrays: 0,
         },
-        estimatedOwnedBytes: sourceBytes + outputBytes + drawingBufferBytes + snapshotBytes + encodingBytes,
-        storage: { sourceBytes, outputBytes, drawingBufferBytes, snapshotBytes, encodingBytes },
-        presentationResources: { snapshotCanvases: destroyed ? 0 : 1 },
+        estimatedOwnedBytes: sourceBytes + outputBytes + drawingBufferBytes + snapshotBytes + bitmapCapacityBytes + encodingBytes,
+        storage: { sourceBytes, outputBytes, drawingBufferBytes, snapshotBytes, bitmapCapacityBytes, encodingBytes },
+        presentationResources: { snapshotCanvases: destroyed ? 0 : 1, liveBitmaps, bitmapsCreated, bitmapsClosed },
+        presentationSource: transferableSnapshot ? 'transferred-image-bitmap' : 'canvas',
+        snapshotStorageNote: 'Bitmap mode counts both snapshot and bitmap capacity, even with lazy allocation. Canvas mode retains its atlas FBO. Bitmaps close before return; browser/driver overhead is excluded.',
         // Estimates exclude driver overhead and target canvases owned by callers.
         storageProfile: storageProfile.name,
         colorConvention: 'straight sRGB source; bilinear in premultiplied linear light; calibrated premultiplied sRGB RGBA8 presentation',

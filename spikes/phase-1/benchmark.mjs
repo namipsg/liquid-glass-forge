@@ -15,11 +15,13 @@ const engines = { chrome: chromium, chromium, firefox, webkit };
 if (selected.some(name => !engines[name])) throw new Error('Use chrome, chromium, firefox or webkit');
 const headed = process.argv.includes('--headed');
 const admission = process.argv.includes('--admission');
+const presentation = process.argv.find(arg => arg.startsWith('--presentation='))?.split('=')[1] ?? 'canvas';
+if (!['canvas', 'bitmap'].includes(presentation)) throw new Error('Use --presentation=canvas or --presentation=bitmap');
 const server = await startServers(4173);
 try {
   for (const name of selected) {
     const stamp = new Date().toISOString().replaceAll(':', '-');
-    const receipt = { schema: 1, timestamp: stamp, name, headed,
+    const receipt = { schema: 1, timestamp: stamp, name, headed, presentation,
       host: { platform: platform(), release: release(), arch: arch(), cpu: cpus()[0]?.model, totalMemoryBytes: totalmem() },
       note: 'Playwright WebKit is not actual Safari. Headless results are a separate lane from hardware/browser qualification.' };
     let browser;
@@ -30,7 +32,7 @@ try {
       await page.bringToFront();
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
-      await page.goto(`${server.url}/?mode=cpu`);
+      await page.goto(`${server.url}/?mode=cpu&presentation=${presentation}`);
       await page.waitForFunction(() => window.phase1Ready || window.phase1Error);
       const init = await page.evaluate(() => ({ error: window.phase1Error, acquisitionMs: window.phase1?.acquisitionMs, cpuFirstFrameMs: window.phase1?.cpuFirstFrameMs }));
       if (init.error) throw new Error(init.error);

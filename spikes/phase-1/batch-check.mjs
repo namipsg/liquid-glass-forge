@@ -2,7 +2,7 @@ import { prepareSource, renderCpu } from './cpu.mjs';
 import { createWebGLRenderer } from './webgl.mjs';
 
 // Shared browser/device fixture. Tolerances remain in each calling test gate.
-export async function checkBatch() {
+export async function checkBatch({ presentation = 'canvas' } = {}) {
   const source = { width: 40, height: 32, data: new Uint8ClampedArray(40 * 32 * 4) };
   for (let y = 0; y < 32; y++) for (let x = 0; x < 40; x++) {
     source.data.set([(17 * x + 3 * y) % 256, (19 * y + 2 * x) % 256,
@@ -34,7 +34,7 @@ export async function checkBatch() {
     return { max, mean: sum / actual.length };
   };
   try {
-    renderer = createWebGLRenderer(source);
+    renderer = createWebGLRenderer(source, { presentation });
     const batch = renderer.renderBatch(options.map((settings, i) => ({ options: settings, target: targets[i] })));
     const parity = targets.map((target, i) => compare(target, options[i]));
     const saved = targets.map(target => read(target).slice());

@@ -24,7 +24,7 @@
   <p>A small CPU/WebGL refraction experiment over an origin-clean image. This is a feasibility spike, not the production material or a compatibility guarantee.</p>
   <section class="grid" aria-label="Rendering modes">
     <article><h2>JavaScript CPU optics</h2><canvas id="cpu" width="320" height="180" aria-hidden="true"></canvas><p>Typed-array sampling and Canvas2D presentation.</p></article>
-    <article><h2>WebGL2 optics</h2><canvas id="gpu" width="320" height="180" aria-hidden="true"></canvas><p>One context, persistent framebuffer, synchronous copy.</p></article>
+    <article><h2>WebGL2 optics</h2><canvas id="gpu" width="320" height="180" aria-hidden="true"></canvas><p>One context, shared atlas, synchronous copy.</p></article>
     <article><h2>Live DOM CSS material</h2><div class="css-scene"><div class="material">Native DOM content</div></div><p>Separate blur/tint mode; no JS backdrop readback.</p></article>
   </section>
   <output id="status" role="status">Loading local image…</output>
