@@ -21,5 +21,7 @@ jobs:
       - run: npm install --global pnpm@10.34.5 --ignore-scripts
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm build
+      - name: Align ephemeral container home ownership for Firefox
+        run: chown "$(id -u):$(id -g)" "$HOME"
       - run: pnpm test
       - run: node --test spikes/phase-1/cpu.test.mjs spikes/phase-1/admission.test.mjs
