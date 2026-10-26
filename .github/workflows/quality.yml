@@ -5,19 +5,21 @@ permissions:
 jobs:
   contracts:
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea # v1.64.1-noble
+      options: --init --ipc=host
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         node: ['20.19.6', '24.12.0']
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: ${{ matrix.node }}
       - run: npm install --global pnpm@10.34.5 --ignore-scripts
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm build
       - run: pnpm test
       - run: node --test spikes/phase-1/cpu.test.mjs spikes/phase-1/admission.test.mjs

@@ -33,6 +33,12 @@ checks also pass on Node 20.19.6. The browser smoke uses Chromium 156.0.8078.4,
 Firefox 157.0 and Playwright WebKit 27.2. It does not substitute for actual Safari
 or physical iOS testing. Hosted runs are visible in [GitHub Actions](https://github.com/namipsg/liquid-glass-forge/actions).
 
+The first hosted Node 20 job reached its timeout while the Ubuntu package mirror
+downloaded browser dependencies, before tests ran. CI now uses the matching
+[official Playwright image](https://playwright.dev/docs/docker), pinned by digest,
+which includes the browsers and system dependencies. Both Node versions still
+run the complete test suite. The original infrastructure failure is retained.
+
 Two consecutive core tarballs have identical SHA-256:
 
 ```text
