@@ -1,6 +1,6 @@
 # Proposed architecture
 
-**Status: design specification.** Names and interfaces may change before an initial release.
+**Status: core contracts implemented; other runtime packages proposed.** The private experimental core follows [version 1 contracts](CONTRACTS.md). Names and interfaces may change before an initial release.
 
 ## Package boundaries
 

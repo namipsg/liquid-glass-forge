@@ -1,6 +1,6 @@
 # Phase 1 feasibility record
 
-**Status: HOLD after the final qualification campaign on 26 October 2026.** The default canvas path passes Samsung A04s admission. Actual Safari passes correctness but misses the unchanged GPU cadence gate; repeatable desktop timing remains unresolved. This is a standalone explicit-source experiment, not an installable production library. Phase 2 has not started. [Reproduction commands](../spikes/phase-1/README.md) are available.
+**Status: accepted for progression with an explicit cadence exception on 26 October 2026.** The project owner waived the remaining Safari/WebKit cadence prerequisite and authorized phase 2 contracts and packaging. The default canvas path passes Samsung A04s admission. Actual Safari passes correctness but misses the unchanged GPU cadence gate; repeatable desktop timing remains unresolved. This waiver does not establish a repair or production performance qualification. [Reproduction commands](../spikes/phase-1/README.md) are available.
 
 ## Verified behavior
 
@@ -68,6 +68,6 @@ A native-focused WebKit follow-up on 26 October 2026 recorded idle rAF p95 of 18
 
 A subsequent controlled A/B/B/A comparison of Playwright WebKit revisions 2370 and 2380 also failed to establish a repair: the two original GPU cadence p95 values were 18/17 ms, 17/18 ms, 18/21 ms and 17/17 ms in execution order. Three of four legs failed the unchanged gate. The newer engine was not promoted. Earlier failures remain part of the qualification evidence; a later passing leg cannot erase them.
 
-This finite campaign is closed with an unresolved cadence gate, rather than another automatic timing rerun. All numerical, cadence, age, workload and storage limits are unchanged. A future repair must identify a supported mechanism and pass the original browser/device gates with repeatable evidence. Production contracts, framework packages and phase 2 remain on hold.
+This finite campaign is closed with an unresolved measured cadence gate. The owner subsequently waived that gate as a prerequisite for phase 2; all numerical, cadence, age, workload and storage limits and original failures remain unchanged. GPU capability alone does not establish browser frame pacing. Any future performance qualification must identify supported operating conditions and pass the original browser/device workloads with repeatable evidence. Physical iOS performance was not tested. The exception authorizes contracts and packaging work, not a Safari/iOS compatibility or frame-rate guarantee.
 
 The [future roadmap](FUTURE.md) continues to reserve motion, Apple-inspired components, React Native and Flutter as separately scoped work.

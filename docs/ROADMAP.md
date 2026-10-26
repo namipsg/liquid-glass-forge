@@ -1,6 +1,6 @@
 # Foundation roadmap
 
-**Status: phase 1 in progress.** A [CPU/WebGL feasibility spike](PHASE-1.md) exists; its admission gates remain open. Later phases are planned. No release date or compatibility guarantee is implied.
+**Status: phase 2 implemented.** The owner accepted the [phase 1 feasibility findings](PHASE-1.md) with an explicit exception for unresolved Safari/WebKit cadence. The [core contracts and package harness](PHASE-2.md) are implemented; source providers and all later phases remain planned. No release date, performance qualification or compatibility guarantee is implied.
 
 ## Delivery phases
 

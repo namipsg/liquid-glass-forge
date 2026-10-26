@@ -1,0 +1,13 @@
+{
+  "name": "@liquid-glass-forge/core",
+  "version": "0.0.0-dev",
+  "description": "Experimental, renderer-independent Liquid Glass Forge contracts and color reference functions",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "engines": { "node": ">=20.19.0" },
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "default": "./dist/index.js" } },
+  "files": ["dist", "LICENSE", "NOTICE", "README.md"],
+  "repository": { "type": "git", "url": "git+https://github.com/namipsg/liquid-glass-forge.git", "directory": "packages/core" }
+}

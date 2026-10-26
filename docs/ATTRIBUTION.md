@@ -10,6 +10,6 @@ The project's independently authored materials are covered by the [MIT License](
 - [ybouane/liquidglass](https://github.com/ybouane/liquidglass), reviewed at commit 59af227103795f06421a96e2c7d3dceb081decd2, informed the web rendering exploration.
 - [hiaaryan/sileo](https://github.com/hiaaryan/sileo), reviewed at commit b70fd826537dcdf0329e55f1e9ab208a66b61c79, informs the proposed React/SVG animation direction.
 
-These are references, not current runtime dependencies. No upstream library source, Apple assets or Sileo code was incorporated into this documentation-only repository setup. Any future reuse must be reviewed for its applicable license and carry required notices in the actual distributed artifacts.
+These are references, not current runtime dependencies. The phase 1 spike and phase 2 core are independently authored; no upstream library source, Apple assets or Sileo code is included. Any future reuse must be reviewed for its applicable license and carry required notices in the actual distributed artifacts.
 
 The project/package names remain proposals pending publication eligibility and scope verification. Source acknowledgments do not establish a trademark license or endorsement.

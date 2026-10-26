@@ -2,7 +2,23 @@
 
 An independent Liquid Glass project for the web, with planned CPU and WebGL rendering, vanilla JavaScript, React, Vue and Angular integrations.
 
-**Status: experimental feasibility work.** A [standalone CPU/WebGL spike](spikes/phase-1/README.md) accompanies the proposal and roadmap. There is no installable library or published compatibility guarantee yet. Package names below describe proposed boundaries.
+**Status: experimental phase 2 foundation.** The unpublished core now provides versioned contracts, validation and color-reference functions, with a build and isolated package-consumer harness. Rendering and framework packages remain planned. The owner accepted [phase 1 findings](docs/PHASE-1.md) with an explicit Safari/WebKit cadence exception; the measured failures remain unqualified. No published compatibility or performance guarantee is implied.
+
+## Local development
+
+Use Node 20.19 or newer and pnpm 10.34.5:
+
+```sh
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm build
+pnpm exec playwright install chromium firefox webkit
+pnpm test
+```
+
+The workspace currently contains only `@liquid-glass-forge/core`, marked private
+at `0.0.0-dev`. Tests pack it twice, install a tarball in an independent temporary
+consumer, and verify ESM/types and browser imports. Raw artifacts remain ignored.
+See [phase 2 evidence and limits](docs/PHASE-2.md) and [core contracts](docs/CONTRACTS.md).
 
 ## Planned foundation
 
@@ -23,6 +39,8 @@ Future work includes Sileo-inspired React/SVG animation, Apple-inspired componen
 | [Quality requirements](docs/QUALITY.md) | Tests, platform evidence and release gates |
 | [Foundation roadmap](docs/ROADMAP.md) | Delivery sequence and completion criteria |
 | [Phase 1 experiment](docs/PHASE-1.md) | Reproduction, measured scope and admission decisions |
+| [Phase 2 foundation](docs/PHASE-2.md) | Implemented contracts, packaging checks and limits |
+| [Core contracts](docs/CONTRACTS.md) | Version 1 data, ownership and optical-reference specification |
 | [Future development](docs/FUTURE.md) | Motion, components and native exploration |
 | [Attribution](docs/ATTRIBUTION.md) | Design inspiration and source references |
 | [Contributing](CONTRIBUTING.md) | How to propose changes during planning |
