@@ -1,10 +1,10 @@
 # Phase 1 feasibility record
 
-**Status: the default canvas path passes Samsung A04s admission; consistent desktop timing and actual Safari revalidation remain open.** WebKit cadence has not been reliably fixed. This is a standalone explicit-source experiment, not an installable production library. Phase 2 has not started. [Reproduction commands](../spikes/phase-1/README.md) are available.
+**Status: HOLD after the final qualification campaign on 26 October 2026.** The default canvas path passes Samsung A04s admission. Actual Safari passes correctness but misses the unchanged GPU cadence gate; repeatable desktop timing remains unresolved. This is a standalone explicit-source experiment, not an installable production library. Phase 2 has not started. [Reproduction commands](../spikes/phase-1/README.md) are available.
 
 ## Verified behavior
 
-Fourteen unit/admission tests and 48 desktop browser checks pass. The browser matrix covers Chromium, installed Chrome, Firefox and Playwright WebKit. It includes both presentation paths, absent OffscreenCanvas support, same-size target state reset, and bitmap cleanup after a copy error. On the physical Samsung Galaxy A04s (Android 14, Chrome 118), all eight device checks pass with the default canvas path, including repeated original-workload performance admission. Those version-specific observations are not a general browser support guarantee. Playwright WebKit does not substitute for actual Safari.
+Fourteen unit/admission tests and 48 desktop browser checks pass. The browser matrix covers Chromium, installed Chrome, Firefox and Playwright WebKit. It includes both presentation paths, absent OffscreenCanvas support, same-size target state reset, and bitmap cleanup after a copy error. On the physical Samsung Galaxy A04s (Android 14, Chrome 155), all eight device checks pass with the default canvas path, including repeated original-workload performance admission. Actual Safari 26.6.2 passes seven of eight device checks; performance admission fails. Those version-specific observations are not a general browser support guarantee. Playwright WebKit does not substitute for actual Safari.
 
 The initial A16 investigation exposed alpha-transfer rounding and per-target GPU synchronization costs. The A04s replaced it as the current mobile reference device. Historical A16 results remain separate; the final atlas path has not been requalified on that device.
 
@@ -43,7 +43,16 @@ Source decoding, first CPU frame and renderer setup are reported separately. Eac
 
 The service budgets retain the original 30/60 update targets. Cadence allows 5% scheduler/timestamp variation. CPU copy-age allows its service window plus one 60 Hz scheduling interval. Image accounting includes renderer arrays/textures/default buffer/snapshot, destination backing lower bounds and borrowed input pixels; browser, compositor and driver overhead is excluded. These are warm feasibility gates, not physical scanout, live-source freshness, thermal-soak or process-memory guarantees.
 
-On the A04s, the latest two original CPU runs measured batch p95 of 32.9/31.7 ms, cadence p95 of 33.342/33.339 ms and copy-age p95 of 47.094/47.687 ms. Default WebGL measured 7.8/10.9 ms, 16.670/16.671 ms and 12.104/12.292 ms respectively. Accounted image storage was 6,918,152 bytes for CPU and 16,654,336 bytes for WebGL. CPU has little headroom on this device; these warm measurements do not establish sustained performance.
+The final original-workload measurements used the unchanged default implementation. Each row contains two runs; both browsers reported visible, focused documents for all four workloads. Safari ran on the 60 Hz reference display with both monitors connected.
+
+| Environment / backend | Batch p95 (ms) | Cadence p95 (ms) | Copy-age p95 (ms) | Admission |
+|---|---:|---:|---:|---|
+| A04s / CPU | 29.3 / 29.7 | 33.4 / 33.4 | 46.0 / 44.3 | Pass |
+| A04s / WebGL | 11.7 / 7.5 | 16.8 / 16.8 | 14.4 / 9.6 | Pass |
+| Safari 26.6.2 / CPU | 14 / 13 | 17 / 18 | 14 / 13 | Pass |
+| Safari 26.6.2 / WebGL | 1 / 1 | **19 / 18** | 1 / 1 | **Fail: cadence >17.5 ms** |
+
+Accounted image storage was 6,918,152 bytes for CPU and 16,654,336 bytes for WebGL in both environments. All 720 measured frames are retained privately without filtering, together with source hashes and original receipts. CPU has limited headroom on the A04s; these warm measurements do not establish sustained performance. Safari's fast copies do not establish a scheduler repair.
 
 In a controlled WebKit comparison on the 60 Hz reference display, bitmap presentation reduced batch p95 from about 4 ms to 1 ms. Cadence still reached 18 ms against the fixed 17.5 ms gate. The same bitmap approach measured 57.8/58.5 ms batches on the A04s and failed admission despite passing pixel/lifecycle checks. It therefore remains an explicit experiment rather than the default or an admitted mobile tier.
 
@@ -51,12 +60,14 @@ The allocation guard allows four million source pixels and four million total at
 
 ## Remaining gates
 
-Actual Safari remains untested on this implementation and its gate is intentionally left open. WebKit still has failing cadence repeats after window placement, scheduling, clock-precision and presentation comparisons. A 20 µs clock control also failed, so integer timestamp rounding alone does not explain the issue. Faster copies do not establish a cadence fix.
+Actual Safari has now been tested on this implementation. Alpha parity, idle persistence, atlas batching, source restrictions, benchmark cleanup and controlled context loss pass; both original GPU runs fail cadence. The first WebDriver session stalled before collecting optical samples; its failed attempt is preserved separately from the completed fresh-session run. Temporary Safari settings were restored after testing. WebKit still has failing cadence repeats after window placement, scheduling, clock-precision and presentation comparisons. A 20 µs clock control also failed, so integer timestamp rounding alone does not explain the issue. Faster copies do not establish a cadence fix.
 
 The last standalone default-mode headed command passed both originals on Chrome and WebKit, while Firefox missed one GPU copy-age gate at 21.64 ms. The explicit bitmap WebKit command also passed in its recorded headed condition. Earlier controlled WebKit failures remain in the evidence; later passes do not establish a reliable repair.
 
 A native-focused WebKit follow-up on 26 October 2026 recorded idle rAF p95 of 18 ms both before and after rendering on the 60 Hz reference display. Its two original GPU workloads measured batch p95 of 15/17 ms and cadence p95 of 21/24 ms, failing admission. A separate GPU-only A/B/B/A atlas-image reuse comparison measured 9/8 ms batches for the default path and 7/7 ms for the prototype, while both paths returned 18/17 ms cadence. That prototype was not retained. The idle controls do not waive the cadence limit or establish a single cause for the failures.
 
-Desktop timing qualification therefore remains open. All numerical, cadence, age, workload and storage limits are unchanged. Production contracts and packages remain on hold until the required lanes pass.
+A subsequent controlled A/B/B/A comparison of Playwright WebKit revisions 2370 and 2380 also failed to establish a repair: the two original GPU cadence p95 values were 18/17 ms, 17/18 ms, 18/21 ms and 17/17 ms in execution order. Three of four legs failed the unchanged gate. The newer engine was not promoted. Earlier failures remain part of the qualification evidence; a later passing leg cannot erase them.
+
+This finite campaign is closed with an unresolved cadence gate, rather than another automatic timing rerun. All numerical, cadence, age, workload and storage limits are unchanged. A future repair must identify a supported mechanism and pass the original browser/device gates with repeatable evidence. Production contracts, framework packages and phase 2 remain on hold.
 
 The [future roadmap](FUTURE.md) continues to reserve motion, Apple-inspired components, React Native and Flutter as separately scoped work.
