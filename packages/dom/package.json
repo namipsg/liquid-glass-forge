@@ -1,14 +1,36 @@
 {
   "name": "@liquid-glass-forge/dom",
   "version": "0.0.0-dev",
-  "description": "Experimental explicit pixel source providers and coordinates for Liquid Glass Forge",
+  "description": "Experimental explicit sources, coordinates and vanilla host lifecycle for Liquid Glass Forge",
   "private": true,
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/styles.css"
+  ],
   "license": "MIT",
-  "engines": { "node": ">=20.19.0" },
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "default": "./dist/index.js" } },
-  "files": ["dist", "LICENSE", "NOTICE", "README.md"],
-  "dependencies": { "@liquid-glass-forge/core": "0.0.0-dev" },
-  "repository": { "type": "git", "url": "git+https://github.com/namipsg/liquid-glass-forge.git", "directory": "packages/dom" }
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "dependencies": {
+    "@liquid-glass-forge/core": "0.0.0-dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namipsg/liquid-glass-forge.git",
+    "directory": "packages/dom"
+  }
 }

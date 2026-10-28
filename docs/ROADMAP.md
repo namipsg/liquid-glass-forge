@@ -1,7 +1,8 @@
 # Foundation roadmap
 
-**Status: phase 3 implemented.** [Core contracts and packaging](PHASE-2.md) and
-[explicit source providers/coordinate mapping](PHASE-3.md) are implemented.
+**Status: phase 4 implemented.** [Core contracts and packaging](PHASE-2.md) and
+[explicit source providers/coordinate mapping](PHASE-3.md) and the
+[vanilla host/lifecycle](PHASE-4.md) are implemented.
 The [phase 1 feasibility findings](PHASE-1.md), including the explicit unresolved
 Safari/WebKit cadence progression waiver, remain unchanged. No release date,
 performance qualification or compatibility guarantee is implied.
@@ -42,9 +43,8 @@ The next product layers are documented in [future development](FUTURE.md). Motio
 
 ## Current boundary — 28 October 2026
 
-Phase 3 provides explicit image/application pixel/ImageData/ImageBitmap/canvas/video
-sources and pure coordinate mapping. Both packages remain private at `0.0.0-dev`.
-See [phase 3 evidence and limitations](PHASE-3.md). Phase 4 vanilla host work is
-next; no host, production optical renderer, framework adapter or npm release is
-part of this phase. The Safari cadence waiver does not turn failing measurements
-into passing performance evidence.
+Phase 4 adds stable decorative hosts, CSS/opaque material, bounded lifecycle and
+shared dirty/visibility scheduling. Both packages remain private at `0.0.0-dev`.
+See [phase 4 evidence and limits](PHASE-4.md). Phase 5 CPU rendering is next;
+no optical renderer, framework adapter or npm release is part of this phase.
+The Safari cadence waiver does not turn failing measurements into passing evidence.

@@ -8,7 +8,7 @@ import { auditPackage } from './package-audit.mjs';
 const root = fileURLToPath(new URL('../', import.meta.url));
 export const packageFiles = {
   core: ['LICENSE','NOTICE','README.md','dist/index.d.ts','dist/index.js','package.json'].sort(),
-  dom: ['LICENSE','NOTICE','README.md','dist/index.d.ts','dist/index.js','dist/providers.d.ts','dist/providers.js','dist/mapping.d.ts','dist/mapping.js','package.json'].sort()
+  dom: ['LICENSE','NOTICE','README.md','dist/index.d.ts','dist/index.js','dist/providers.d.ts','dist/providers.js','dist/mapping.d.ts','dist/mapping.js','dist/host.d.ts','dist/host.js','dist/scene.d.ts','dist/scene.js','dist/styles.css','package.json'].sort()
 };
 function run(command, args, cwd) {
   const r = spawnSync(command, args, { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 2*1024*1024,
@@ -65,12 +65,13 @@ export async function packSmoke() {
     }
     await writeFile(path.join(consumer,'smoke.mjs'), `import assert from 'node:assert/strict';
 const descriptors = new Map();
-for (const name of ['window','document','navigator','Worker','OffscreenCanvas','requestAnimationFrame','fetch','XMLHttpRequest','WebSocket','setTimeout','setInterval']) {
+for (const name of ['window','document','navigator','Worker','OffscreenCanvas','requestAnimationFrame','queueMicrotask','ResizeObserver','IntersectionObserver','matchMedia','fetch','XMLHttpRequest','WebSocket','setTimeout','setInterval']) {
   descriptors.set(name,Object.getOwnPropertyDescriptor(globalThis,name));
   Object.defineProperty(globalThis,name,{ configurable:true,get(){throw new Error('Import touched '+name);} });
 }
 const core = await import('@liquid-glass-forge/core');
-const { SourceProvider, mapSourceRegion } = await import('@liquid-glass-forge/dom');
+const { SourceProvider, mapSourceRegion, createGlassScene, mountGlassHost } = await import('@liquid-glass-forge/dom');
+assert.equal(typeof createGlassScene,'function');assert.equal(typeof mountGlassHost,'function');
 for (const [name, descriptor] of descriptors) { if(descriptor) Object.defineProperty(globalThis,name,descriptor); else delete globalThis[name]; }
 assert.equal(core.CONTRACT_VERSION,1);
 for (const name of ['core','dom']) await assert.rejects(import('@liquid-glass-forge/'+name+'/dist/index.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});
@@ -81,7 +82,7 @@ assert.equal(mapSourceRegion({source:{width:1,height:1},box:{x:0,y:0,width:1,hei
 console.log('Both installed ESM/types surfaces, SSR import traps, deep exports and owned pixels passed');
 `);
     await writeFile(path.join(consumer,'consumer.mts'), `import { CONTRACT_VERSION, type PixelSource, type FrameDescriptor } from '@liquid-glass-forge/core';
-import { SourceProvider, mapSourceRegion, type SourceSpec, type MappingInput, type MappingResult } from '@liquid-glass-forge/dom';
+import { SourceProvider, mapSourceRegion, createGlassScene, mountGlassHost, type GlassRenderer, type SourceSpec, type MappingInput, type MappingResult } from '@liquid-glass-forge/dom';
 const version: 1=CONTRACT_VERSION;
 // @ts-expect-error literal type must remain precise
 const invalidVersion: 2=CONTRACT_VERSION;
@@ -92,6 +93,12 @@ new SourceProvider({kind:'dom-capture'});
 const result: MappingResult=mapSourceRegion({source:{width:1,height:1},box:{x:0,y:0,width:1,height:1},target:{x:0,y:0,width:1,height:1}} satisfies MappingInput);
 if(result.ok) { const x:number=result.crop.x; }
 export function publicTypes(source:PixelSource,frame:FrameDescriptor):[PixelSource,FrameDescriptor,1] { return [source,frame,version]; }
+const materialScene=createGlassScene();materialScene.dispose();
+const adapter:GlassRenderer={render(request,signal){return {width:request.width,height:request.height,data:new Uint8Array(request.width*request.height*4)};}};
+// @ts-expect-error public lifecycle/material input is not any
+createGlassScene({renderer:adapter,timeoutMs:'forever'});
+// @ts-expect-error mount material input must retain its literal union
+mountGlassHost(document.createElement('div'),{material:'invisible'});
 provider.destroy();
 `);
     await writeFile(path.join(dir,'consumer-import.txt'),run(process.execPath,['smoke.mjs'],consumer));

@@ -1,8 +1,8 @@
 # Core contracts — experimental version 1
 
 Core version 1 defines data and validation. Phase 3 adds a private DOM source
-and coordinate package, specified in [source contracts](SOURCES.md). CPU/WebGL
-renderers, a DOM host and framework integrations remain planned.
+and coordinate package, specified in [source contracts](SOURCES.md). Phase 4 adds a [vanilla host and shared scene](HOSTS.md). CPU/WebGL
+renderers and framework integrations remain planned.
 
 ## Source and ownership
 

@@ -43,10 +43,13 @@ export async function sourceServers() {
       ['/core.js', new URL('../packages/core/dist/index.js', import.meta.url)],
       ['/dom.js', new URL('../packages/dom/dist/index.js', import.meta.url)],
       ['/providers.js', new URL('../packages/dom/dist/providers.js', import.meta.url)],
-      ['/mapping.js', new URL('../packages/dom/dist/mapping.js', import.meta.url)]
+      ['/mapping.js', new URL('../packages/dom/dist/mapping.js', import.meta.url)],
+      ['/host.js', new URL('../packages/dom/dist/host.js', import.meta.url)],
+      ['/scene.js', new URL('../packages/dom/dist/scene.js', import.meta.url)],
+      ['/styles.css', new URL('../packages/dom/dist/styles.css', import.meta.url)]
     ]);
     if (files.has(url.pathname)) {
-      try { res.writeHead(200, { 'Content-Type': 'text/javascript' }); res.end(await readFile(files.get(url.pathname))); }
+      try { res.writeHead(200, { 'Content-Type': url.pathname.endsWith('.css') ? 'text/css' : 'text/javascript' }); res.end(await readFile(files.get(url.pathname))); }
       catch { res.destroy(); } return;
     }
     if (url.pathname === '/') {

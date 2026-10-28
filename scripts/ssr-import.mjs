@@ -3,11 +3,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const entry = pathToFileURL(fileURLToPath(new URL('../packages/core/dist/index.js', import.meta.url))).href;
 const domEntry = pathToFileURL(fileURLToPath(new URL('../packages/dom/dist/index.js', import.meta.url))).href;
 const code = `
-for (const name of ['window','document','navigator','Worker','OffscreenCanvas','requestAnimationFrame','fetch','XMLHttpRequest','WebSocket','setTimeout','setInterval']) {
+for (const name of ['window','document','navigator','Worker','OffscreenCanvas','requestAnimationFrame','queueMicrotask','ResizeObserver','IntersectionObserver','matchMedia','fetch','XMLHttpRequest','WebSocket','setTimeout','setInterval']) {
   Object.defineProperty(globalThis, name, { configurable: true, get() { throw new Error('Import touched ' + name); } });
 }
 const dom = await import(${JSON.stringify(domEntry)});
-if (typeof dom.SourceProvider !== 'function') throw new Error('Missing source provider');
+if (typeof dom.createGlassScene !== 'function' || typeof dom.mountGlassHost !== 'function' || typeof dom.SourceProvider !== 'function') throw new Error('Missing source provider');
 const core = await import(${JSON.stringify(entry)});
 if (core.CONTRACT_VERSION !== 1) throw new Error('Missing public contract');
 `;

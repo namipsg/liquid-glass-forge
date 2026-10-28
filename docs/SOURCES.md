@@ -1,8 +1,8 @@
 # Explicit sources and coordinates — experimental phase 3
 
 `@liquid-glass-forge/dom` is private at `0.0.0-dev`. It acquires explicit readable
-pixels and maps explicit geometry. A host, optical renderer, observers for DOM
-layout, framework integrations and npm publication belong to later phases.
+pixels and maps explicit geometry. Phase 4 adds a [host and shared scene](HOSTS.md). Optical rendering, framework
+integrations and npm publication belong to later phases.
 
 ## SourceProvider
 
@@ -64,7 +64,7 @@ requesting it throws. Browser throttling may make updates slower. This is not a
 frame-delivery guarantee. No clock is installed on import/construction or for
 static/canvas sources. Last unsubscribe, provider pause, replacement and destroy
 remove owned listeners and callbacks; paused/ended/unreadable media has no polling
-timer. Source scheduling does not implement the later host's page-visibility policy.
+timer. Source scheduling delegates page visibility to the Phase 4 scene, which unsubscribes while hidden.
 Subscriber exceptions are isolated and ignored, so they cannot interrupt cleanup
 or other subscribers. Applications should handle/report errors in their listener.
 

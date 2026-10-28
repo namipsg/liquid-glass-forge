@@ -1,6 +1,6 @@
 # Proposed architecture
 
-**Status: core contracts and DOM sources/coordinates implemented; hosts, renderers and frameworks proposed.** The private experimental core follows [version 1 contracts](CONTRACTS.md). Names and interfaces may change before an initial release.
+**Status: core contracts, DOM sources/coordinates and vanilla host/lifecycle implemented; renderers and frameworks proposed.** The private experimental core follows [version 1 contracts](CONTRACTS.md). Names and interfaces may change before an initial release.
 
 ## Package boundaries
 

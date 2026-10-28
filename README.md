@@ -2,7 +2,7 @@
 
 An independent Liquid Glass project for the web, with planned CPU and WebGL rendering, vanilla JavaScript, React, Vue and Angular integrations.
 
-**Status: experimental phase 3 foundation.** The private core provides versioned contracts, validation and color-reference functions. The private DOM package provides explicit image/pixel/bitmap/canvas/video sources and coordinate mapping, with cancellation, ownership and package-consumer checks. Host/rendering/framework work remains planned. The [phase 1 Safari/WebKit cadence exception](docs/PHASE-1.md) remains a progression waiver; measured failures and numerical guards are unchanged. No published compatibility or performance guarantee is implied.
+**Status: experimental phase 4 foundation.** The private core provides versioned contracts, validation and color-reference functions. The private DOM package provides explicit image/pixel/bitmap/canvas/video sources and coordinate mapping, plus a stable vanilla host, CSS/opaque material fallback, bounded lifecycle and shared dirty/visibility scheduling. Rendering and framework work remains planned. The [phase 1 Safari/WebKit cadence exception](docs/PHASE-1.md) remains a progression waiver; measured failures and numerical guards are unchanged. No published compatibility or performance guarantee is implied.
 
 ## Local development
 
@@ -20,9 +20,9 @@ both private at `0.0.0-dev`. Tests pack both twice, install actual tarballs into
 an independent offline consumer, check ESM/types/SSR, and import their packed
 modules in Chromium, Firefox and WebKit. Source and coordinate fixtures also
 run in all three engines. Raw artifacts remain ignored. See [source usage and
-limits](docs/SOURCES.md), [phase 3 verification](docs/PHASE-3.md) and [core contracts](docs/CONTRACTS.md).
+limits](docs/SOURCES.md), [phase 4 verification](docs/PHASE-4.md) and [host API](docs/HOSTS.md) and [core contracts](docs/CONTRACTS.md).
 
-## Planned foundation
+## Foundation direction
 
 - JavaScript CPU optics and a WebGL2 implementation over explicit readable sources.
 - CSS backdrop materials and an opaque fallback for live DOM interfaces.
@@ -43,6 +43,8 @@ Future work includes Sileo-inspired React/SVG animation, Apple-inspired componen
 | [Phase 1 experiment](docs/PHASE-1.md) | Reproduction, measured scope and admission decisions |
 | [Phase 2 foundation](docs/PHASE-2.md) | Implemented contracts, packaging checks and limits |
 | [Phase 3 sources](docs/PHASE-3.md) | Source acquisition, coordinate mapping and verification |
+| [Phase 4 host](docs/PHASE-4.md) | Implemented vanilla host, lifecycle and verification |
+| [Host API](docs/HOSTS.md) | Material, ownership, adapter seam and scheduling limits |
 | [Source API](docs/SOURCES.md) | Explicit inputs, ownership, scheduling and mapping limits |
 | [Core contracts](docs/CONTRACTS.md) | Version 1 data, ownership and optical-reference specification |
 | [Future development](docs/FUTURE.md) | Motion, components and native exploration |

@@ -10,12 +10,13 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "check": "node scripts/build.mjs && node scripts/ssr-import.mjs",
-    "test:unit": "node --test tests/core.test.mjs tests/sources.test.mjs tests/dynamic-sources.test.mjs tests/mapping.test.mjs",
+    "test:unit": "node --test tests/core.test.mjs tests/sources.test.mjs tests/dynamic-sources.test.mjs tests/mapping.test.mjs tests/scene.test.mjs",
     "test:package-audit": "node --test tests/package-audit.test.mjs",
     "test:pack": "node scripts/pack-smoke.mjs",
     "test:browser-import": "node --test tests/browser-import.test.mjs",
-    "test": "pnpm check && pnpm test:unit && pnpm test:package-audit && pnpm test:pack && pnpm test:browser-import && pnpm test:sources-browser",
-    "test:sources-browser": "node --test tests/sources-browser.test.mjs tests/dynamic-browser.test.mjs tests/mapping-browser.test.mjs"
+    "test": "pnpm check && pnpm test:unit && pnpm test:package-audit && pnpm test:pack && pnpm test:browser-import && pnpm test:sources-browser && pnpm test:host-browser",
+    "test:sources-browser": "node --test tests/sources-browser.test.mjs tests/dynamic-browser.test.mjs tests/mapping-browser.test.mjs",
+    "test:host-browser": "node --test tests/host-browser.test.mjs tests/scene-browser.test.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
