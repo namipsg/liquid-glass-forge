@@ -1,8 +1,8 @@
 # Core contracts — experimental version 1
 
-Phase 2 defines data and validation, not a production renderer. Only the core
-package is implemented. The proposed CPU, WebGL, DOM and framework boundaries
-remain in the architecture; they are not empty published packages.
+Core version 1 defines data and validation. Phase 3 adds a private DOM source
+and coordinate package, specified in [source contracts](SOURCES.md). CPU/WebGL
+renderers, a DOM host and framework integrations remain planned.
 
 ## Source and ownership
 
@@ -19,7 +19,7 @@ The application must increment revision when pixels change; a later renderer
 must snapshot borrowed pixels before asynchronous work. `ownership: 'transfer'`
 is explicit permission for a future owner to transfer a complete dedicated
 buffer; it requires a whole-buffer view. Creating or validating the descriptor
-itself never transfers anything. No source provider or transfer pool exists yet.
+itself never transfers anything. Phase 3 providers return independent owned snapshots; no transfer pool exists.
 
 ## Frames and lifetime
 
@@ -81,7 +81,7 @@ work, not current exports.
 
 ## Packaging and verification
 
-The private `0.0.0-dev` core builds ESM plus declarations with no runtime
+The private `0.0.0-dev` core and DOM source packages build ESM plus declarations with no runtime
 libraries, browser globals, workers, network requests or import timers. It has no
 consumer install hooks. Tests install an actual tarball in an independent
 consumer, type-check its public exports, and reject undeclared deep imports.

@@ -1,4 +1,4 @@
-name: Core contracts and packed consumers
+name: Contracts, sources and packed consumers
 on: [push, pull_request]
 permissions:
   contents: read

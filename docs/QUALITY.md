@@ -1,6 +1,6 @@
 # Quality and release requirements
 
-**Status: acceptance requirements, not a record of passing tests.** Implementation, test infrastructure and performance measurements are pending.
+**Status: acceptance requirements, not a record of passing tests.** Core/source/package checks are implemented through [phase 3](PHASE-3.md). Later renderer/framework/release qualification remains pending; phase 1 measurements and its Safari cadence waiver remain documented.
 
 ## Required evidence
 
