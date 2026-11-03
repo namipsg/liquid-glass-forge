@@ -139,3 +139,15 @@ View readiness and application stability gate browser attachment; SSR retains
 projected native content and decorative material without engine activation.
 DestroyRef cancels pending gates and engine work. Bitmap completion does not
 write Angular signals. Sources/renderers remain caller-owned reusable objects.
+
+
+Phase 10 corrects opaque material under active optics: the host supplies a solid
+system `Canvas` background and inherited `CanvasText`, while the decorative
+bitmap has zero opacity. Forced colors and reduced transparency apply the same
+solid treatment, including when an optical renderer continues producing pixels.
+This preserves the engine/target ownership contract and avoids changing semantic
+DOM or application events. The explicit-material selector uses CSS `:has`,
+verified in the recorded Chromium/Firefox/WebKit matrix. Applications that set
+their own foreground colors still own their content's contrast. Reduced motion
+introduces no library animation clock; application transitions own their policy.
+See [Phase 10](PHASE-10.md) for the cross-adapter access and failure evidence.

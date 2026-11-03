@@ -3,19 +3,21 @@
 An independent Liquid Glass project for the web, with CPU/WebGL2 rendering,
 a vanilla host, and React, Vue and Angular integrations.
 
-**Status: Phase 9 Angular adapter implemented within the scope below.** Seven private packages
+**Status: Phase 10 integrated resilience implemented within the scope below.** Seven private packages
 provide explicit sources, versioned optics, workers, shared scenes and readable
 CSS/opaque material. [Phase 7](docs/PHASE-7.md) records the React component, hook
 and provider with packed Vite/Next.js SSR, hydration and lifecycle checks.
 [Phase 8](docs/PHASE-8.md) records the Vue component/composable/provider, KeepAlive
 and packed Vue/Nuxt SSR consumers. [Phase 9](docs/PHASE-9.md) adds standalone Angular
 components/directives, zoneless lifecycle and packed Angular SSR/hydration.
+[Phase 10](docs/PHASE-10.md) combines all four adapters with forced CPU/worker/WebGL,
+CSP faults, access checks and regression mutations.
 
 [Phase 5](docs/PHASE-5.md) retains the named A04s CPU workload qualification.
 [Phase 6](docs/PHASE-6.md) records GPU blur, atlas presentation, recovery and
 software/A04s/Safari evidence, including retained timing failures. The original
 [Safari cadence waiver](docs/PHASE-1.md) remains unchanged. Broader device,
-integrated framework/GPU and release qualification remain open.
+sustained performance and release qualification remain open.
 
 ## Local development
 
@@ -35,6 +37,9 @@ twice and install the private tarballs offline into an independent consumer.
 They check ESM/types/SSR and import packed modules in Chromium, Firefox and WebKit.
 Production React/Next.js, Vue/Nuxt and Angular consumers verify hydration and lifecycle.
 Angular uses partial compilation via the isolated TypeScript6/ng-packagr tool workspace.
+`pnpm test:faults` runs the combined production consumer matrix; `pnpm test:access`
+reproduces the opaque-material regression. Native Google Chrome inspection and a
+concise visual candidate follow the owner-requested review method.
 Raw artifacts remain ignored. See [sources](docs/SOURCES.md),
 [CPU qualification](docs/PHASE-5.md), [React](docs/PHASE-7.md), [Vue](docs/PHASE-8.md),
 [Angular](docs/PHASE-9.md), [host API](docs/HOSTS.md) and [core contracts](docs/CONTRACTS.md).
@@ -60,6 +65,7 @@ Future work includes Sileo-inspired React/SVG animation, Apple-inspired componen
 | [Phase 1 experiment](docs/PHASE-1.md) | Reproduction, measured scope and admission decisions |
 | [Phase 2 foundation](docs/PHASE-2.md) | Implemented contracts, packaging checks and limits |
 | [Phase 3 sources](docs/PHASE-3.md) | Source acquisition, coordinate mapping and verification |
+| [Phase 10 resilience](docs/PHASE-10.md) | Forced backends, CSP/faults, access, combined lifecycle and mutation evidence |
 | [Phase 9 Angular](docs/PHASE-9.md) | Standalone component/directives, APF, zoneless CSR and eager SSR/hydration |
 | [Phase 8 Vue](docs/PHASE-8.md) | Component/composable/provider, KeepAlive and packed Vue/Nuxt SSR/hydration |
 | [Phase 7 React](docs/PHASE-7.md) | Component/hook/provider, Strict Mode and packed Vite/Next.js SSR/hydration |

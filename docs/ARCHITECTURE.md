@@ -89,3 +89,12 @@ cancels the gate and owns cleanup. That boundary covers the tested eager
 hydration applications, not arbitrary deferred/incremental hydration. Source
 callbacks and bitmap work run outside Angular without per-frame signal writes.
 Angular core/common22.2.4 and RxJS7.8.2 remain exact external peers.
+
+
+[Phase 10](PHASE-10.md) verifies these seams together through physically installed
+production consumers: every adapter runs forced CPU/worker/WebGL, explicit
+fallback, restrictive CSP, cancellation and repeated lifecycle cases. Opaque
+presentation is enforced above optical output by a solid host and hidden
+bitmap. Semantics remain in normal DOM. Access evidence names the tested native
+AX/keyboard/visual methods, and does not infer a physical-device or VoiceOver
+qualification from headless browser results.

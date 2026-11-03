@@ -1,0 +1,12 @@
+@import '@liquid-glass-forge/dom/styles.css';
+html { color-scheme: light dark; font: 16px system-ui, sans-serif; }
+body { margin: 16px; color: CanvasText; background: Canvas; }
+header { margin-bottom: 20px; } header > * { margin-right: 8px; }
+button, input, select { font: inherit; } button, a, input, select { margin: 6px; }
+:focus-visible { outline: 3px solid CanvasText; outline-offset: 3px; }
+.adverse { padding: 24px; background: repeating-conic-gradient(#000 0% 25%,#fff 0% 50%) 0/24px 24px; }
+.test-card { display: inline-block; vertical-align: top; width: 280px; height: 170px; margin: 12px; padding: 12px; box-sizing: border-box; }
+.test-card p { margin: 8px; } .test-card img { display: block; margin: 10px; }
+.review-mode .test-card { width: 320px; height: 230px; border-radius: 28px; box-shadow: 0 8px 24px #0003; }
+.review-mode #review-guide { max-width: 960px; line-height: 1.5; }
+@media(prefers-reduced-motion: reduce) { ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; } }
