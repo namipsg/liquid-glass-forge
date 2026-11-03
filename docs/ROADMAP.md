@@ -1,6 +1,6 @@
 # Foundation roadmap
 
-**Status: Phase 7 React adapter implemented and verified within its recorded scope.** [Core contracts and packaging](PHASE-2.md) and
+**Status: Phase 8 Vue adapter implemented and verified within its recorded scope.** [Core contracts and packaging](PHASE-2.md) and
 [explicit source providers/coordinate mapping](PHASE-3.md) and the
 [vanilla host/lifecycle](PHASE-4.md) are implemented.
 The [phase 1 feasibility findings](PHASE-1.md), including the explicit unresolved
@@ -44,7 +44,7 @@ The next product layers are documented in [future development](FUTURE.md). Motio
 ## Current boundary — 3 November 2026
 
 Phase 4 adds stable decorative hosts, CSS/opaque material, bounded lifecycle and
-shared dirty/visibility scheduling. All five packages remain private at `0.0.0-dev`.
+shared dirty/visibility scheduling. All six packages remain private at `0.0.0-dev`.
 See [phase 4 evidence and limits](PHASE-4.md). [Phase 5](PHASE-5.md) adds the CPU kernel, worker and bounded vanilla adapter.
 The original physical workload now passes two main and two required-worker
 repetitions on the A04s under unchanged service/cadence/age/image limits. Earlier
@@ -55,5 +55,11 @@ The Safari cadence waiver does not turn failing measurements into passing eviden
 [Phase 7 React](PHASE-7.md) now implements the original M19–M21 component, hook,
 shared-scene ownership, Strict Mode cleanup and packed production Vite/Next.js
 SSR/hydration boundary. React/React DOM19.3.1 is the tested peer combination.
-Vue/Angular remain future work. Actual WebGL-through-React coverage joins Step10;
+Angular remains future work. Actual WebGL-through-React coverage joins Step10;
 no new physical or broad performance support is inferred from these adapter tests.
+
+
+[Phase8 Vue](PHASE-8.md) implements original M22–M24 components/composables,
+reactive ownership, KeepAlive cancellation and packed production Vue/Nuxt SSR.
+Vue3.5.44 is the exact tested peer. Actual WebGL-through-Vue joins Step10.
+Angular, integrated resilience and broader qualification remain future phases.

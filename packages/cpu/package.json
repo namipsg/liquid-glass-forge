@@ -4,7 +4,9 @@
   "description": "Experimental JavaScript CPU optics for explicit Liquid Glass Forge pixel sources",
   "private": true,
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/worker.js"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=20.19.0"

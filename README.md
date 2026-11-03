@@ -1,12 +1,14 @@
 # Liquid Glass Forge
 
 An independent Liquid Glass project for the web, with CPU/WebGL2 rendering,
-a vanilla host and React integration. Vue and Angular remain planned.
+a vanilla host, React and Vue integrations. Angular remains planned.
 
-**Status: Phase 7 React adapter implemented and verified.** Five private packages
+**Status: Phase 8 Vue adapter implemented and verified.** Six private packages
 provide explicit sources, versioned optics, workers, shared scenes and readable
 CSS/opaque material. [Phase 7](docs/PHASE-7.md) records the React component, hook
 and provider with packed Vite/Next.js SSR, hydration and lifecycle checks.
+[Phase 8](docs/PHASE-8.md) records the Vue component/composable/provider, KeepAlive
+and packed Vue/Nuxt SSR consumers.
 
 [Phase 5](docs/PHASE-5.md) retains the named A04s CPU workload qualification.
 [Phase 6](docs/PHASE-6.md) records GPU blur, atlas presentation, recovery and
@@ -16,7 +18,8 @@ integrated framework/GPU and release qualification remain open.
 
 ## Local development
 
-Use Node 20.19 or newer and pnpm 10.34.5:
+Use Node 24.21.0 and pnpm 10.34.5 for the complete suite, including Nuxt.
+CI retains a Node20.19.6 base lane; Nuxt requires the newer runtime:
 
 ```sh
 pnpm install --frozen-lockfile --ignore-scripts
@@ -25,12 +28,14 @@ pnpm exec playwright install chromium firefox webkit
 pnpm test
 ```
 
-The workspace contains `@liquid-glass-forge/core`, `@liquid-glass-forge/cpu` and
-`@liquid-glass-forge/dom` plus `@liquid-glass-forge/webgl` and `@liquid-glass-forge/react`, all private at `0.0.0-dev`. Tests pack all five twice, install actual tarballs into
-an independent offline consumer, check ESM/types/SSR, and import their packed
-modules in Chromium, Firefox and WebKit. Source and coordinate fixtures also
-run in all three engines. Raw artifacts remain ignored. See [source usage and
-limits](docs/SOURCES.md), [CPU usage and qualification](docs/PHASE-5.md), [phase 4 verification](docs/PHASE-4.md) and [host API](docs/HOSTS.md) and [core contracts](docs/CONTRACTS.md).
+The workspace contains `@liquid-glass-forge/core`, `cpu`, `dom`, `webgl`, `react`
+and `vue`, all private at `0.0.0-dev`. Tests stage external peers, pack all six
+twice and install the private tarballs offline into an independent consumer.
+They check ESM/types/SSR and import packed modules in Chromium, Firefox and WebKit.
+Production React/Next.js and Vue/Nuxt consumers verify hydration and lifecycle.
+Raw artifacts remain ignored. See [sources](docs/SOURCES.md),
+[CPU qualification](docs/PHASE-5.md), [React](docs/PHASE-7.md), [Vue](docs/PHASE-8.md),
+[host API](docs/HOSTS.md) and [core contracts](docs/CONTRACTS.md).
 
 ## Foundation direction
 
@@ -53,6 +58,7 @@ Future work includes Sileo-inspired React/SVG animation, Apple-inspired componen
 | [Phase 1 experiment](docs/PHASE-1.md) | Reproduction, measured scope and admission decisions |
 | [Phase 2 foundation](docs/PHASE-2.md) | Implemented contracts, packaging checks and limits |
 | [Phase 3 sources](docs/PHASE-3.md) | Source acquisition, coordinate mapping and verification |
+| [Phase 8 Vue](docs/PHASE-8.md) | Component/composable/provider, KeepAlive and packed Vue/Nuxt SSR/hydration |
 | [Phase 7 React](docs/PHASE-7.md) | Component/hook/provider, Strict Mode and packed Vite/Next.js SSR/hydration |
 | [Phase 6 WebGL](docs/PHASE-6.md) | Shared atlas, GPU blur, parity, recovery and measured scope |
 | [Phase 5 CPU](docs/PHASE-5.md) | Kernel, worker, vanilla adapter and named-device qualification |

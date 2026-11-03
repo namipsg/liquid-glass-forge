@@ -125,3 +125,9 @@ The [React adapter](PHASE-7.md) uses the supplied-target seam so React owns its
 stable decorative canvas and semantic children. Multiple surfaces under one
 provider share an engine/source subscription. Framework cleanup disposes only
 its scene/attachments, preserving caller-owned reusable source/renderer objects.
+
+
+The [Vue adapter](PHASE-8.md) uses supplied targets so Vue retains all semantic
+and decorative nodes. Shared providers pause with KeepAlive. Composables detach
+cached children independently and observe material/ref changes without replacing
+unrelated surfaces. Sources/renderers remain reusable caller-owned objects.

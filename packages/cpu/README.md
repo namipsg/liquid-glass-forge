@@ -17,3 +17,10 @@ changing optical strength still computes refraction on every frame.
 
 See `docs/PHASE-5.md` in the project for equations, acceptance and current limits.
 Implementation tests do not establish new physical-device admission.
+
+
+The exported `@liquid-glass-forge/cpu/worker.js` entry registers the worker message
+handler and is marked as side-effectful for bundlers. The package root remains
+safe to import on the server. A consumer-owned worker entry may import that public
+subpath and pass a statically bundled `Worker` through `workerFactory`. Phase8's
+packed Vue/Nuxt tests exercise cancellation of a real completed worker frame.

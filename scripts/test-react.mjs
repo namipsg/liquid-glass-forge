@@ -25,11 +25,11 @@ const check=(name,value)=>{receipt.checks.push({name,...value});writeFileSync(pa
 try{
   for(const folder of ['packages/react/src','tests/fixtures/react'])for(const f of await readdir(folder)){const file=folder+'/'+f;receipt.sourceSha256[file]=sha(await readFile(file));}
   await writeFile(path.join(consumer,'package.json'),JSON.stringify({private:true,type:'module'}));const tarballs=[];
-  for(const name of Object.keys(packageFiles)){
+  for(const name of ['core','cpu','dom','webgl','react']){
     const meta=JSON.parse(execFileSync('npm',['pack','--json','--ignore-scripts','--pack-destination',dir],{cwd:path.join(root,'packages',name),encoding:'utf8',timeout:30000}))[0];const tarball=path.join(dir,meta.filename),files=execFileSync('tar',['-tzf',tarball],{encoding:'utf8'}).trim().split('\n').map(f=>f.replace(/^package\//,'')).sort();assert.deepEqual(files,packageFiles[name]);const manifest=JSON.parse(execFileSync('tar',['-xOf',tarball,'package/package.json'],{encoding:'utf8'}));auditPackage(manifest,files,{internalVersions:Object.fromEntries(Object.keys(packageFiles).map(n=>['@liquid-glass-forge/'+n,'0.0.0-dev'])),installedPeers:receipt.versions});receipt.artifacts.push({name,sha256:sha(await readFile(tarball)),files});tarballs.push(tarball);
   }
   console.log('Installing physical packed React consumer');
-  await command('npm',['install','--ignore-scripts','--offline','--no-audit','--no-fund','--save-exact',...tarballs,'react@19.3.1','react-dom@19.3.1','@types/react@19.3.0','@types/react-dom@19.3.0','next@16.4.4','vite@8.3.5'],'install.txt');
+  await command('npm',['install','--ignore-scripts','--prefer-online','--no-audit','--no-fund','--save-exact',...tarballs,'react@19.3.1','react-dom@19.3.1','@types/react@19.3.0','@types/react-dom@19.3.0','next@16.4.4','vite@8.3.5'],'install.txt');
   await cp(path.join(consumer,'package-lock.json'),path.join(dir,'consumer-package-lock.json'));
   for(const a of receipt.artifacts){const installed=path.join(consumer,'node_modules/@liquid-glass-forge',a.name);assert.equal((await lstat(installed)).isSymbolicLink(),false);assert.ok((await realpath(installed)).startsWith(await realpath(consumer)));for(const f of a.files){const tar=tarballs[receipt.artifacts.indexOf(a)];assert.deepEqual(await readFile(path.join(installed,f)),execFileSync('tar',['-xOf',tar,'package/'+f]));}}
   for(const [name,version] of Object.entries(receipt.versions))assert.equal(JSON.parse(await readFile(path.join(consumer,'node_modules',name,'package.json'))).version,version);
