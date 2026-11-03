@@ -2,13 +2,17 @@ import { createSource, MAX_PIXELS, type PixelBytes } from '@liquid-glass-forge/c
 
 export type GlassMaterial = 'glass' | 'opaque';
 export interface HostPixels { readonly width: number; readonly height: number; readonly data: PixelBytes }
+export interface HostCanvas { readonly width: number; readonly height: number; readonly canvas: HTMLCanvasElement }
+export interface HostPresented { readonly width: number; readonly height: number; readonly presentedTarget: HTMLCanvasElement }
+export type HostFrame = HostPixels | HostCanvas | HostPresented;
 export interface GlassHostOptions { readonly target?: HTMLCanvasElement; readonly material?: GlassMaterial }
 export interface GlassHost {
   readonly element: HTMLElement;
   readonly target: HTMLCanvasElement;
   measure(): Readonly<{ width: number; height: number }>;
   setMaterial(material: GlassMaterial): void;
-  present(pixels: HostPixels): void;
+  prepareCanvas(width: number, height: number): HTMLCanvasElement;
+  present(pixels: HostFrame): void;
   clear(): void;
   dispose(): void;
 }
@@ -41,7 +45,7 @@ export function mountGlassHost(element: HTMLElement, options: GlassHostOptions =
   if (supplied) {
     if (originalWidth * originalHeight > MAX_PIXELS) throw new HostError('INVALID_HOST', 'Supplied backing exceeds core pixel bound');
     try {
-      context = target.getContext('2d', { colorSpace: 'srgb' });
+      context = target.getContext('2d', { colorSpace: 'srgb', willReadFrequently: true });
       if (!context) throw new Error('Canvas2D unavailable');
       if (originalWidth && originalHeight) originalPixels = context.getImageData(0, 0, originalWidth, originalHeight);
     } catch (cause) { throw new HostError('UNAVAILABLE_HOST', 'Supplied target must have a readable 2D backing', { cause }); }
@@ -77,6 +81,7 @@ export function mountGlassHost(element: HTMLElement, options: GlassHostOptions =
     if (!node.classList.contains(name)) { const hadClass = node.hasAttribute('class'); node.classList.add(name); undo.push(() => { node.classList.remove(name); if (!node.className && !hadClass) node.removeAttribute('class'); }); }
   };
   let disposed = false, ownedWidth = target.width, ownedHeight = target.height, backingTouched = false;
+  let presentationImage: ImageData | undefined;
   const alive = () => { if (disposed) throw new HostError('DISPOSED', 'Host is disposed'); };
   const restore = () => {
     if (backingTouched && target.width === ownedWidth && target.height === ownedHeight) {
@@ -84,6 +89,7 @@ export function mountGlassHost(element: HTMLElement, options: GlassHostOptions =
       if (supplied && originalPixels) target.getContext('2d')?.putImageData(originalPixels, 0, 0);
     }
     originalPixels = undefined;
+    presentationImage = undefined;
     for (const release of undo.reverse()) { try { release(); } catch { /* Continue releasing independent ownership. */ } }
     for (const [node, text] of originalStyleAttributes) {
       const expected = doc.createElement('div').style; expected.cssText = text ?? '';
@@ -91,6 +97,7 @@ export function mountGlassHost(element: HTMLElement, options: GlassHostOptions =
       if ([...keys].every(key => node.style.getPropertyValue(key) === expected.getPropertyValue(key) && node.style.getPropertyPriority(key) === expected.getPropertyPriority(key))) {
         if (text === null) node.removeAttribute('style'); else node.setAttribute('style', text);
       }
+      if (text === null && node.style.cssText === '' && node.getAttribute('style') !== null) node.removeAttribute('style');
     }
     if (!supplied) target.remove();
     context = null; owners.delete(element);
@@ -105,17 +112,39 @@ export function mountGlassHost(element: HTMLElement, options: GlassHostOptions =
       const filter = material === 'opaque' ? 'none' : 'blur(var(--lgf-blur, 12px)) saturate(1.1)';
       style(target, 'backdrop-filter', filter); style(target, '-webkit-backdrop-filter', filter);
     },
-    present(pixels: HostPixels) {
+    prepareCanvas(width: number, height: number) {
+      alive(); if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) || width < 1 || height < 1 || width*height > MAX_PIXELS) throw new HostError('INVALID_PIXELS','Invalid native canvas size');
+      context ??= target.getContext('2d',{colorSpace:'srgb',willReadFrequently:true}); if (!context) throw new HostError('UNAVAILABLE_HOST','Canvas2D unavailable');
+      ownedWidth=width;ownedHeight=height;backingTouched=true;presentationImage=undefined;
+      if(target.width!==width)target.width=width;if(target.height!==height)target.height=height;return target;
+    },
+    present(pixels: HostFrame) {
       alive();
+      if ('presentedTarget' in pixels) {
+        if (pixels.presentedTarget !== target || target.width !== pixels.width || target.height !== pixels.height || pixels.width !== ownedWidth || pixels.height !== ownedHeight || !backingTouched) throw new HostError('INVALID_PIXELS','Unprepared native presentation');
+        return;
+      }
+      if ('canvas' in pixels) {
+        const canvas = pixels.canvas, frameView = canvas?.ownerDocument?.defaultView;
+        if (!frameView || !(canvas instanceof frameView.HTMLCanvasElement) || canvas === target || canvas.width !== pixels.width || canvas.height !== pixels.height) throw new HostError('INVALID_PIXELS','Invalid canvas frame');
+        host.prepareCanvas(pixels.width,pixels.height);
+        if(typeof context!.reset==='function')context!.reset();else target.width=pixels.width;
+        context!.globalCompositeOperation='copy';context!.imageSmoothingEnabled=false;context!.drawImage(canvas,0,0);
+        return;
+      }
       try { createSource({ contractVersion: 1, width: pixels.width, height: pixels.height, data: pixels.data, revision: 0, ownership: 'borrowed', colorSpace: 'srgb', alphaMode: 'straight' }); }
       catch (cause) { throw new HostError('INVALID_PIXELS', 'Expected bounded RGBA8 output', { cause }); }
-      context ??= target.getContext('2d', { colorSpace: 'srgb' });
+      context ??= target.getContext('2d', { colorSpace: 'srgb', willReadFrequently: true });
       if (!context) throw new HostError('UNAVAILABLE_HOST', 'Canvas2D is unavailable');
-      target.width = pixels.width; target.height = pixels.height;
+      if (target.width !== pixels.width) target.width = pixels.width;
+      if (target.height !== pixels.height) target.height = pixels.height;
       ownedWidth = pixels.width; ownedHeight = pixels.height; backingTouched = true;
-      const image = context.createImageData(pixels.width, pixels.height); image.data.set(pixels.data); context.putImageData(image, 0, 0);
+      if (!presentationImage || presentationImage.width !== pixels.width || presentationImage.height !== pixels.height) {
+        presentationImage = context.createImageData(pixels.width, pixels.height);
+      }
+      presentationImage.data.set(pixels.data); context.putImageData(presentationImage, 0, 0);
     },
-    clear() { alive(); target.width = 0; target.height = 0; ownedWidth = 0; ownedHeight = 0; backingTouched = true; },
+    clear() { alive(); presentationImage = undefined; target.width = 0; target.height = 0; ownedWidth = 0; ownedHeight = 0; backingTouched = true; },
     dispose() { if (disposed) return; disposed = true; restore(); }
   });
   try {

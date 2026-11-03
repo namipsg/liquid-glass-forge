@@ -18,7 +18,7 @@ const consumer = await mkdtemp(path.join(tmpdir(),'lgf-vanilla-installed-'));
 after(async()=>rm(consumer,{recursive:true,force:true}));
 await writeFile(path.join(consumer,'package.json'),JSON.stringify({name:'vanilla-packed-browser',private:true,type:'module'}));
 const tarballs=[];
-for (const name of ['core','dom']) {
+for (const name of ['core','cpu','dom']) {
   const packed = JSON.parse(execFileSync('npm',['pack','--json','--ignore-scripts','--pack-destination',artifacts],
     { cwd: fileURLToPath(new URL(`../packages/${name}/`,import.meta.url)),encoding:'utf8',timeout:30000 }))[0];
   assert.equal(packed.filename, `liquid-glass-forge-${name}-0.0.0-dev.tgz`);
@@ -26,7 +26,7 @@ for (const name of ['core','dom']) {
   const files = execFileSync('tar',['-tzf',tarball],{encoding:'utf8'}).trim().split('\n').map(f=>{assert.ok(f.startsWith('package/'));return f.slice(8);}).sort();
   assert.deepEqual(files,packageFiles[name]);
   const manifest = JSON.parse(execFileSync('tar',['-xOf',tarball,'package/package.json'],{encoding:'utf8'}));
-  auditPackage(manifest,files,{internalVersions:{'@liquid-glass-forge/core':'0.0.0-dev','@liquid-glass-forge/dom':'0.0.0-dev'}});
+  auditPackage(manifest,files,{internalVersions:{'@liquid-glass-forge/core':'0.0.0-dev','@liquid-glass-forge/dom':'0.0.0-dev','@liquid-glass-forge/cpu':'0.0.0-dev'}});
   for(const file of files.filter(f=>f.endsWith('.js')||f.endsWith('.css'))) {
     const bytes=execFileSync('tar',['-xOf',tarball,`package/${file}`],{timeout:15000});
     assert.deepEqual(bytes,await readFile(new URL(`../packages/${name}/${file}`,import.meta.url)));
@@ -40,7 +40,7 @@ assert.ok(!(await realpath(consumer)).startsWith(await realpath(root)));
 for(const [name,engine] of Object.entries({chromium,firefox,webkit})) {
   test(`${name}: installed vanilla packages/CSS preserve native input and complete source/host lifecycle without a bundler`,async()=>{
     const server=createServer((req,res)=>{
-      if(req.url==='/' || req.url==='/nojs') res.writeHead(200,{'Content-Type':'text/html'}).end('<!doctype html><link rel="stylesheet" href="/dom/styles.css"><script type="importmap">{"imports":{"@liquid-glass-forge/core":"/core/index.js"}}</script><div class="lgf-host" style="width:220px;height:80px"><canvas class="lgf-surface" data-lgf-material="opaque" aria-hidden="true" role="presentation" tabindex="-1"></canvas><input id="nojs-input"></div><div id="vanilla" style="width:220px;height:80px"><input id="vanilla-input"><button id="vanilla-button">Native</button></div>');
+      if(req.url==='/' || req.url==='/nojs') res.writeHead(200,{'Content-Type':'text/html'}).end('<!doctype html><link rel="stylesheet" href="/dom/styles.css"><script type="importmap">{"imports":{"@liquid-glass-forge/core":"/core/index.js","@liquid-glass-forge/cpu":"/cpu/index.js"}}</script><div class="lgf-host" style="width:220px;height:80px"><canvas class="lgf-surface" data-lgf-material="opaque" aria-hidden="true" role="presentation" tabindex="-1"></canvas><input id="nojs-input"></div><div id="vanilla" style="width:220px;height:80px"><input id="vanilla-input"><button id="vanilla-button">Native</button></div>');
       else if(modules.has(req.url)) res.writeHead(200,{'Content-Type':req.url.endsWith('.css')?'text/css':'text/javascript'}).end(modules.get(req.url));
       else res.writeHead(404).end();
     });

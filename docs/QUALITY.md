@@ -1,6 +1,6 @@
 # Quality and release requirements
 
-**Status: acceptance requirements, not a record of passing tests.** Core/source/host/package checks are implemented through [phase 4](PHASE-4.md). Later renderer/framework/release qualification remains pending; phase 1 measurements and its Safari cadence waiver remain documented.
+**Status: acceptance requirements.** Core/source/host/package and [Phase 5 CPU checks](PHASE-5.md) pass, including the named A04s workload. [Phase 6 WebGL](PHASE-6.md) has installed-browser, physical A04s and actual Safari26.6.2 exit evidence, frozen for independent review. The SwiftShader timing failures and historical Safari cadence waiver remain recorded. Broader device/framework/release qualification remains pending; Phase 1 measurements and its Safari cadence waiver remain documented.
 
 ## Required evidence
 

@@ -59,12 +59,20 @@ function abortable<T>(work: Promise<T>, signal: AbortSignal): Promise<T> {
     if (signal.aborted) abort();
   });
 }
-function bytes(width: number, height: number, data: PixelBytes, revision: number): PixelSource {
+function bytes(width: number, height: number, data: PixelBytes, revision: number, target?: PixelBytes): PixelSource {
   try {
     const input = createSource({ contractVersion: 1, width, height, revision, data,
       ownership: 'borrowed', colorSpace: 'srgb', alphaMode: 'straight' });
+    if (target !== undefined) {
+      const output = createSource({ ...input, data: target, ownership: 'borrowed' });
+      if (output.data.buffer === input.data.buffer) throw new TypeError('Acquisition target must not alias the borrowed source');
+      new Uint8Array(output.data.buffer, output.data.byteOffset, output.data.byteLength)
+        .set(new Uint8Array(input.data.buffer, input.data.byteOffset, input.data.byteLength));
+      return output;
+    }
     // Copy synchronously before yielding; never detach the application's view.
-    return createSource({ ...input, data: new Uint8ClampedArray(input.data), ownership: 'transfer' });
+    return createSource({ ...input,
+      data: new Uint8ClampedArray(input.data.buffer, input.data.byteOffset, input.data.byteLength).slice(), ownership: 'transfer' });
   } catch (cause) { throw error('INVALID_SOURCE', 'Invalid RGBA8 source storage', cause); }
 }
 function raster(value: CanvasImageSource, width: number, height: number, revision: number): PixelSource {
@@ -115,14 +123,14 @@ async function decodedImage(spec: Extract<SourceSpec, { kind: 'image' }>, revisi
     image.onload = null; image.onerror = null; image.src = '';
   }
 }
-function acquire(spec: SourceSpec, revision: number, signal: AbortSignal): PixelSource | Promise<PixelSource> {
+function acquire(spec: SourceSpec, revision: number, signal: AbortSignal, target?: PixelBytes): PixelSource | Promise<PixelSource> {
   throwIfAborted(signal);
   switch (spec.kind) {
-    case 'pixels': return bytes(spec.width, spec.height, spec.data, revision);
+    case 'pixels': return bytes(spec.width, spec.height, spec.data, revision, target);
     case 'image-data':
       // Older ImageData implementations expose only the original sRGB format.
       if (spec.value.colorSpace !== undefined && spec.value.colorSpace !== 'srgb') throw error('UNSUPPORTED_SOURCE', 'Only sRGB ImageData is supported');
-      return bytes(spec.value.width, spec.value.height, spec.value.data, revision);
+      return bytes(spec.value.width, spec.value.height, spec.value.data, revision, target);
     case 'bitmap': return raster(spec.value, spec.value.width, spec.value.height, revision);
     case 'canvas': return raster(spec.value, spec.value.width, spec.value.height, revision);
     case 'video':
@@ -266,10 +274,19 @@ export class SourceProvider {
     this.#spec = { kind: 'pixels', width: 1, height: 1, data: new Uint8Array(4) };
   }
   read(options: { readonly signal?: AbortSignal } = {}): Promise<SourceSnapshot> {
+    return this.#read(options);
+  }
+  /** Full synchronous RGBA8 capture into caller-owned storage; never transferred or retained. */
+  readInto(target: PixelBytes, options: { readonly signal?: AbortSignal } = {}): Promise<SourceSnapshot> {
+    if (!ArrayBuffer.isView(target)) return Promise.reject(error('INVALID_SOURCE', 'An attached RGBA8 acquisition target is required'));
+    return this.#read(options, target);
+  }
+  #read(options: { readonly signal?: AbortSignal }, target?: PixelBytes): Promise<SourceSnapshot> {
     if (this.#destroyed) return Promise.reject(error('DESTROYED', 'Provider is destroyed'));
     if (this.#paused) return Promise.reject(error('PAUSED', 'Provider is paused'));
     try { this.#refresh(); } catch (cause) { return Promise.reject(cause); }
     if (options.signal?.aborted) return Promise.reject(error('ABORTED', 'Read aborted'));
+    if (target !== undefined && this.#spec.kind !== 'pixels' && this.#spec.kind !== 'image-data') return Promise.reject(error('UNSUPPORTED_SOURCE', 'Caller-owned acquisition requires explicit RGBA8 pixels or ImageData'));
     this.#cancel?.(error('SUPERSEDED', 'A newer read superseded this read'));
     const generation = this.#generation, revision = this.#revision;
     return new Promise((resolve, reject) => {
@@ -292,7 +309,7 @@ export class SourceProvider {
       options.signal?.addEventListener('abort', abort, { once: true });
       try {
         // acquire is invoked now, so pixel inputs are copied before read returns.
-        Promise.resolve(acquire(this.#spec, revision, controller.signal)).then(
+        Promise.resolve(acquire(this.#spec, revision, controller.signal, target)).then(
           source => finish(undefined, source), cause => finish(cause));
       } catch (cause) { finish(cause); }
     });

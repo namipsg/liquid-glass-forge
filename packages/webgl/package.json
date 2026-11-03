@@ -1,0 +1,40 @@
+{
+  "name": "@liquid-glass-forge/webgl",
+  "version": "0.0.0-dev",
+  "private": true,
+  "description": "Experimental shared-atlas WebGL2 optics and optional vanilla integration",
+  "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./dom": {
+      "types": "./dist/dom.d.ts",
+      "import": "./dist/dom.js",
+      "default": "./dist/dom.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "dependencies": {
+    "@liquid-glass-forge/core": "0.0.0-dev",
+    "@liquid-glass-forge/cpu": "0.0.0-dev",
+    "@liquid-glass-forge/dom": "0.0.0-dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namipsg/liquid-glass-forge.git",
+    "directory": "packages/webgl"
+  }
+}

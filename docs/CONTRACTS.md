@@ -1,8 +1,8 @@
 # Core contracts — experimental version 1
 
 Core version 1 defines data and validation. Phase 3 adds a private DOM source
-and coordinate package, specified in [source contracts](SOURCES.md). Phase 4 adds a [vanilla host and shared scene](HOSTS.md). CPU/WebGL
-renderers and framework integrations remain planned.
+and coordinate package, specified in [source contracts](SOURCES.md). Phase 4 adds a [vanilla host and shared scene](HOSTS.md). The [Phase 5 CPU package](PHASE-5.md) implements these optical contracts;
+the [Phase 6 WebGL package](PHASE-6.md) uses the same models. Framework integrations remain planned.
 
 ## Source and ownership
 
@@ -19,7 +19,8 @@ The application must increment revision when pixels change; a later renderer
 must snapshot borrowed pixels before asynchronous work. `ownership: 'transfer'`
 is explicit permission for a future owner to transfer a complete dedicated
 buffer; it requires a whole-buffer view. Creating or validating the descriptor
-itself never transfers anything. Phase 3 providers return independent owned snapshots; no transfer pool exists.
+itself never transfers anything. Phase 3 providers return independent owned snapshots. Phase 5 snapshots borrowed
+bytes before asynchronous waits/transfers and pools only engine-owned output leases.
 
 ## Frames and lifetime
 

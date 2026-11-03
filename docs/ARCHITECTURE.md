@@ -1,6 +1,6 @@
 # Proposed architecture
 
-**Status: core contracts, DOM sources/coordinates and vanilla host/lifecycle implemented; renderers and frameworks proposed.** The private experimental core follows [version 1 contracts](CONTRACTS.md). Names and interfaces may change before an initial release.
+**Status: core, sources, host, CPU and WebGL implemented; named-device evidence and limits are recorded per renderer; frameworks remain pending.** The private experimental core follows [version 1 contracts](CONTRACTS.md). Names and interfaces may change before an initial release.
 
 ## Package boundaries
 
@@ -34,7 +34,10 @@ Initialization must settle and release partial allocations on failure. Async wor
 
 ## CPU model and ownership
 
-The planned optical pipeline is a bounded geometry/bevel field, bilinear displaced sampling, optional dispersion, separable blur, tint/highlights and masked composition. Freeze equations, boundary behavior, operation order, sRGB conversion and premultiplied linear-light handling in a versioned model.
+The CPU package implements the core rounded-refraction-v1 model and the opt-in
+[rounded-material-v1 equations](PHASE-5.md): source-space separable blur, channel
+dispersion, linear tint and rim/specular finishing before masked composition.
+The core model and original fixtures remain unchanged.
 
 Use independent analytical fixtures alongside the production CPU kernel. CPU/WebGL agreement alone cannot detect the same mistake in both implementations.
 
@@ -44,7 +47,7 @@ Borrowed application buffers/bitmaps must never be detached or closed. The engin
 
 ## WebGL and presentation
 
-Use one reusable GPU context per shared scene where feasible, with persistent texture/framebuffer storage. A proposed presentation strategy draws/blits output to the default framebuffer and synchronously copies tiles into stable Canvas2D targets before yielding. Its cost and correctness must be established in feasibility work; it is not yet a validated implementation.
+Use one reusable GPU context per shared scene where feasible, with persistent texture/framebuffer storage. The [Phase 6 implementation](PHASE-6.md) draws/blits persistent atlas output to the default framebuffer, takes one synchronous Canvas2D snapshot and copies dirty tiles into stable host targets before yielding. Independent numerical, fault, resource and installed-browser fixtures constrain this path; named-workload timing has a separate evidence boundary.
 
 Record context attributes and alpha/color conventions. Do not assume default-framebuffer contents persist after presentation. Test unchanged tiles, atlas repacking, resizing and opaque-to-transparent replacement. Clear destination regions before replacing transparent output. [Khronos drawing-buffer rules](https://registry.khronos.org/webgl/specs/latest/1.0/#the-drawing-buffer)
 

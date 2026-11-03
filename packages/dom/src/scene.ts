@@ -1,6 +1,6 @@
 import { MAX_PIXELS, MAX_SURFACES } from '@liquid-glass-forge/core';
 import type { SourceSnapshot } from './providers.js';
-import { mountGlassHost, type GlassHost, type GlassHostOptions, type GlassMaterial, type HostPixels } from './host.js';
+import { mountGlassHost, type GlassHost, type GlassHostOptions, type GlassMaterial, type HostPixels, type HostCanvas, type HostPresented } from './host.js';
 
 export interface SceneSource {
   read(options?: { readonly signal?: AbortSignal }): Promise<SourceSnapshot>;
@@ -8,14 +8,20 @@ export interface SceneSource {
   destroy?(): void;
 }
 export interface FramePixels extends HostPixels { readonly release?: () => void }
+export type FrameOutput = (HostPixels | HostCanvas | HostPresented) & { readonly release?: () => void };
 export interface RenderRequest {
   readonly snapshot: SourceSnapshot;
   readonly width: number; readonly height: number; readonly dpr: number;
   readonly rect: Readonly<{ x: number; y: number; width: number; height: number }>;
+  readonly id?: string;
+  /** Synchronous native presentation registers backing ownership before writes. */
+  readonly prepareTarget?: (width: number, height: number) => HTMLCanvasElement;
 }
 export interface GlassRenderer {
   initialize?(signal: AbortSignal): void | (() => void) | Promise<void | (() => void)>;
-  render(request: RenderRequest, signal: AbortSignal): FramePixels | Promise<FramePixels>;
+  render(request: RenderRequest, signal: AbortSignal): FrameOutput | Promise<FrameOutput>;
+  renderBatch?(requests: readonly RenderRequest[], signal: AbortSignal): readonly FrameOutput[] | Promise<readonly FrameOutput[]>;
+  releaseSurface?(id: string): void;
 }
 export interface GlassSceneOptions {
   readonly source?: SceneSource; readonly renderer?: GlassRenderer;
@@ -33,7 +39,7 @@ export interface GlassAttachment {
   invalidate(): void;
   dispose(): void;
 }
-interface Entry { host: GlassHost; live: boolean; intersecting: boolean; width: number; height: number }
+interface Entry { id: string; host: GlassHost; live: boolean; intersecting: boolean; width: number; height: number }
 
 /** One deadline per active operation. Late owned results are reclaimed even after cancellation. */
 function bounded<T>(work: (signal: AbortSignal) => T | Promise<T>, parent: AbortSignal, ms: number, late: (result: T) => void): Promise<T> {
@@ -64,6 +70,7 @@ export class GlassScene {
   #controller = new AbortController();
   #job: AbortController | undefined;
   #entries = new Set<Entry>(); #dirty = new Set<Entry>();
+  #nextId = 0;
   #queued = false; #busy = false;
   #prime: SourceSnapshot | undefined;
   #initialCleanup: (() => void) | undefined;
@@ -93,7 +100,7 @@ export class GlassScene {
   get state(): 'initializing' | 'ready' | 'paused' | 'failed' | 'destroyed' { return this.#state; }
   #report(cause: unknown): void { try { this.#options.onError?.(cause); } catch { /* Error observers do not own cleanup. */ } }
   #release(fn: (() => void) | undefined): void { try { fn?.(); } catch (cause) { this.#report(cause); } }
-  #releaseFrame(frame: FramePixels): void { this.#release(frame?.release ? () => frame.release!() : undefined); }
+  #releaseFrame(frame: FrameOutput): void { this.#release(frame?.release ? () => frame.release!() : undefined); }
   #alive(): void { if (this.#state === 'destroyed') throw new SceneError('DESTROYED', 'Scene destroyed'); }
   #stopJob(reason: SceneError): void { this.#job?.abort(reason); }
   #sourceDispose(): void {
@@ -211,6 +218,23 @@ export class GlassScene {
       if (!Number.isSafeInteger(totalPixels) || totalPixels > MAX_PIXELS) throw new SceneError('INVALID_OPTIONS', 'Scene batch exceeds core output pixel limit');
       const snapshot = this.#prime ?? await bounded(s => this.#options.source!.read({ signal: s }), controller.signal, this.#timeout, () => {});
       this.#prime = undefined;
+      if (this.#options.renderer.renderBatch) {
+        if(controller.signal.aborted||generation!==this.#generation||revision!==this.#revision||!this.#active())return;
+        const selected = batch.filter(e=>this.#visible(e));if(!selected.length)return;
+        const requests = selected.map(e=>{
+          const size=e.host.measure(),view=e.host.element.ownerDocument.defaultView!,dpr=view.devicePixelRatio||1;
+          const box=e.host.element.getBoundingClientRect();e.width=size.width;e.height=size.height;
+          return Object.freeze({snapshot,width:Math.round(size.width*dpr),height:Math.round(size.height*dpr),dpr,id:e.id,
+            rect:Object.freeze({x:box.x,y:box.y,width:box.width,height:box.height}),
+            prepareTarget:(w:number,h:number)=>{if(controller.signal.aborted || generation!==this.#generation || revision!==this.#revision || !this.#active() || !e.live)throw new SceneError('SUPERSEDED','Native target is no longer current');return e.host.prepareCanvas(w,h);}});
+        });
+        const frames=await bounded(s=>this.#options.renderer!.renderBatch!(requests,s),controller.signal,this.#timeout,values=>values.forEach(value=>this.#releaseFrame(value)));
+        try {
+          if(frames.length!==selected.length)throw new SceneError('FAILED','Native batch output count mismatch');
+          frames.forEach((frame,i)=>{const e=selected[i]!;if(generation===this.#generation&&revision===this.#revision&&this.#active()&&this.#visible(e))e.host.present(frame);});
+        } finally { frames.forEach(frame=>this.#releaseFrame(frame)); }
+        return;
+      }
       for (const e of batch) {
         if (generation !== this.#generation || revision !== this.#revision || !this.#active() || !this.#visible(e)) break;
         const size = e.host.measure(), view = e.host.element.ownerDocument.defaultView!;
@@ -236,7 +260,7 @@ export class GlassScene {
     this.#doc = element.ownerDocument;
     if (this.#entries.size >= MAX_SURFACES) throw new SceneError('INVALID_OPTIONS', 'At most sixteen hosts per scene');
     const host = mountGlassHost(element, options), size = host.measure();
-    const e: Entry = { host, live: true, intersecting: true, width: size.width, height: size.height }; this.#entries.add(e); this.#dirty.add(e);
+    const e: Entry = { id: 'host_'+ ++this.#nextId, host, live: true, intersecting: true, width: size.width, height: size.height }; this.#entries.add(e); this.#dirty.add(e);
     try {
       const hadObservers = this.#listeners.length > 0; this.#observe();
       if (hadObservers) { this.#resize?.observe(element); this.#intersection?.observe(element); }
@@ -247,6 +271,7 @@ export class GlassScene {
       invalidate: () => { if (!e.live) throw new SceneError('DESTROYED', 'Attachment disposed'); this.#invalidate(e); },
       dispose: () => {
         if (!e.live) return; e.live = false; this.#revision++; this.#entries.delete(e); this.#dirty.delete(e);
+        this.#release(() => this.#options.renderer?.releaseSurface?.(e.id));
         this.#release(() => this.#resize?.unobserve(element)); this.#release(() => this.#intersection?.unobserve(element)); this.#release(() => host.dispose()); this.#syncSubscription();
         if (!this.#entries.size) { this.#stopJob(new SceneError('SUPERSEDED', 'No attached hosts')); this.#stopObservers(); }
       }

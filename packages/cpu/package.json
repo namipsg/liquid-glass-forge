@@ -1,0 +1,40 @@
+{
+  "name": "@liquid-glass-forge/cpu",
+  "version": "0.0.0-dev",
+  "description": "Experimental JavaScript CPU optics for explicit Liquid Glass Forge pixel sources",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./worker.js": "./dist/worker.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "dependencies": {
+    "@liquid-glass-forge/core": "0.0.0-dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namipsg/liquid-glass-forge.git",
+    "directory": "packages/cpu"
+  },
+  "workers": [
+    "dist/worker.js",
+    "dist/worker-protocol.js",
+    "dist/worker-kernel.js",
+    "dist/worker-core.js"
+  ]
+}

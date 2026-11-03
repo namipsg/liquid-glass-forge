@@ -15,6 +15,44 @@ test('application bytes snapshot before yielding; metadata and storage are indep
   assert.equal(input.data.byteLength, 4);
   assert.equal(snapshot.source.data[0], 12);
 });
+test('pixel snapshots bulk-copy offset views of both byte brands without aliasing or changing the result brand', async () => {
+  for (const Type of [Uint8Array, Uint8ClampedArray]) {
+    const backing = new Type([90, 91, 0, 128, 255, 255, 92, 93]), input = backing.subarray(2, 6);
+    const provider = new SourceProvider(spec(input));
+    const pending = provider.read(); input.fill(1);
+    const snapshot = await pending;
+    assert.ok(snapshot.source.data instanceof Uint8ClampedArray);
+    assert.equal(snapshot.source.data.byteOffset, 0); assert.equal(snapshot.source.data.buffer.byteLength, 4);
+    assert.deepEqual([...snapshot.source.data], [0, 128, 255, 255]);
+    snapshot.source.data.fill(2); assert.deepEqual([...input], [1, 1, 1, 1]);
+    assert.deepEqual([...backing.subarray(0, 2)], [90, 91]); assert.deepEqual([...backing.subarray(6)], [92, 93]);
+    assert.equal(backing.buffer.byteLength, 8); provider.destroy();
+  }
+});
+test('readInto captures every byte synchronously into caller-owned subviews without changing default read ownership', async () => {
+  for (const Type of [Uint8Array,Uint8ClampedArray]) {
+    const input=new Type([0,128,255,255]),backing=new Type([90,91,8,8,8,8,92,93]),target=backing.subarray(2,6),provider=new SourceProvider(spec(input));
+    const pending=provider.readInto(target);input.fill(1);const captured=await pending;
+    assert.equal(captured.source.data,target);assert.equal(captured.source.ownership,'borrowed');assert.deepEqual([...target],[0,128,255,255]);
+    assert.deepEqual([...backing.subarray(0,2)],[90,91]);assert.deepEqual([...backing.subarray(6)],[92,93]);
+    input.set([4,5,6,255]);provider.invalidate();const next=await provider.readInto(target);assert.deepEqual([...target],[4,5,6,255]);assert.equal(next.revision,1);
+    const owned=await provider.read();assert.equal(owned.source.ownership,'transfer');assert.notEqual(owned.source.data.buffer,target.buffer);
+    provider.destroy();assert.equal(backing.byteLength,8);assert.deepEqual([...target],[4,5,6,255]);
+  }
+});
+test('readInto rejects invalid/aliased targets before writing and preserves abort/latest/replacement/disposal semantics', async () => {
+  const input=new Uint8Array([12,34,56,255]),provider=new SourceProvider(spec(input));
+  const detached=new Uint8Array(4);structuredClone(detached,{transfer:[detached.buffer]});
+  for(const target of [undefined,input,new Uint8Array(3),new Float32Array(1),new Uint8Array(new SharedArrayBuffer(4)),detached]) {
+    await assert.rejects(provider.readInto(target),{code:'INVALID_SOURCE'});assert.deepEqual([...input],[12,34,56,255]);
+  }
+  const target=new Uint8Array([9,9,9,9]),abort=new AbortController();abort.abort();
+  await assert.rejects(provider.readInto(target,{signal:abort.signal}),{code:'ABORTED'});assert.deepEqual([...target],[9,9,9,9]);
+  const a=provider.readInto(target),b=provider.readInto(new Uint8Array(4));await assert.rejects(a,{code:'SUPERSEDED'});await b;
+  provider.replace(spec(new Uint8Array([1,2,3,255])));const snapshot=await provider.readInto(target);assert.equal(snapshot.generation,1);assert.deepEqual([...target],[1,2,3,255]);
+  provider.destroy();await assert.rejects(provider.readInto(target),{code:'DESTROYED'});assert.equal(target.byteLength,4);
+  const image=new SourceProvider({kind:'image',url:'https://example.invalid/not-fetched.png'});await assert.rejects(image.readInto(target),{code:'UNSUPPORTED_SOURCE'});image.destroy();
+});
 test('latest read wins, replacement and invalidation reject stale work', async () => {
   const p = new SourceProvider(spec());
   const a = p.read(), rejected = assert.rejects(a, { code: 'SUPERSEDED' });

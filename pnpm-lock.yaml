@@ -17,11 +17,32 @@ importers:
 
   packages/core: {}
 
+  packages/cpu:
+    dependencies:
+      '@liquid-glass-forge/core':
+        specifier: 0.0.0-dev
+        version: link:../core
+
   packages/dom:
     dependencies:
       '@liquid-glass-forge/core':
         specifier: 0.0.0-dev
         version: link:../core
+      '@liquid-glass-forge/cpu':
+        specifier: 0.0.0-dev
+        version: link:../cpu
+
+  packages/webgl:
+    dependencies:
+      '@liquid-glass-forge/core':
+        specifier: 0.0.0-dev
+        version: link:../core
+      '@liquid-glass-forge/cpu':
+        specifier: 0.0.0-dev
+        version: link:../cpu
+      '@liquid-glass-forge/dom':
+        specifier: 0.0.0-dev
+        version: link:../dom
 
 packages:
 

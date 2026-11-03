@@ -56,6 +56,59 @@ for(const [name,engine] of Object.entries({chromium,firefox,webkit})) {
       },servers.origin);
       assert.equal(supplied.invalid,true);assert.equal(supplied.duplicate,true);assert.deepEqual(supplied.attrs,supplied.expectedAttrs);assert.equal(supplied.styles,true);assert.deepEqual(supplied.pixels,[10,20,30,255,40,50,60,255]);assert.equal(supplied.rolled,true);assert.equal(supplied.rollback,true);assert.equal(supplied.appWidth,'300px');
       receipt.checks.push('supplied backing/style/attributes restored, bounds/duplicate/partial allocation rollback and later application style changes preserved');
+      const presentation=await page.evaluate(async origin=>{
+        const {mountGlassHost}=await import(`${origin}/dom.js`),root=document.querySelector('#host');
+        const c=document.createElement('canvas');c.width=2;c.height=1;root.append(c);
+        const ctx=c.getContext('2d'),original=[10,20,30,255,40,50,60,255];
+        ctx.putImageData(new ImageData(new Uint8ClampedArray(original),2,1),0,0);
+        const before=c.outerHTML,h=mountGlassHost(root,{target:c}),counts={width:0,height:0,allocations:0,presents:0};
+        // Wrap native operations on this target only; count actual resets and owned storage identities.
+        for(const key of ['width','height']) {
+          const descriptor=Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype,key);
+          Object.defineProperty(c,key,{configurable:true,get(){return descriptor.get.call(this);},set(value){counts[key]++;descriptor.set.call(this,value);}});
+        }
+        const create=ctx.createImageData,put=ctx.putImageData;let firstImage,lastImage;
+        ctx.createImageData=function(...args){counts.allocations++;return create.apply(this,args);};
+        ctx.putImageData=function(image,...args){counts.presents++;firstImage??=image;lastImage=image;return put.call(this,image,...args);};
+        const snapshots=[],snapshot=()=>({...counts}),read=()=>[...ctx.getImageData(0,0,c.width,c.height).data];
+        const first=new Uint8Array([255,0,0,255,0,255,0,255]);h.present({width:2,height:1,data:first});snapshots.push(snapshot());
+        first.fill(0);const afterMutation=read();
+        const second=[0,0,255,255,255,255,255,255];h.present({width:2,height:1,data:new Uint8Array(second)});snapshots.push(snapshot());
+        const sameImage=firstImage===lastImage,secondPixels=read();
+        h.present({width:1,height:2,data:new Uint8Array(second)});snapshots.push(snapshot());const resizedImage=lastImage;
+        const resizePixels=read();h.present({width:1,height:2,data:new Uint8Array(first)});snapshots.push(snapshot());
+        const sameResizedImage=resizedImage===lastImage,replacedPixels=read();
+        // An application reset must be repaired using actual dimensions even if frame dimensions stay fixed.
+        c.width=3;snapshots.push(snapshot());h.present({width:1,height:2,data:new Uint8Array(second)});snapshots.push(snapshot());
+        const externalRepair=read(),sameAfterExternalReset=resizedImage===lastImage;
+        h.clear();snapshots.push(snapshot());const cleared=[c.width,c.height];
+        h.present({width:1,height:2,data:new Uint8Array(second)});snapshots.push(snapshot());
+        const freshAfterClear=lastImage!==resizedImage,afterClearPixels=read();
+        h.dispose();const restored={html:c.outerHTML,pixels:[...ctx.getImageData(0,0,2,1).data]};
+        let disposed=false;try{h.present({width:1,height:1,data:new Uint8Array(4)});}catch(e){disposed=e.code==='DISPOSED';}c.remove();
+        // Unclaimed application dimensions and pixels survive disposal, including after clear().
+        const external=[];
+        for(const clear of [false,true]) {
+          const target=document.createElement('canvas');target.width=2;target.height=1;root.append(target);
+          const app=mountGlassHost(root,{target});app.present({width:1,height:1,data:new Uint8Array([255,0,0,255])});if(clear)app.clear();
+          target.width=3;target.height=2;target.getContext('2d').fillStyle='rgb(0,255,0)';target.getContext('2d').fillRect(0,0,3,2);app.dispose();
+          external.push({dimensions:[target.width,target.height],pixel:[...target.getContext('2d').getImageData(2,1,1,1).data]});target.remove();
+        }
+        return {snapshots,afterMutation,secondPixels,sameImage,resizePixels,sameResizedImage,replacedPixels,externalRepair,sameAfterExternalReset,cleared,freshAfterClear,afterClearPixels,restored,before,original,disposed,external};
+      },servers.origin);
+      assert.deepEqual(presentation.snapshots,[
+        {width:0,height:0,allocations:1,presents:1},{width:0,height:0,allocations:1,presents:2},
+        {width:1,height:1,allocations:2,presents:3},{width:1,height:1,allocations:2,presents:4},
+        {width:2,height:1,allocations:2,presents:4},{width:3,height:1,allocations:2,presents:5},
+        {width:4,height:2,allocations:2,presents:5},{width:5,height:3,allocations:3,presents:6}
+      ]);
+      assert.deepEqual(presentation.afterMutation,[255,0,0,255,0,255,0,255]);
+      assert.deepEqual(presentation.replacedPixels,[0,0,0,0,0,0,0,0]);
+      for(const key of ['secondPixels','resizePixels','externalRepair','afterClearPixels'])assert.deepEqual(presentation[key],[0,0,255,255,255,255,255,255]);
+      for(const key of ['sameImage','sameResizedImage','sameAfterExternalReset','freshAfterClear','disposed'])assert.equal(presentation[key],true);
+      assert.deepEqual(presentation.cleared,[0,0]);assert.equal(presentation.restored.html,presentation.before);assert.deepEqual(presentation.restored.pixels,presentation.original);
+      assert.deepEqual(presentation.external,[{dimensions:[3,2],pixel:[0,255,0,255]},{dimensions:[3,2],pixel:[0,255,0,255]}]);
+      receipt.checks.push('stable backing and one owned ImageData per shape, full per-frame copies, resize/clear invalidation, external reset repair and guarded disposal restoration');
       const nojs=await browser.newPage({javaScriptEnabled:false});await nojs.goto(servers.origin);
       await nojs.setContent(`<link rel="stylesheet" href="${servers.origin}/styles.css"><div class="lgf-host" style="width:260px;height:100px"><canvas class="lgf-surface" data-lgf-material="opaque" aria-hidden="true" role="presentation" tabindex="-1"></canvas><label>Native baseline <input id="plain"></label></div>`);
       await nojs.locator('link').evaluate(e=>e.sheet!==null);await nojs.fill('#plain','without JS');assert.equal(await nojs.inputValue('#plain'),'without JS');

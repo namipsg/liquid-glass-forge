@@ -1,7 +1,7 @@
 # Liquid Glass Forge DOM sources
 
 Private experimental `0.0.0-dev` sources, coordinate mapping and vanilla host/lifecycle.
-Requires the exact matching `@liquid-glass-forge/core` version. ESM and TypeScript
+Requires exact matching core/CPU package versions. ESM and TypeScript
 declarations are included; imports are SSR-safe and start no timers or network.
 
 ```ts
@@ -15,6 +15,11 @@ p.destroy();
 Sources: explicit bytes, sRGB ImageData, borrowed ImageBitmap, decoded URL image,
 readable canvas/OffscreenCanvas, or borrowed HTMLVideoElement. Inputs remain
 caller-owned. Reads have bounded cancellation and latest-generation semantics.
+For explicit bytes or sRGB ImageData, `readInto(target)` copies every pixel into
+an attached caller-owned RGBA8 view of the exact size. It returns borrowed
+metadata and never transfers or retains the target; source/target aliasing is
+rejected. Reuse the target only after consumers have captured or finished it.
+The ordinary `read()` continues to return a fresh owned snapshot.
 Canvas drawing needs explicit invalidation; video subscription can observe frame
 revisions through a cancellable frame callback or bounded event/timer fallback.
 
@@ -28,6 +33,14 @@ for full API semantics and limits. `createGlassScene()` mounts CSS/opaque materi
 dirty/visibility scheduling. Load the `./styles.css` asset export; JavaScript imports
 inject no styles. `scene.attach(element)`, `ready`, `update`, `pause`, `resume` and
 `dispose` preserve native content and release owned resources. The optional
-source/renderer pair is a low-level adapter seam; no optical renderer ships.
+source/renderer pair is a low-level adapter seam; `createCpuRenderer` supplies
+JavaScript CPU optics with optional workers, capped backing resolution and
+cancellable update pacing. See the project Phase 5 document for usage and
+source-bound performance/device qualification. A `surface(request)` callback
+can supply per-request radius, bevel and strength; values are validated and
+captured before asynchronous work. Diagnostics report effective optics, actual
+execution start, rate wait and presentation pacing. Active completion pacing is
+included in the documented service measurements; idle hosts schedule no work.
 See the [host contract](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/HOSTS.md).
-No framework adapter, published browser support or performance qualification is provided yet.
+Framework adapters and public browser-support tiers are outside this package.
+Performance claims are limited to the repository's measured workload/environment.

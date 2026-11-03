@@ -45,16 +45,19 @@ export async function sourceServers() {
       ['/providers.js', new URL('../packages/dom/dist/providers.js', import.meta.url)],
       ['/mapping.js', new URL('../packages/dom/dist/mapping.js', import.meta.url)],
       ['/host.js', new URL('../packages/dom/dist/host.js', import.meta.url)],
+      ['/cpu.js', new URL('../packages/dom/dist/cpu.js', import.meta.url)],
       ['/scene.js', new URL('../packages/dom/dist/scene.js', import.meta.url)],
       ['/styles.css', new URL('../packages/dom/dist/styles.css', import.meta.url)]
     ]);
+    const cpu=/^\/cpu-package\/([a-z-]+\.js)$/.exec(url.pathname);
+    if(cpu) files.set(url.pathname,new URL('../packages/cpu/dist/'+cpu[1],import.meta.url));
     if (files.has(url.pathname)) {
       try { res.writeHead(200, { 'Content-Type': url.pathname.endsWith('.css') ? 'text/css' : 'text/javascript' }); res.end(await readFile(files.get(url.pathname))); }
       catch { res.destroy(); } return;
     }
     if (url.pathname === '/') {
       res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end('<!doctype html><script type="importmap">{"imports":{"@liquid-glass-forge/core":"/core.js"}}</script>'); return;
+      res.end('<!doctype html><script type="importmap">{"imports":{"@liquid-glass-forge/core":"/core.js","@liquid-glass-forge/cpu":"/cpu-package/index.js"}}</script>'); return;
     }
     res.writeHead(404); res.end();
   };

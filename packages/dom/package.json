@@ -26,7 +26,8 @@
     "README.md"
   ],
   "dependencies": {
-    "@liquid-glass-forge/core": "0.0.0-dev"
+    "@liquid-glass-forge/core": "0.0.0-dev",
+    "@liquid-glass-forge/cpu": "0.0.0-dev"
   },
   "repository": {
     "type": "git",

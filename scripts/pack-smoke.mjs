@@ -8,7 +8,9 @@ import { auditPackage } from './package-audit.mjs';
 const root = fileURLToPath(new URL('../', import.meta.url));
 export const packageFiles = {
   core: ['LICENSE','NOTICE','README.md','dist/index.d.ts','dist/index.js','package.json'].sort(),
-  dom: ['LICENSE','NOTICE','README.md','dist/index.d.ts','dist/index.js','dist/providers.d.ts','dist/providers.js','dist/mapping.d.ts','dist/mapping.js','dist/host.d.ts','dist/host.js','dist/scene.d.ts','dist/scene.js','dist/styles.css','package.json'].sort()
+  cpu: ['LICENSE','NOTICE','README.md','package.json',...['index','kernel','executor','protocol','worker'].flatMap(n=>['dist/'+n+'.js','dist/'+n+'.d.ts']),...['core','kernel','protocol'].map(n=>'dist/worker-'+n+'.js')].sort(),
+  webgl: ['LICENSE','NOTICE','README.md','package.json',...['index','atlas','shaders','effects','dom'].flatMap(n=>['dist/'+n+'.js','dist/'+n+'.d.ts'])].sort(),
+  dom: ['LICENSE','NOTICE','README.md','dist/index.d.ts','dist/index.js','dist/cpu.d.ts','dist/cpu.js','dist/providers.d.ts','dist/providers.js','dist/mapping.d.ts','dist/mapping.js','dist/host.d.ts','dist/host.js','dist/scene.d.ts','dist/scene.js','dist/styles.css','package.json'].sort()
 };
 function run(command, args, cwd) {
   const r = spawnSync(command, args, { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 2*1024*1024,
@@ -70,20 +72,39 @@ for (const name of ['window','document','navigator','Worker','OffscreenCanvas','
   Object.defineProperty(globalThis,name,{ configurable:true,get(){throw new Error('Import touched '+name);} });
 }
 const core = await import('@liquid-glass-forge/core');
-const { SourceProvider, mapSourceRegion, createGlassScene, mountGlassHost } = await import('@liquid-glass-forge/dom');
-assert.equal(typeof createGlassScene,'function');assert.equal(typeof mountGlassHost,'function');
+const gpu=await import('@liquid-glass-forge/webgl');
+const optical=await import('@liquid-glass-forge/webgl/dom');
+new gpu.WebGLAtlas().dispose();optical.createWebGLRenderer().dispose();optical.createOpticalRenderer({backend:'auto',fallback:'material'}).dispose();
+const {CpuExecutor,prepareCpuSource,renderCpu,disposeCpuSource}=await import('@liquid-glass-forge/cpu');
+assert.equal(typeof CpuExecutor,'function');
+const { SourceProvider, mapSourceRegion, createGlassScene, mountGlassHost, createCpuRenderer } = await import('@liquid-glass-forge/dom');
+assert.equal(typeof createGlassScene,'function');assert.equal(typeof createCpuRenderer,'function');assert.equal(typeof mountGlassHost,'function');
 for (const [name, descriptor] of descriptors) { if(descriptor) Object.defineProperty(globalThis,name,descriptor); else delete globalThis[name]; }
 assert.equal(core.CONTRACT_VERSION,1);
-for (const name of ['core','dom']) await assert.rejects(import('@liquid-glass-forge/'+name+'/dist/index.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});
+for (const name of ['core','cpu','dom','webgl']) await assert.rejects(import('@liquid-glass-forge/'+name+'/dist/index.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});
+const pixel=core.createSource({contractVersion:1,width:1,height:1,revision:0,ownership:'borrowed',colorSpace:'srgb',alphaMode:'straight',data:new Uint8Array([20,40,60,255])});const prepared=prepareCpuSource(pixel);assert.deepEqual([...renderCpu(prepared,{id:'one',width:1,height:1,radius:0,strength:0})],[20,40,60,255]);disposeCpuSource(prepared);
 const bytes=new Uint8Array([10,20,30,255]), p=new SourceProvider({kind:'pixels',width:1,height:1,data:bytes});
 const pending=p.read();bytes[0]=99;assert.deepEqual([...(await pending).source.data],[10,20,30,255]);p.destroy();
 assert.equal(typeof mapSourceRegion,'function');
 assert.equal(mapSourceRegion({source:{width:1,height:1},box:{x:0,y:0,width:1,height:1},target:{x:0,y:0,width:1,height:1}}).ok,true);
-console.log('Both installed ESM/types surfaces, SSR import traps, deep exports and owned pixels passed');
+console.log('Four installed ESM/types surfaces, SSR import traps, deep exports and owned pixels passed');
 `);
-    await writeFile(path.join(consumer,'consumer.mts'), `import { CONTRACT_VERSION, type PixelSource, type FrameDescriptor } from '@liquid-glass-forge/core';
+    await writeFile(path.join(consumer,'consumer.mts'), `import { CpuExecutor, type CpuEffects } from '@liquid-glass-forge/cpu';
+import { CONTRACT_VERSION, type PixelSource, type FrameDescriptor } from '@liquid-glass-forge/core';
 import { SourceProvider, mapSourceRegion, createGlassScene, mountGlassHost, type GlassRenderer, type SourceSpec, type MappingInput, type MappingResult } from '@liquid-glass-forge/dom';
+import { WebGLAtlas, type WebGLEffects } from '@liquid-glass-forge/webgl';
+import { createWebGLRenderer, createOpticalRenderer } from '@liquid-glass-forge/webgl/dom';
+const gpuAdapter:GlassRenderer=createWebGLRenderer({effects:{model:'rounded-material-v1',blurRadius:2}});
+new WebGLAtlas({maxRestores:2}).dispose();
+// @ts-expect-error exact backend policy
+createOpticalRenderer({backend:'vulkan'});
+// @ts-expect-error versioned effect model
+const invalidGPU:WebGLEffects={model:'future-model'};
 const version: 1=CONTRACT_VERSION;
+const executor=new CpuExecutor({worker:'off'});executor.dispose();
+// @ts-expect-error exact worker policy must not become any
+new CpuExecutor({worker:'webgl'});
+const effects:CpuEffects={model:'rounded-material-v1',blurRadius:1};
 // @ts-expect-error literal type must remain precise
 const invalidVersion: 2=CONTRACT_VERSION;
 const spec: SourceSpec={kind:'pixels',width:1,height:1,data:new Uint8Array(4)};
@@ -107,6 +128,6 @@ provider.destroy();
     receipt.status='passed';
   } catch (error) { receipt.status='failed';receipt.error=error.stack;throw error; }
   finally { if(consumer) await rm(consumer,{recursive:true,force:true}); receipt.completedAt=new Date().toISOString();await writeFile(path.join(dir,'receipt.json'),JSON.stringify(receipt,null,2)); }
-  console.log(`Both package smoke checks passed; receipt: ${path.relative(root,path.join(dir,'receipt.json'))}`); return receipt;
+  console.log(`Four package smoke checks passed; receipt: ${path.relative(root,path.join(dir,'receipt.json'))}`); return receipt;
 }
 if(process.argv[1] && import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href) packSmoke().catch(e=>{console.error(e);process.exitCode=1;});

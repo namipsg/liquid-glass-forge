@@ -1,11 +1,11 @@
 # Foundation roadmap
 
-**Status: phase 4 implemented.** [Core contracts and packaging](PHASE-2.md) and
+**Status: Phase 5 CPU vertical slice and named A04s workload qualified.** [Core contracts and packaging](PHASE-2.md) and
 [explicit source providers/coordinate mapping](PHASE-3.md) and the
 [vanilla host/lifecycle](PHASE-4.md) are implemented.
 The [phase 1 feasibility findings](PHASE-1.md), including the explicit unresolved
 Safari/WebKit cadence progression waiver, remain unchanged. No release date,
-performance qualification or compatibility guarantee is implied.
+broader performance or compatibility guarantee is implied.
 
 ## Delivery phases
 
@@ -41,10 +41,12 @@ For each change, specify one observable behavior, reproduce a failure or run a f
 
 The next product layers are documented in [future development](FUTURE.md). Motion, component catalogs, React Native and Flutter remain separately scoped work.
 
-## Current boundary — 28 October 2026
+## Current boundary — 1 November 2026
 
 Phase 4 adds stable decorative hosts, CSS/opaque material, bounded lifecycle and
-shared dirty/visibility scheduling. Both packages remain private at `0.0.0-dev`.
-See [phase 4 evidence and limits](PHASE-4.md). Phase 5 CPU rendering is next;
-no optical renderer, framework adapter or npm release is part of this phase.
+shared dirty/visibility scheduling. All four packages remain private at `0.0.0-dev`.
+See [phase 4 evidence and limits](PHASE-4.md). [Phase 5](PHASE-5.md) adds the CPU kernel, worker and bounded vanilla adapter.
+The original physical workload now passes two main and two required-worker
+repetitions on the A04s under unchanged service/cadence/age/image limits. Earlier
+failed measurements remain retained. [Phase 6](PHASE-6.md) implements WebGL2 optics, blur, shared atlas presentation and bounded recovery, with installed-browser and A04s evidence. Original Step06 exit evidence, including actual Safari26.6.2, is complete and frozen for independent review. Broader passing-performance qualification belongs to Step11/M32. Broader devices, framework adapters and release/distribution qualification remain future work.
 The Safari cadence waiver does not turn failing measurements into passing evidence.

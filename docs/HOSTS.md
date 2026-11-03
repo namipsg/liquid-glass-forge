@@ -1,7 +1,8 @@
 # Vanilla host and shared scene — experimental phase 4
 
 The private DOM package adds a decorative host and a shared lifecycle/scheduler.
-The default is CSS material. It includes no CPU/WebGL optical renderer.
+The default remains CSS material. The explicit [Phase 5 CPU adapter](PHASE-5.md)
+adds JavaScript optics; the optional [Phase 6 WebGL adapter](PHASE-6.md) adds native synchronous canvas batches.
 Load the package's `styles.css` export through your asset pipeline; JavaScript
 imports do not inject styles or request assets.
 
@@ -24,7 +25,7 @@ scene.dispose(); // also disposes its attached decorative targets
 `GlassHost` exposes `element`, `target`, `measure()`, `setMaterial()`,
 `present({ width, height, data })`, `clear()` and idempotent `dispose()`.
 `present` is a bounded Canvas2D byte presentation primitive, not optical rendering.
-It accepts core RGBA8 storage and limits; imports request no browser APIs.
+It accepts core RGBA8 storage and limits; imports request no browser APIs. Phase 6 also supports owned canvas frames and a prepared-target presentation token. `prepareCanvas(width,height)` records backing ownership before a native synchronous copy, so disposal during a pending batch restores supplied targets. An optional `renderBatch` seam coalesces dirty scene surfaces under the existing bounds; pixel-returning adapters retain the per-surface path.
 
 Use an HTML container with a block/inline-block box. Replaced/void elements,
 non-replaced inline boxes and `display:contents` are unsupported. Hidden and
@@ -75,7 +76,8 @@ Share one scene across hosts which use one latest-read SourceProvider.
 `GlassRenderer.initialize(signal)` may return an initialization cleanup function.
 `render(request, signal)` returns `{width,height,data,release?}`. The request holds
 one immutable source snapshot, backing dimensions, DPR and a viewport rectangle.
-No renderer implementation ships in this phase; tests inject a color producer.
+Phase 4 used a test producer. The separate Phase 5 CPU adapter now implements
+this seam; its measured qualification remains pending.
 Every returned frame's `release` is called once after synchronous presentation,
 or when its result becomes stale, cancelled, timed out or disposed. Late
 initialization cleanup is likewise reclaimed. Cleanup errors are reported to
