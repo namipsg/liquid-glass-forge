@@ -9,4 +9,7 @@ button, input, select { font: inherit; } button, a, input, select { margin: 6px;
 .test-card p { margin: 8px; } .test-card img { display: block; margin: 10px; }
 .review-mode .test-card { width: 320px; height: 230px; border-radius: 28px; box-shadow: 0 8px 24px #0003; }
 .review-mode #review-guide { max-width: 960px; line-height: 1.5; }
+.qualification { margin: 0; } .qualification header, .qualification #destination { display: none; }
+.qualification .adverse { padding: 0; background: Canvas; }
+.qualification .test-card { display: inline-block !important; width: 320px; height: 180px; margin: 0; padding: 0; }
 @media(prefers-reduced-motion: reduce) { ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; } }

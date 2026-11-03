@@ -9,7 +9,7 @@ api.subscribe(state => {
   if (!state.shown || !state.run) return;
   if (!scene) {
     scene = createGlassScene({ source: current.source, renderer: current.renderer, timeoutMs: 1500, onError: current.report });
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < state.count; i++) {
       const host = document.createElement('section'); host.className = 'test-card'; host.innerHTML = cardMarkup(i);
       document.querySelector('#app').append(host); handles.push(scene.attach(host, { material: state.material }));
     }

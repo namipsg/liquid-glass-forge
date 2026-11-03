@@ -12,8 +12,10 @@ import { configure, frame, opaqueCheck, staleCheck, lifecycleChecks, accessCheck
 import { regressionMutations } from '../tests/integration-mutations.mjs';
 
 const root = process.cwd(), sha = b => createHash('sha256').update(b).digest('hex');
-await mkdir('private/phase-10/integration', { recursive: true });
-const dir = await mkdtemp(path.resolve('private/phase-10/integration/run-'));
+const prepareOnly = process.argv.includes('--prepare-only');
+const outputRoot = prepareOnly ? 'private/phase-11/candidates' : 'private/phase-10/integration';
+await mkdir(outputRoot, { recursive: true });
+const dir = await mkdtemp(path.resolve(outputRoot, 'run-'));
 const consumer = await mkdtemp(path.join(tmpdir(), 'lgf-resilience-consumer-')), www = path.join(consumer, 'www');
 const versions = { react: '19.3.1', 'react-dom': '19.3.1', vue: '3.5.44', vite: '8.3.5',
   '@angular/core': '22.2.4', '@angular/common': '22.2.4', '@angular/compiler': '22.2.4', '@angular/compiler-cli': '22.2.4',
@@ -117,9 +119,21 @@ try {
   await cp(path.join(www, 'angular/browser'), path.join(www, 'angular-flat'), { recursive: true });
   await rm(path.join(www, 'angular'), { recursive: true }); await cp(path.join(www, 'angular-flat'), path.join(www, 'angular'), { recursive: true }); await rm(path.join(www, 'angular-flat'), { recursive: true });
   await cp(path.join(consumer, 'node_modules/@liquid-glass-forge/cpu/dist'), path.join(www, 'worker'), { recursive: true });
+  if (prepareOnly) {
+    for (const name of ['core', 'cpu', 'dom', 'webgl']) await cp(path.join(consumer, 'node_modules/@liquid-glass-forge', name, 'dist'), path.join(www, name), { recursive: true });
+    for (const [source, destination] of [['tests/cpu-device-fixtures.mjs', 'cpu-device-fixtures.js'], ['tests/webgl-fixtures.mjs', 'webgl-fixtures.js'], ['tests/cpu-oracle.mjs', 'oracle.js'], ['spikes/phase-1/fixture.svg', 'fixture.svg']]) await cp(source, path.join(www, destination));
+    await cp('tests/qualification-controller.mjs', path.join(www, 'qualification-controller.js'));
+    await cp('docs/qualification-plan.json', path.join(www, 'qualification-plan.json'));
+    const map = JSON.stringify({ imports: { '@liquid-glass-forge/core': '/core/index.js', '@liquid-glass-forge/cpu': '/cpu/index.js', '@liquid-glass-forge/dom': '/dom/index.js', '@liquid-glass-forge/webgl': '/webgl/index.js', '@liquid-glass-forge/webgl/dom': '/webgl/dom.js' } });
+    await writeFile(path.join(www, 'bench.html'), '<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/dom/styles.css"><script type="importmap">' + map + '</script><section id="measurements"></section>');
+    await writeFile(path.join(www, 'soak.html'), '<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/soak.css"><h1>Phase 11 dynamic qualification</h1><main>' + ['vanilla','react','vue','angular'].map(name => '<iframe title="' + name + '" src="/' + name + '/?qualification=1"></iframe>').join('') + '</main><script type="module" src="/qualification-controller.js"></script>');
+    await writeFile(path.join(www, 'soak.css'), 'body{margin:8px;font:14px system-ui}h1{font-size:16px}main{display:grid;grid-template-columns:340px 340px;gap:8px}iframe{width:340px;height:200px;border:1px solid #777}');
+  }
   await cp(www, path.join(dir, 'review-www'), { recursive: true });
   receipt.reviewAssets = path.relative(root, path.join(dir, 'review-www'));
   await check('production linked vanilla/React/Vue/Angular applications; no runtime JIT');
+  if (prepareOnly) { receipt.prepared = true; receipt.pass = false; receipt.status = 'prepared; not a qualification pass'; }
+  else {
   server = await integrationServers(www);
   for (const [engineName, engine] of Object.entries({ chromium, firefox, webkit })) {
     browser = await engine.launch();
@@ -194,6 +208,7 @@ try {
   await regressionMutations({ consumer, www, server, browser, command, check });
   await browser.close(); browser = undefined;
   receipt.pass = true;
+  }
 } catch (error) {
   receipt.error = error.stack;
   const page = browser?.contexts().flatMap(context => context.pages()).at(-1);

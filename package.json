@@ -17,7 +17,7 @@
     "test:package-audit": "node --test tests/package-audit.test.mjs",
     "test:pack": "node scripts/pack-smoke.mjs",
     "test:browser-import": "node --test tests/browser-import.test.mjs",
-    "test": "pnpm check && pnpm test:unit && pnpm test:cpu && pnpm test:cpu-executor && pnpm test:cpu-worker-browser && pnpm test:cpu-host-browser && pnpm test:package-audit && pnpm test:pack && pnpm test:browser-import && pnpm test:sources-browser && pnpm test:host-browser && pnpm test:webgl && pnpm test:webgl-browser && pnpm test:react && pnpm test:vue && pnpm test:angular && pnpm test:access && pnpm test:faults",
+    "test": "pnpm check && pnpm test:unit && pnpm test:cpu && pnpm test:cpu-executor && pnpm test:cpu-worker-browser && pnpm test:cpu-host-browser && pnpm test:package-audit && pnpm test:pack && pnpm test:browser-import && pnpm test:sources-browser && pnpm test:host-browser && pnpm test:webgl && pnpm test:webgl-browser && pnpm test:react && pnpm test:vue && pnpm test:angular && pnpm test:access && pnpm test:faults && pnpm test:qualification",
     "test:sources-browser": "node --test tests/sources-browser.test.mjs tests/dynamic-browser.test.mjs tests/mapping-browser.test.mjs",
     "test:host-browser": "node --test tests/host-browser.test.mjs tests/scene-browser.test.mjs",
     "test:cpu-host-browser": "node --test tests/cpu-host-browser.test.mjs",
@@ -32,7 +32,13 @@
     "test:angular": "node scripts/test-angular.mjs",
     "check:base": "node scripts/build.mjs --base && node scripts/ssr-import.mjs --base",
     "test:faults": "node scripts/test-resilience.mjs",
-    "test:access": "node --test tests/opaque-browser.test.mjs"
+    "test:access": "node --test tests/opaque-browser.test.mjs",
+    "qualification:prepare": "node scripts/test-resilience.mjs --prepare-only",
+    "test:devices": "node scripts/qualify-devices.mjs",
+    "test:soak": "node scripts/qualify-soak.mjs",
+    "test:visual": "node scripts/visual-qualification.mjs",
+    "test:qualification": "node --test tests/qualification-gates.test.mjs",
+    "qualification:status": "node scripts/report-qualification.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

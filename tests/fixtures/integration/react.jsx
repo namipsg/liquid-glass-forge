@@ -9,7 +9,7 @@ function App() {
   if (!state.shown || !state.run) return null;
   const run = state.run;
   return <GlassSceneProvider source={run.source} renderer={run.renderer} timeoutMs={1500} onError={run.report}>
-    {[0, 1].map(i => <GlassSurface key={i} className="test-card" material={state.material}>
+    {Array.from({ length: state.count }, (_, i) => <GlassSurface key={i} className="test-card" material={state.material}>
       <div dangerouslySetInnerHTML={{ __html: cardMarkup(i) }} />
     </GlassSurface>)}
   </GlassSceneProvider>;

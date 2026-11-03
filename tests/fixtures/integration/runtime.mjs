@@ -1,6 +1,7 @@
 import { SourceProvider } from '@liquid-glass-forge/dom';
 import { createOpticalRenderer } from '@liquid-glass-forge/webgl/dom';
 import { webglContextPoolDiagnostics, releaseIdleWebGLContexts, WEBGL_ATTRIBUTES } from '@liquid-glass-forge/webgl';
+import { qualificationRun } from './qualification.mjs';
 
 export const cases = ['cpu', 'worker', 'webgl', 'auto-live', 'gpu-none', 'gpu-cpu', 'gpu-material',
   'shader-cpu', 'worker-auto', 'worker-crash', 'worker-timeout', 'decode', 'cors',
@@ -101,7 +102,7 @@ export function installRuntime(adapter) {
     The decorative canvases should not be announced. Current material: <strong id="current-material">glass</strong>.</p></header>
     <main class="adverse"><div id="app"></div></main><p id="destination">Destination</p>`;
   const listeners = new Set(), history = [];
-  let state = { run: null, shown: true, material: 'glass', revision: 0 };
+  let state = { run: null, shown: true, material: 'glass', revision: 0, count: 2 };
   const emit = patch => { state = { ...state, ...patch, revision: state.revision + 1 }; document.querySelector('#current-material').textContent = state.material; for (const fn of listeners) fn(state); };
   const api = {
     get state() { return state; }, history,
@@ -115,9 +116,14 @@ export function installRuntime(adapter) {
       if (!cases.includes(name)) throw Error('Unknown fixture case');
       await api.unmount();
       if (state.run) { if (state.run.active) throw Error('Unreleased pending initialization'); state.run.finish(); }
-      const run = makeRun(name); history.push(run); emit({ run, shown: true, material: 'glass' });
+      const run = makeRun(name); history.push(run); emit({ run, shown: true, material: 'glass', count: 2 });
       document.querySelector('#status').textContent = name;
       await until(() => !!document.querySelector('.test-card'), 'scenario DOM');
+    },
+    async qualify(backend) {
+      await api.unmount(); state.run?.finish(); const run = qualificationRun(backend); history.push(run);
+      document.body.classList.add('qualification'); emit({ run, shown: true, material: 'glass', count: run.count });
+      await until(() => document.querySelectorAll('.test-card').length === run.count, 'qualification hosts');
     },
     material(value) { emit({ material: value }); },
     update(color = [0, 255, 0, 255]) { state.run.source.replace({ kind: 'pixels', width: 1, height: 1, data: new Uint8Array(color) }); },

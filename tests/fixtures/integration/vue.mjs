@@ -9,7 +9,7 @@ createApp(defineComponent({ setup() {
     const value = state.value, run = value.run;
     if (!value.shown || !run) return null;
     return h(GlassSceneProvider, { source: run.source, renderer: run.renderer, timeoutMs: 1500, onError: run.report },
-      { default: () => [0, 1].map(i => h(GlassSurface, { key: i, class: 'test-card', material: value.material },
+      { default: () => Array.from({ length: value.count }, (_, i) => h(GlassSurface, { key: i, class: 'test-card', material: value.material },
         { default: () => h('div', { innerHTML: cardMarkup(i) }) })) });
   };
 } })).mount('#app');

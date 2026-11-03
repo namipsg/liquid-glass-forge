@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate; beta held until every required row qualifies",
+  "requiredAdapters": ["vanilla", "react", "vue", "angular"],
+  "requiredBackends": ["cpu", "worker", "webgl"],
+  "requiredEnvironments": [
+    {"id":"mac-chrome-m4","device":"Mac16,10 / Apple M4","os":"macOS 26.6.2","browser":"Google Chrome 156.0.8078.80","physical":true},
+    {"id":"mac-safari-m4","device":"Mac16,10 / Apple M4","os":"macOS 26.6.2","browser":"Safari 26.6.2","physical":true},
+    {"id":"android-a04s","device":"Samsung SM-A047F / Mali-G52","physical":true},
+    {"id":"iphone","device":"authorized iPhone 17 Pro Max / iPhone18,2","os":"iOS 27.0.1","physical":true},
+    {"id":"ipad","device":null,"physical":true,"missing":"No physical iPad available in observed inventory"},
+    {"id":"additional-desktop-gpu","device":null,"physical":true,"missing":"An additional named desktop GPU class/host is not available"}
+  ],
+  "lifecycleCycles": 100,
+  "soakMinimumMs": 1800000,
+  "soakWarmupFrames": 15,
+  "source": {"width":640,"height":360,"dynamic":"one pixel changes per completed batch; full source replaced/read each revision"},
+  "cpu": {"count":1,"width":320,"height":180,"batchMs":33.333333333333336,"intervalMs":35,"ageMs":50,"bytes":8388608},
+  "webgl": {"count":4,"width":640,"height":360,"batchMs":16.666666666666668,"intervalMs":17.5,"ageMs":16.666666666666668,"bytes":16777216},
+  "resourcePolicy": {"activeInitializationsPerScene":1,"subscriptionsPerScene":1,"leasedGpuContextsPerScene":1,"contextPoolCap":4,"retiredActive":0,"retiredSubscriptions":0,"retiredWorkers":0,"retiredLeasedContexts":0},
+  "soakScope": "Each environment/backend campaign covers all four adapters concurrently for a full 30 minutes; no cross-backend or cross-environment duration aggregation.",
+  "admissionScope": "Two complete original CPU-main and worker repetitions and two original GPU repetitions; original static-source/changing-optics budgets are separate from dynamic soak measurements.",
+  "memoryScope": "Known image/executor storage and owned resource counts; browser heap, compositor and driver memory are not inferred.",
+  "betaRule": "Missing, failed, diagnostic, software-rendered or short-duration evidence cannot close a required physical row. Phase 1 Safari progression waiver is not a passing timing result."
+}

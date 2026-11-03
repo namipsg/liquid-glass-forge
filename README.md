@@ -3,7 +3,11 @@
 An independent Liquid Glass project for the web, with CPU/WebGL2 rendering,
 a vanilla host, and React, Vue and Angular integrations.
 
-**Status: Phase 10 integrated resilience implemented within the scope below.** Seven private packages
+**Status: Phase 11 physical qualification is incomplete; beta held.**
+[Phase 11](docs/PHASE-11.md) records physical Mac/Android checks, one passing
+30-minute worker soak, failing admission/visual evidence and missing hardware.
+[SUPPORT.json](docs/SUPPORT.json) withholds the API/support freeze.
+Phase 10 integrated resilience remains implemented within its recorded scope. Seven private packages
 provide explicit sources, versioned optics, workers, shared scenes and readable
 CSS/opaque material. [Phase 7](docs/PHASE-7.md) records the React component, hook
 and provider with packed Vite/Next.js SSR, hydration and lifecycle checks.

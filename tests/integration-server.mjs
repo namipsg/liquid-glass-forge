@@ -2,9 +2,10 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fixturePng } from './source-server.mjs';
+import { createHash } from 'node:crypto';
 
 /** Serve built physical consumers, never workspace aliases. No CSP exceptions for scripts. */
-export async function integrationServers(www, { reviewIndex = false } = {}) {
+export async function integrationServers(www, { reviewIndex = false, host = '127.0.0.1' } = {}) {
   const servers = [], png = fixturePng(), requests = [];
   const handler = async (req, res) => {
     const url = new URL(req.url, 'http://localhost'); requests.push(url.pathname);
@@ -28,13 +29,15 @@ export async function integrationServers(www, { reviewIndex = false } = {}) {
       const bytes = await readFile(file), html = file.endsWith('.html');
       const other = 'http://127.0.0.1:' + servers[1].address().port;
       const headers = { 'Content-Type': html ? 'text/html' : file.endsWith('.css') ? 'text/css' : file.endsWith('.js') || file.endsWith('.mjs') ? 'text/javascript' : 'application/octet-stream', 'Cache-Control': 'no-store' };
-      if (html) headers['Content-Security-Policy'] = `default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; worker-src ${url.searchParams.has('deny-worker') ? "'none'" : "'self'"}; img-src 'self' ${other}; connect-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'`;
+      const importMap = /<script type="importmap">([^<]+)<\/script>/.exec(bytes.toString());
+      const mapHash = importMap ? " 'sha256-" + createHash('sha256').update(importMap[1]).digest('base64') + "'" : '';
+      if (html) headers['Content-Security-Policy'] = `default-src 'none'; script-src 'self'${mapHash}; style-src 'self' 'unsafe-inline'; worker-src ${url.searchParams.has('deny-worker') ? "'none'" : "'self'"}; img-src 'self' ${other}; connect-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'self'; frame-ancestors ${url.searchParams.has('qualification') ? "'self'" : "'none'"}`;
       res.writeHead(200, headers).end(bytes);
     } catch { res.writeHead(404).end(); }
   };
   for (let i = 0; i < 2; i++) {
     const server = createServer((req, res) => { void handler(req, res).catch(() => res.destroy()); });
-    servers.push(server); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+    servers.push(server); await new Promise(resolve => server.listen(0, host, resolve));
   }
   return { origin: 'http://127.0.0.1:' + servers[0].address().port, other: 'http://127.0.0.1:' + servers[1].address().port, requests,
     async close() { await Promise.all(servers.map(server => new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }))); } };

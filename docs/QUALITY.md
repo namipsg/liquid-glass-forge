@@ -2,6 +2,12 @@
 
 **Status: acceptance requirements.** Core/source/host/package and [Phase 5 CPU checks](PHASE-5.md) pass, including the named A04s workload. [Phase 6 WebGL](PHASE-6.md) has installed-browser, physical A04s and actual Safari26.6.2 exit evidence, frozen for independent review. The SwiftShader timing failures and historical Safari cadence waiver remain recorded. [Phase 7 React](PHASE-7.md) verifies Strict Mode and packed Vite/Next.js SSR/hydration in Chromium, Firefox and WebKit. [Phase8 Vue](PHASE-8.md) adds KeepAlive and packed Vue/Nuxt SSR/hydration checks. [Phase9 Angular](PHASE-9.md) covers partial APF, zoneless lifecycle and packed production CSR/eager SSR hydration. [Phase 10](PHASE-10.md) combines forced backends, CSP faults, access and lifecycle regressions across all adapters, with owner-requested Chrome inspection and a concise visual candidate. Broader device/performance/release qualification remains pending; Phase 1 measurements and its Safari cadence waiver remain documented.
 
+[Phase 11](PHASE-11.md) adds native physical collection, a real 30-minute worker
+soak and a [held support candidate](SUPPORT.json). Timing failures, rejected
+captures, missing physical iPad/additional GPU and outstanding soak campaigns
+prevent beta qualification. The gates preserve the original budgets and reject
+short diagnostics, incomplete visuals, changed artifacts and software GPU claims.
+
 ## Required evidence
 
 | Layer | Behavior to verify |

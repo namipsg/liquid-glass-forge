@@ -1,0 +1,573 @@
+{
+  "schemaVersion": 1,
+  "status": "hold",
+  "betaFrozen": false,
+  "environments": [
+    {
+      "id": "mac-chrome-m4",
+      "device": "Mac16,10 / Apple M4",
+      "os": "macOS 26.6.2",
+      "browser": "Google Chrome 156.0.8078.80",
+      "physical": true,
+      "status": "held",
+      "reasons": [
+        "Original CPU off/1 admission missing or failing",
+        "Original CPU off/2 admission missing or failing",
+        "Original CPU required/1 admission missing or failing",
+        "Original CPU required/2 admission missing or failing"
+      ],
+      "visualReasons": [],
+      "soaks": [
+        {
+          "backend": "cpu",
+          "reasons": [
+            "No full-duration cpu soak receipt"
+          ]
+        },
+        {
+          "backend": "worker",
+          "reasons": []
+        },
+        {
+          "backend": "webgl",
+          "reasons": [
+            "No full-duration webgl soak receipt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mac-safari-m4",
+      "device": "Mac16,10 / Apple M4",
+      "os": "macOS 26.6.2",
+      "browser": "Safari 26.6.2",
+      "physical": true,
+      "status": "held",
+      "reasons": [
+        "Original CPU required/2 admission missing or failing"
+      ],
+      "visualReasons": [
+        "react/worker visual evidence missing or rejected"
+      ],
+      "soaks": [
+        {
+          "backend": "cpu",
+          "reasons": [
+            "No full-duration cpu soak receipt"
+          ]
+        },
+        {
+          "backend": "worker",
+          "reasons": [
+            "No full-duration worker soak receipt"
+          ]
+        },
+        {
+          "backend": "webgl",
+          "reasons": [
+            "No full-duration webgl soak receipt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "android-a04s",
+      "device": "Samsung SM-A047F / Mali-G52",
+      "physical": true,
+      "status": "held",
+      "reasons": [
+        "Original CPU required/1 admission missing or failing",
+        "Original CPU required/2 admission missing or failing",
+        "Original GPU 1 admission missing or failing",
+        "Original GPU 2 admission missing or failing"
+      ],
+      "visualReasons": [
+        "vanilla/cpu visual evidence missing or rejected",
+        "vanilla/worker visual evidence missing or rejected",
+        "vanilla/webgl visual evidence missing or rejected",
+        "react/cpu visual evidence missing or rejected",
+        "react/worker visual evidence missing or rejected",
+        "react/webgl visual evidence missing or rejected",
+        "vue/cpu visual evidence missing or rejected",
+        "vue/worker visual evidence missing or rejected",
+        "vue/webgl visual evidence missing or rejected",
+        "angular/cpu visual evidence missing or rejected",
+        "angular/worker visual evidence missing or rejected",
+        "angular/webgl visual evidence missing or rejected"
+      ],
+      "soaks": [
+        {
+          "backend": "cpu",
+          "reasons": [
+            "No full-duration cpu soak receipt"
+          ]
+        },
+        {
+          "backend": "worker",
+          "reasons": [
+            "No full-duration worker soak receipt"
+          ]
+        },
+        {
+          "backend": "webgl",
+          "reasons": [
+            "No full-duration webgl soak receipt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iphone",
+      "device": "authorized iPhone 17 Pro Max / iPhone18,2",
+      "os": "iOS 27.0.1",
+      "physical": true,
+      "status": "held",
+      "reasons": [
+        "Incomplete, diagnostic or wrong environment",
+        "vanilla/cpu physical lifecycle evidence missing",
+        "vanilla/worker physical lifecycle evidence missing",
+        "vanilla/webgl physical lifecycle evidence missing",
+        "vanilla named hardware GPU is not verified",
+        "react/cpu physical lifecycle evidence missing",
+        "react/worker physical lifecycle evidence missing",
+        "react/webgl physical lifecycle evidence missing",
+        "react named hardware GPU is not verified",
+        "vue/cpu physical lifecycle evidence missing",
+        "vue/worker physical lifecycle evidence missing",
+        "vue/webgl physical lifecycle evidence missing",
+        "vue named hardware GPU is not verified",
+        "angular/cpu physical lifecycle evidence missing",
+        "angular/worker physical lifecycle evidence missing",
+        "angular/webgl physical lifecycle evidence missing",
+        "angular named hardware GPU is not verified",
+        "Original CPU off/1 admission missing or failing",
+        "Original CPU off/2 admission missing or failing",
+        "Original CPU required/1 admission missing or failing",
+        "Original CPU required/2 admission missing or failing",
+        "Original GPU 1 admission missing or failing",
+        "Original GPU 2 admission missing or failing",
+        "Conformance or page-error gate is incomplete"
+      ],
+      "visualReasons": [
+        "vanilla/cpu visual evidence missing or rejected",
+        "vanilla/worker visual evidence missing or rejected",
+        "vanilla/webgl visual evidence missing or rejected",
+        "react/cpu visual evidence missing or rejected",
+        "react/worker visual evidence missing or rejected",
+        "react/webgl visual evidence missing or rejected",
+        "vue/cpu visual evidence missing or rejected",
+        "vue/worker visual evidence missing or rejected",
+        "vue/webgl visual evidence missing or rejected",
+        "angular/cpu visual evidence missing or rejected",
+        "angular/worker visual evidence missing or rejected",
+        "angular/webgl visual evidence missing or rejected"
+      ],
+      "soaks": [
+        {
+          "backend": "cpu",
+          "reasons": [
+            "No full-duration cpu soak receipt"
+          ]
+        },
+        {
+          "backend": "worker",
+          "reasons": [
+            "No full-duration worker soak receipt"
+          ]
+        },
+        {
+          "backend": "webgl",
+          "reasons": [
+            "No full-duration webgl soak receipt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ipad",
+      "device": null,
+      "physical": true,
+      "missing": "No physical iPad available in observed inventory",
+      "status": "held",
+      "reasons": [
+        "Required physical identity is not supplied",
+        "No physical device receipt"
+      ],
+      "visualReasons": [
+        "vanilla/cpu visual evidence missing or rejected",
+        "vanilla/worker visual evidence missing or rejected",
+        "vanilla/webgl visual evidence missing or rejected",
+        "react/cpu visual evidence missing or rejected",
+        "react/worker visual evidence missing or rejected",
+        "react/webgl visual evidence missing or rejected",
+        "vue/cpu visual evidence missing or rejected",
+        "vue/worker visual evidence missing or rejected",
+        "vue/webgl visual evidence missing or rejected",
+        "angular/cpu visual evidence missing or rejected",
+        "angular/worker visual evidence missing or rejected",
+        "angular/webgl visual evidence missing or rejected"
+      ],
+      "soaks": [
+        {
+          "backend": "cpu",
+          "reasons": [
+            "No full-duration cpu soak receipt"
+          ]
+        },
+        {
+          "backend": "worker",
+          "reasons": [
+            "No full-duration worker soak receipt"
+          ]
+        },
+        {
+          "backend": "webgl",
+          "reasons": [
+            "No full-duration webgl soak receipt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "additional-desktop-gpu",
+      "device": null,
+      "physical": true,
+      "missing": "An additional named desktop GPU class/host is not available",
+      "status": "held",
+      "reasons": [
+        "Required physical identity is not supplied",
+        "No physical device receipt"
+      ],
+      "visualReasons": [
+        "vanilla/cpu visual evidence missing or rejected",
+        "vanilla/worker visual evidence missing or rejected",
+        "vanilla/webgl visual evidence missing or rejected",
+        "react/cpu visual evidence missing or rejected",
+        "react/worker visual evidence missing or rejected",
+        "react/webgl visual evidence missing or rejected",
+        "vue/cpu visual evidence missing or rejected",
+        "vue/worker visual evidence missing or rejected",
+        "vue/webgl visual evidence missing or rejected",
+        "angular/cpu visual evidence missing or rejected",
+        "angular/worker visual evidence missing or rejected",
+        "angular/webgl visual evidence missing or rejected"
+      ],
+      "soaks": [
+        {
+          "backend": "cpu",
+          "reasons": [
+            "No full-duration cpu soak receipt"
+          ]
+        },
+        {
+          "backend": "worker",
+          "reasons": [
+            "No full-duration worker soak receipt"
+          ]
+        },
+        {
+          "backend": "webgl",
+          "reasons": [
+            "No full-duration webgl soak receipt"
+          ]
+        }
+      ]
+    }
+  ],
+  "candidate": {
+    "receipt": "private/phase-11/candidates/run-y6zicD/receipt.json",
+    "artifacts": [
+      {
+        "name": "angular",
+        "files": [
+          "LICENSE",
+          "NOTICE",
+          "README.md",
+          "fesm2022/liquid-glass-forge-angular.mjs",
+          "fesm2022/liquid-glass-forge-angular.mjs.map",
+          "package.json",
+          "types/liquid-glass-forge-angular.d.ts"
+        ],
+        "sha256": "fd8908109e2bdb8937e6b1484f67317006db57cace59a6fb7aae6fe952be12d6"
+      },
+      {
+        "name": "vue",
+        "files": [
+          "LICENSE",
+          "NOTICE",
+          "README.md",
+          "dist/index.d.ts",
+          "dist/index.js",
+          "package.json"
+        ],
+        "sha256": "6a74a9fc117b4f826416ef5a84277021febd24b50bcba5bf9cec8bd177f4a8b4"
+      },
+      {
+        "name": "react",
+        "files": [
+          "LICENSE",
+          "NOTICE",
+          "README.md",
+          "dist/index.d.ts",
+          "dist/index.js",
+          "package.json"
+        ],
+        "sha256": "10c84b53428921d669ab1a37cef57a7a452fec5e55aaebfd5f2f73c4f00b0d39"
+      },
+      {
+        "name": "core",
+        "files": [
+          "LICENSE",
+          "NOTICE",
+          "README.md",
+          "dist/index.d.ts",
+          "dist/index.js",
+          "package.json"
+        ],
+        "sha256": "3cba9159bd19c2ef80be53cd75adf02ce451be4544a59fb42bcef8c657a020f0"
+      },
+      {
+        "name": "cpu",
+        "files": [
+          "LICENSE",
+          "NOTICE",
+          "README.md",
+          "dist/executor.d.ts",
+          "dist/executor.js",
+          "dist/index.d.ts",
+          "dist/index.js",
+          "dist/kernel.d.ts",
+          "dist/kernel.js",
+          "dist/protocol.d.ts",
+          "dist/protocol.js",
+          "dist/worker-core.js",
+          "dist/worker-kernel.js",
+          "dist/worker-protocol.js",
+          "dist/worker.d.ts",
+          "dist/worker.js",
+          "package.json"
+        ],
+        "sha256": "0c1bc4c26056223e203b5e311424fc9ffae10de96e1375af0b824d35b4bb971b"
+      },
+      {
+        "name": "webgl",
+        "files": [
+          "LICENSE",
+          "NOTICE",
+          "README.md",
+          "dist/atlas.d.ts",
+          "dist/atlas.js",
+          "dist/dom.d.ts",
+          "dist/dom.js",
+          "dist/effects.d.ts",
+          "dist/effects.js",
+          "dist/index.d.ts",
+          "dist/index.js",
+          "dist/shaders.d.ts",
+          "dist/shaders.js",
+          "package.json"
+        ],
+        "sha256": "9ef8527a09b35de66707400c95b175964287a32152ef29029156cdcfb5ef3357"
+      },
+      {
+        "name": "dom",
+        "files": [
+          "LICENSE",
+          "NOTICE",
+          "README.md",
+          "dist/cpu.d.ts",
+          "dist/cpu.js",
+          "dist/host.d.ts",
+          "dist/host.js",
+          "dist/index.d.ts",
+          "dist/index.js",
+          "dist/mapping.d.ts",
+          "dist/mapping.js",
+          "dist/providers.d.ts",
+          "dist/providers.js",
+          "dist/scene.d.ts",
+          "dist/scene.js",
+          "dist/styles.css",
+          "package.json"
+        ],
+        "sha256": "a80deb2a283a593dc76a88e83ba7c17ea618d371c9e59b4bbcfd458e8f960ab8"
+      }
+    ],
+    "planSha256": "dc21041bfcf270ebd14ad553841eeb0e5d948c4cb49cb55b739131397ba43a42"
+  },
+  "evidence": {
+    "visuals": {
+      "receipt": "private/phase-11/visual-status.json",
+      "status": "hold"
+    },
+    "devices": [
+      {
+        "environment": "android-a04s",
+        "receipt": "private/phase-11/devices/android-a04s-p7go7n/receipt.json",
+        "completed": true,
+        "diagnostic": false,
+        "sourceBindingsValid": true
+      },
+      {
+        "environment": "iphone",
+        "receipt": "private/phase-11/devices/iphone-XXIYxi/receipt.json",
+        "completed": false,
+        "diagnostic": false,
+        "sourceBindingsValid": true
+      },
+      {
+        "environment": "mac-chrome-m4",
+        "receipt": "private/phase-11/devices/mac-chrome-m4-FWA4s8/receipt.json",
+        "completed": true,
+        "diagnostic": false,
+        "sourceBindingsValid": true
+      },
+      {
+        "environment": "mac-safari-m4",
+        "receipt": "private/phase-11/devices/mac-safari-m4-ESq6d0/receipt.json",
+        "completed": true,
+        "diagnostic": false,
+        "sourceBindingsValid": true
+      }
+    ],
+    "soaks": [
+      {
+        "environment": "mac-chrome-m4",
+        "backend": "worker",
+        "receipt": "private/phase-11/soak/run-DmmAdR/receipt.json",
+        "completed": true,
+        "diagnostic": false,
+        "elapsedMs": 1800008.199999988,
+        "sourceBindingsValid": true
+      }
+    ]
+  },
+  "claimPolicy": "Functional, original admission and sustained-soak evidence are separate. Missing hardware, failures and short diagnostics keep beta held; no physical support inferred from software engines.",
+  "apiCandidate": {
+    "status": "candidate; freeze withheld",
+    "contractVersion": 1,
+    "packages": [
+      {
+        "name": "@liquid-glass-forge/angular",
+        "version": "0.0.0-dev",
+        "exports": {
+          "./package.json": {
+            "default": "./package.json"
+          },
+          ".": {
+            "types": "./types/liquid-glass-forge-angular.d.ts",
+            "default": "./fesm2022/liquid-glass-forge-angular.mjs"
+          }
+        },
+        "declarations": {
+          "types/liquid-glass-forge-angular.d.ts": "ad8bc6050623bfc1ac568e0f0604ee37575d7ca10d9b023a0a5151499fb22f94"
+        }
+      },
+      {
+        "name": "@liquid-glass-forge/vue",
+        "version": "0.0.0-dev",
+        "exports": {
+          ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+          }
+        },
+        "declarations": {
+          "dist/index.d.ts": "aeb2910baf63eea2771434bc5ef03746f79f202ec93249e1375582a2748e9718"
+        }
+      },
+      {
+        "name": "@liquid-glass-forge/react",
+        "version": "0.0.0-dev",
+        "exports": {
+          ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+          }
+        },
+        "declarations": {
+          "dist/index.d.ts": "51f956c0f910d0bc96ced004d9202bc3071bab917ffb1ef875dcaf18640d6090"
+        }
+      },
+      {
+        "name": "@liquid-glass-forge/core",
+        "version": "0.0.0-dev",
+        "exports": {
+          ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+          }
+        },
+        "declarations": {
+          "dist/index.d.ts": "4786d7c5989870e6c9a5a4a5e3d2877b31a8edac2c4c4d6d9a91e68602fb4618"
+        }
+      },
+      {
+        "name": "@liquid-glass-forge/cpu",
+        "version": "0.0.0-dev",
+        "exports": {
+          ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+          },
+          "./worker.js": "./dist/worker.js"
+        },
+        "declarations": {
+          "dist/executor.d.ts": "59208f5cd99988ef8a582f1fe353f25b14d770dc180f50f30e36b90618498b8a",
+          "dist/index.d.ts": "42e9ca5f65c5a265e33d0c51c12467a441642bfc3b6a52180b7f2d9eda8aa5cf",
+          "dist/kernel.d.ts": "359c9c37f858ef3a31be1846e56bc01f10618a959d93fafea78c37600fab6c9f",
+          "dist/protocol.d.ts": "939dc9d54ba8d9147d93c1f2559c02bbd01ec53148db0989dc85e1b5cf859ff0",
+          "dist/worker.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+        }
+      },
+      {
+        "name": "@liquid-glass-forge/webgl",
+        "version": "0.0.0-dev",
+        "exports": {
+          ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+          },
+          "./dom": {
+            "types": "./dist/dom.d.ts",
+            "import": "./dist/dom.js",
+            "default": "./dist/dom.js"
+          }
+        },
+        "declarations": {
+          "dist/atlas.d.ts": "5d536b79924113814d4b5a6011a91b7a6ed1768ff0f9b0bd90581baeccd99cef",
+          "dist/dom.d.ts": "03fdb3ecf81dc187a31003a386947e599fde1a9d28eef4b2330f5d6575d28c3c",
+          "dist/effects.d.ts": "f9124dc78e474282e136dac3357d178a89534ca05d7bebbc6d211824144df113",
+          "dist/index.d.ts": "78ed93a27fa10afc05ffc5c6cad0f4dcdb49dcf7f5b3de8137ce5c0207538dcb",
+          "dist/shaders.d.ts": "cc5eb8dcca38ad704453d65ed850b3170903a8c5251c61ff3198fa3936829493"
+        }
+      },
+      {
+        "name": "@liquid-glass-forge/dom",
+        "version": "0.0.0-dev",
+        "exports": {
+          ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+          },
+          "./styles.css": "./dist/styles.css"
+        },
+        "declarations": {
+          "dist/cpu.d.ts": "58c7a88627bab5e0ab6dd12dbb65c62147418bfc1559cfe7a67642f54fec5166",
+          "dist/host.d.ts": "c463cff05badf89e46bf26e3eeda169f69e071c9a8df45399e1d074e5ff93131",
+          "dist/index.d.ts": "1461dbdd6cef6c94ce1c50533a503a132531f44f3f3717b9c7a9846b9fa52de6",
+          "dist/mapping.d.ts": "42a3b923327877ca39d7c92abe1e28f57ca567052999a050c144a9264878657b",
+          "dist/providers.d.ts": "85660a713c8e9d02ddef955c073474a3e49fdeeb74f71e707b78fb4419a59714",
+          "dist/scene.d.ts": "7fb02d76da53a73d0d5951d68d0be878223a04a27a1dd40c1b288b94071d312e"
+        }
+      }
+    ],
+    "futureRuntimePackages": "absent; motion, component catalogs, React Native and Flutter remain planned"
+  }
+}

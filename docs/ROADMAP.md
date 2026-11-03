@@ -1,6 +1,9 @@
 # Foundation roadmap
 
-**Status: Phase 10 integrated resilience implemented within its recorded review scope.** [Core contracts and packaging](PHASE-2.md) and
+**Status: Phase 11 qualification checkpoint implemented; acceptance incomplete and beta held.**
+[Physical evidence and remaining gates](PHASE-11.md) include one full worker soak,
+timing/visual failures and missing iPad/additional GPU coverage. Phase 10 remains
+implemented within its recorded review scope. [Core contracts and packaging](PHASE-2.md) and
 [explicit source providers/coordinate mapping](PHASE-3.md) and the
 [vanilla host/lifecycle](PHASE-4.md) are implemented.
 The [phase 1 feasibility findings](PHASE-1.md), including the explicit unresolved
@@ -80,5 +83,6 @@ Opaque material now hides optical pixels over a solid system background. Access
 verification combines browser semantics, native AX, keyboard and measured
 contrast/focus screenshots. At the owner's request, installed Google Chrome
 inspection and a concise candidate replace the complex manual four-app review;
-no human VoiceOver pass is inferred. Phase 11 physical environment/performance
-qualification remains the next separately authorized phase.
+no human VoiceOver pass is inferred. [Phase 11](PHASE-11.md) now records the available
+physical qualification work and explicit incomplete matrix. Beta/API freeze and
+Phase 12 distribution remain held.
