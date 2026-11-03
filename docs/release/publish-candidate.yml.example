@@ -1,0 +1,90 @@
+# Review and activate at .github/workflows/publish-candidate.yml only after Phase 11,
+# owner bootstrap/trusted-publisher setup and protection configuration are complete.
+name: Publish exact approved candidate
+on:
+  workflow_dispatch:
+    inputs:
+      rehearsal_run_id:
+        description: Successful rehearsal run containing this exact source commit
+        required: true
+        type: string
+      approved_manifest_sha256:
+        description: SHA-256 of the exact reviewed immutable manifest
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  preflight:
+    if: github.repository == 'namipsg/liquid-glass-forge' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24.21.0'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: distribution-${{ github.sha }}
+          path: private/phase-12/approved
+          run-id: ${{ inputs.rehearsal_run_id }}
+          github-token: ${{ github.token }}
+      - run: node scripts/release-verify.mjs --manifest private/phase-12/approved/manifest.json --release
+  publish:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    environment: npm-release
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24.21.0'
+      - run: npm install --global npm@11.19.0 --ignore-scripts
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: distribution-${{ github.sha }}
+          path: private/phase-12/approved
+          run-id: ${{ inputs.rehearsal_run_id }}
+          github-token: ${{ github.token }}
+      - env:
+          APPROVED_MANIFEST_SHA256: ${{ inputs.approved_manifest_sha256 }}
+        run: node scripts/publish-approved.mjs --manifest private/phase-12/approved/manifest.json --approved-manifest-sha256 "$APPROVED_MANIFEST_SHA256"
+  verify-registry:
+    needs: publish
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
+      options: --init --ipc=host
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24.21.0'
+      - run: npm install --global npm@11.19.0 pnpm@10.34.5 --ignore-scripts
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Align ephemeral container home ownership for Firefox
+        run: chown "$(id -u):$(id -g)" "$HOME"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: distribution-${{ github.sha }}
+          path: private/phase-12/approved
+          run-id: ${{ inputs.rehearsal_run_id }}
+          github-token: ${{ github.token }}
+      - run: pnpm test:registry --manifest private/phase-12/approved/manifest.json
+# Deliberately no recommended-tag promotion. Review the exact-registry receipt
+# and provenance before an independently approved dist-tag operation.

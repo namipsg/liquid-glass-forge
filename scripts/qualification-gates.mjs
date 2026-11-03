@@ -2,6 +2,15 @@ import { ADMISSION } from '../spikes/phase-1/admission.mjs';
 const sameArtifacts=(a,b)=>a?.length===b?.length&&a.every(item=>b.some(other=>other.name===item.name&&other.sha256===item.sha256));
 const finite=value=>Number.isFinite(value)&&value>=0;
 const p95=values=>values.sort((a,b)=>a-b)[Math.ceil(values.length*.95)-1];
+export function candidatePackageVersion(manifests) {
+  const expected=['core','cpu','dom','webgl','react','vue','angular'].map(n=>'@liquid-glass-forge/'+n);
+  if(manifests.length!==7||new Set(manifests.map(m=>m.name)).size!==7||manifests.some(m=>!expected.includes(m.name)))throw Error('Unexpected candidate package set');
+  const version=manifests[0].version;
+  if(manifests.some(m=>m.version!==version))throw Error('Mixed candidate versions');
+  if(version==='0.0.0-dev'&&manifests.every(m=>m.private===true))return version;
+  if(/^\d+\.\d+\.\d+-rc\.(0|[1-9]\d*)$/.test(version)&&manifests.every(m=>m.private===false))return version;
+  throw Error('Expected a private development set or explicit synchronized public release candidate');
+}
 export function assertFrozenPlan(plan) {
   for(const backend of ['cpu','webgl'])for(const [key,value]of Object.entries(ADMISSION[backend])) {
     const configured=plan[backend]?.[key];

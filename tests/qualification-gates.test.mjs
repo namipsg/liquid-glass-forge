@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFile}from'node:fs/promises';
-import {assertFrozenPlan,originalBenchmarkPass,soakGates,qualificationMatrix}from'../scripts/qualification-gates.mjs';
+import {assertFrozenPlan,originalBenchmarkPass,soakGates,qualificationMatrix,candidatePackageVersion}from'../scripts/qualification-gates.mjs';
 const plan=JSON.parse(await readFile('docs/qualification-plan.json')),artifacts=[{name:'core',sha256:'exact'}];
 const run=()=>({backend:'cpu',execution:'required',repeat:1,width:320,height:180,source:{width:640,height:360},frames:90,warmup:15,environment:{visibility:'visible'},accountedImageBytes:8000000,rawFrames:Array.from({length:90},(_,i)=>({frame:i,optics:{radius:36,bevel:30,strength:12+((i+15)%20)/5},batchMs:30,intervalMs:34,completionAgeMs:34}))});
 const soak=()=>({backend:'worker',diagnostic:false,completed:true,elapsedMs:1800001,hostElapsedMs:1800002,artifacts,errors:[],cycles:[{backend:'worker',count:100,adapters:plan.requiredAdapters}],summary:Object.fromEntries(plan.requiredAdapters.map(a=>[a,{frames:52000,ageP95Ms:34,intervalP95Ms:34,knownImageBytesMax:8300000}])),cleanup:plan.requiredAdapters.map(adapter=>({adapter,active:0,subscriptions:0,workers:0,leased:0})),samples:[{adapters:plan.requiredAdapters.map(adapter=>({adapter,visibility:'visible',active:1,subscriptions:1,errors:[],targets:[{width:320,height:180}]}))}]});
@@ -39,4 +39,10 @@ test('a producer flag cannot hide failing admission or software GPU identity',()
     const {p,devices,soaks,visuals}=completeMatrix();devices[0].pass=true;mutate(devices[0]);
     assert.equal(qualificationMatrix(p,{artifacts},devices,soaks,visuals).betaFrozen,false);
   }
+});
+test('qualification can bind a proposed public RC without accepting mixed or future package sets',()=>{
+  const manifests=['core','cpu','dom','webgl','react','vue','angular'].map(name=>({name:'@liquid-glass-forge/'+name,version:'0.0.0-dev',private:true}));
+  assert.equal(candidatePackageVersion(manifests),'0.0.0-dev');
+  for(const m of manifests){m.version='0.1.0-rc.1';m.private=false;}assert.equal(candidatePackageVersion(manifests),'0.1.0-rc.1');
+  for(const mutate of [m=>m[0].version='0.2.0-rc.1',m=>m[0].private=true,m=>m[0].name='@liquid-glass-forge/motion',m=>m.pop()]){const m=structuredClone(manifests);mutate(m);assert.throws(()=>candidatePackageVersion(m));}
 });

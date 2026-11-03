@@ -3,7 +3,9 @@
 An independent Liquid Glass project for the web, with CPU/WebGL2 rendering,
 a vanilla host, and React, Vue and Angular integrations.
 
-**Status: Phase 11 physical qualification is incomplete; beta held.**
+**Status: Phase 12 distribution preparation implemented; qualification and publication held.**
+[Phase 12](docs/PHASE-12.md) adds immutable artifacts and locally tested release preparation;
+[release instructions](docs/RELEASING.md) retain explicit publication gates.
 [Phase 11](docs/PHASE-11.md) records physical Mac/Android checks, one passing
 30-minute worker soak, failing admission/visual evidence and missing hardware.
 [SUPPORT.json](docs/SUPPORT.json) withholds the API/support freeze.
@@ -69,6 +71,9 @@ Future work includes Sileo-inspired React/SVG animation, Apple-inspired componen
 | [Phase 1 experiment](docs/PHASE-1.md) | Reproduction, measured scope and admission decisions |
 | [Phase 2 foundation](docs/PHASE-2.md) | Implemented contracts, packaging checks and limits |
 | [Phase 3 sources](docs/PHASE-3.md) | Source acquisition, coordinate mapping and verification |
+| [Phase 12 distribution](docs/PHASE-12.md) | Scope ownership, immutable rehearsal, registry verification and release holds |
+| [Release procedure](docs/RELEASING.md) | Artifact approval, protected workflow, OIDC, promotion and rollback |
+| [Phase 11 qualification](docs/PHASE-11.md) | Physical results, full worker soak and incomplete beta matrix |
 | [Phase 10 resilience](docs/PHASE-10.md) | Forced backends, CSP/faults, access, combined lifecycle and mutation evidence |
 | [Phase 9 Angular](docs/PHASE-9.md) | Standalone component/directives, APF, zoneless CSR and eager SSR/hydration |
 | [Phase 8 Vue](docs/PHASE-8.md) | Component/composable/provider, KeepAlive and packed Vue/Nuxt SSR/hydration |
@@ -83,7 +88,9 @@ Future work includes Sileo-inspired React/SVG animation, Apple-inspired componen
 | [Attribution](docs/ATTRIBUTION.md) | Design inspiration and source references |
 | [Contributing](CONTRIBUTING.md) | How to propose changes during planning |
 
-The proposed npm family is **@liquid-glass-forge/**. No installation command is provided until a package is published and verified.
+The npm organization **@liquid-glass-forge/** is owned by `namipsg`. Packages remain
+private and unpublished; no installation command is provided until publication
+and exact registry verification pass.
 
 ## License and attribution
 

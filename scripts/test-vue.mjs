@@ -10,6 +10,7 @@ import assert from 'node:assert/strict';
 import { chromium,firefox,webkit } from '@playwright/test';
 import { packageFiles } from './pack-smoke.mjs';
 import { auditPackage } from './package-audit.mjs';
+import { consumerPackage, distributionVersions } from './distribution-artifacts.mjs';
 if(process.argv[2]&&process.argv[2]!=='vue')throw Error('Vue adapter expected');
 const root=process.cwd(),sha=b=>createHash('sha256').update(b).digest('hex');
 await mkdir('private/phase-8/consumer',{recursive:true});const dir=await mkdtemp(path.resolve('private/phase-8/consumer/run-')),consumer=await mkdtemp(path.join(tmpdir(),'lgf-vue-consumer-'));
@@ -26,7 +27,7 @@ try{
  for(const folder of ['packages/vue/src','tests/fixtures/vue'])for(const f of await readdir(folder)){const p=folder+'/'+f;receipt.sourceSha256[p]=sha(await readFile(p));}
  await writeFile(path.join(consumer,'package.json'),JSON.stringify({private:true,type:'module'}));const tarballs=[];
  for(const name of ['core','cpu','dom','webgl','react','vue']){
-  const meta=JSON.parse(execFileSync('npm',['pack','--json','--ignore-scripts','--pack-destination',dir],{cwd:path.join(root,'packages',name),encoding:'utf8',timeout:30000}))[0],tarball=path.join(dir,meta.filename),files=execFileSync('tar',['-tzf',tarball],{encoding:'utf8'}).trim().split('\n').map(f=>f.replace(/^package\//,'')).sort();assert.deepEqual(files,packageFiles[name]);auditPackage(JSON.parse(execFileSync('tar',['-xOf',tarball,'package/package.json'],{encoding:'utf8'})),files,{internalVersions:Object.fromEntries(Object.keys(packageFiles).map(n=>['@liquid-glass-forge/'+n,'0.0.0-dev'])),installedPeers:versions});tarballs.push(tarball);receipt.artifacts.push({name,files,sha256:sha(await readFile(tarball))});
+  const meta=consumerPackage(name,dir),tarball=path.join(dir,meta.filename),files=execFileSync('tar',['-tzf',tarball],{encoding:'utf8'}).trim().split('\n').map(f=>f.replace(/^package\//,'')).sort();assert.deepEqual(files,packageFiles[name]);auditPackage(JSON.parse(execFileSync('tar',['-xOf',tarball,'package/package.json'],{encoding:'utf8'})),files,{internalVersions:distributionVersions(),installedPeers:versions});tarballs.push(tarball);receipt.artifacts.push({name,files,sha256:sha(await readFile(tarball))});
  }
  console.log('Install physical packed Vue/Nuxt consumer');await command('npm',['install','--ignore-scripts','--prefer-online','--no-audit','--no-fund','--save-exact',...tarballs,...Object.entries(versions).map(([n,v])=>n+'@'+v)],'install.txt');await cp(path.join(consumer,'package-lock.json'),path.join(dir,'consumer-package-lock.json'));
  for(const a of receipt.artifacts){const p=path.join(consumer,'node_modules/@liquid-glass-forge',a.name);assert.equal((await lstat(p)).isSymbolicLink(),false);assert.ok((await realpath(p)).startsWith(await realpath(consumer)));for(const f of a.files)assert.deepEqual(await readFile(path.join(p,f)),execFileSync('tar',['-xOf',tarballs[receipt.artifacts.indexOf(a)],'package/'+f]));}

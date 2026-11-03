@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { chromium, firefox, webkit } from '@playwright/test';
 import { packageFiles } from './pack-smoke.mjs';
 import { auditPackage } from './package-audit.mjs';
+import { consumerPackage, distributionVersions } from './distribution-artifacts.mjs';
 import { integrationServers } from '../tests/integration-server.mjs';
 import { configure, frame, opaqueCheck, staleCheck, lifecycleChecks, accessChecks } from '../tests/integration-checks.mjs';
 import { regressionMutations } from '../tests/integration-mutations.mjs';
@@ -22,6 +23,7 @@ const versions = { react: '19.3.1', 'react-dom': '19.3.1', vue: '3.5.44', vite: 
   '@angular/platform-browser': '22.2.4', '@angular/build': '22.2.5', '@angular/cli': '22.2.5', typescript: '6.0.3', rxjs: '7.8.2', tslib: '2.9.1' };
 const receipt = { startedAt: new Date().toISOString(), baselineCommit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   runtime: { node: process.version, platform: process.platform, arch: process.arch }, versions, sourceSha256: {}, artifacts: [], checks: [], pass: false, temporaryConsumer: consumer };
+receipt.distributionManifest=process.env.LGF_DISTRIBUTION_MANIFEST;
 let server, browser;
 async function command(exe, args, log) {
   const child = spawn(exe, args, { cwd: consumer, env: { ...process.env, NODE_ENV: 'production', NG_CLI_ANALYTICS: 'false', CI: '1', npm_config_ignore_scripts: 'true' }, stdio: ['ignore', 'pipe', 'pipe'] }), chunks = [];
@@ -87,11 +89,11 @@ try {
   await writeFile(path.join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
   const tarballs = [];
   for (const [name, inventory] of Object.entries(packageFiles)) {
-    const packed = JSON.parse(execFileSync('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', dir], { cwd: path.join(root, 'packages', name, name === 'angular' ? 'dist' : ''), encoding: 'utf8', timeout: 30000 }))[0];
+    const packed = consumerPackage(name,dir);
     const file = path.join(dir, packed.filename), files = execFileSync('tar', ['-tzf', file], { encoding: 'utf8' }).trim().split('\n').map(f => f.replace(/^package\//, '')).sort();
     assert.deepEqual(files, inventory);
     auditPackage(JSON.parse(execFileSync('tar', ['-xOf', file, 'package/package.json'], { encoding: 'utf8' })), files,
-      { internalVersions: Object.fromEntries(Object.keys(packageFiles).map(n => ['@liquid-glass-forge/' + n, '0.0.0-dev'])), installedPeers: versions });
+      { internalVersions: distributionVersions(), installedPeers: versions });
     tarballs.push(file); receipt.artifacts.push({ name, files, sha256: sha(await readFile(file)) });
   }
   console.log('Install seven physical packages and pinned production build dependencies');

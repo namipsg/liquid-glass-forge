@@ -12,4 +12,6 @@ The project's independently authored materials are covered by the [MIT License](
 
 These are references, not current runtime dependencies. The phase 1 spike and phase 2 core are independently authored; no upstream library source, Apple assets or Sileo code is included. Any future reuse must be reviewed for its applicable license and carry required notices in the actual distributed artifacts.
 
-The project/package names remain proposals pending publication eligibility and scope verification. Source acknowledgments do not establish a trademark license or endorsement.
+The npm organization `@liquid-glass-forge` was created on 3 November 2026 under
+`namipsg`. Registry ownership does not establish trademark clearance, a trademark
+license or endorsement. Package publication remains held; see [the release procedure](RELEASING.md).

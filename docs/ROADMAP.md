@@ -1,6 +1,8 @@
 # Foundation roadmap
 
-**Status: Phase 11 qualification checkpoint implemented; acceptance incomplete and beta held.**
+**Status: Phase 12 distribution preparation implemented; qualification and publication held.**
+[Distribution rehearsal and limits](PHASE-12.md) record npm ownership, immutable
+artifacts and the protected release design. Phase 11 acceptance remains incomplete.
 [Physical evidence and remaining gates](PHASE-11.md) include one full worker soak,
 timing/visual failures and missing iPad/additional GPU coverage. Phase 10 remains
 implemented within its recorded review scope. [Core contracts and packaging](PHASE-2.md) and
@@ -85,4 +87,5 @@ contrast/focus screenshots. At the owner's request, installed Google Chrome
 inspection and a concise candidate replace the complex manual four-app review;
 no human VoiceOver pass is inferred. [Phase 11](PHASE-11.md) now records the available
 physical qualification work and explicit incomplete matrix. Beta/API freeze and
-Phase 12 distribution remain held.
+Phase 12 publication/registry acceptance remain held. Local distribution
+preparation is recorded in [Phase 12](PHASE-12.md).

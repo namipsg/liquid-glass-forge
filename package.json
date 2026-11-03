@@ -14,7 +14,7 @@
     "test:cpu": "node --test tests/cpu.test.mjs tests/cpu-colour-tables.test.mjs tests/cpu-baseline-fast.test.mjs tests/cpu-source-cache.test.mjs",
     "test:cpu-executor": "node --test tests/cpu-executor.test.mjs",
     "test:cpu-worker-browser": "node --test tests/cpu-worker-browser.test.mjs",
-    "test:package-audit": "node --test tests/package-audit.test.mjs",
+    "test:package-audit": "node --test tests/package-audit.test.mjs tests/distribution.test.mjs",
     "test:pack": "node scripts/pack-smoke.mjs",
     "test:browser-import": "node --test tests/browser-import.test.mjs",
     "test": "pnpm check && pnpm test:unit && pnpm test:cpu && pnpm test:cpu-executor && pnpm test:cpu-worker-browser && pnpm test:cpu-host-browser && pnpm test:package-audit && pnpm test:pack && pnpm test:browser-import && pnpm test:sources-browser && pnpm test:host-browser && pnpm test:webgl && pnpm test:webgl-browser && pnpm test:react && pnpm test:vue && pnpm test:angular && pnpm test:access && pnpm test:faults && pnpm test:qualification",
@@ -38,7 +38,11 @@
     "test:soak": "node scripts/qualify-soak.mjs",
     "test:visual": "node scripts/visual-qualification.mjs",
     "test:qualification": "node --test tests/qualification-gates.test.mjs",
-    "qualification:status": "node scripts/report-qualification.mjs"
+    "qualification:status": "node scripts/report-qualification.mjs",
+    "release:prepare": "node scripts/release-prepare.mjs",
+    "release:verify": "node scripts/release-verify.mjs",
+    "release:consumers": "node scripts/test-distribution.mjs --tarballs",
+    "test:registry": "node scripts/test-distribution.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
