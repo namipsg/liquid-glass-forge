@@ -1,0 +1,36 @@
+{
+  "name": "@liquid-glass-forge/react",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "dependencies": {
+    "@liquid-glass-forge/dom": "0.0.0-dev"
+  },
+  "peerDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namipsg/liquid-glass-forge.git",
+    "directory": "packages/react"
+  }
+}

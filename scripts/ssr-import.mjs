@@ -5,10 +5,15 @@ const domEntry = pathToFileURL(fileURLToPath(new URL('../packages/dom/dist/index
 const cpuEntry = pathToFileURL(fileURLToPath(new URL('../packages/cpu/dist/index.js', import.meta.url))).href;
 const gpuEntry = pathToFileURL(fileURLToPath(new URL('../packages/webgl/dist/index.js', import.meta.url))).href;
 const adapterEntry = pathToFileURL(fileURLToPath(new URL('../packages/webgl/dist/dom.js', import.meta.url))).href;
+const reactEntry=pathToFileURL(fileURLToPath(new URL('../packages/react/dist/index.js',import.meta.url))).href;
 const code = `
+// React's development peer captures queueMicrotask at import; preload that external peer.
+await import('react');
 for (const name of ['window','document','navigator','Worker','OffscreenCanvas','requestAnimationFrame','queueMicrotask','ResizeObserver','IntersectionObserver','matchMedia','fetch','XMLHttpRequest','WebSocket','setTimeout','setInterval']) {
   Object.defineProperty(globalThis, name, { configurable: true, get() { throw new Error('Import touched ' + name); } });
 }
+const reactAdapter=await import(${JSON.stringify(reactEntry)});
+if(typeof reactAdapter.useGlassSurface!=='function')throw new Error('Missing React adapter');
 const dom = await import(${JSON.stringify(domEntry)});
 if (typeof dom.createGlassScene !== 'function' || typeof dom.mountGlassHost !== 'function' || typeof dom.SourceProvider !== 'function') throw new Error('Missing source provider');
 const core = await import(${JSON.stringify(entry)});

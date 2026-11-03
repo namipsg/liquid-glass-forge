@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { auditPackage } from './package-audit.mjs';
 const root = fileURLToPath(new URL('../', import.meta.url));
 export const packageFiles = {
+  react: ['LICENSE','NOTICE','README.md','dist/index.d.ts','dist/index.js','package.json'].sort(),
   core: ['LICENSE','NOTICE','README.md','dist/index.d.ts','dist/index.js','package.json'].sort(),
   cpu: ['LICENSE','NOTICE','README.md','package.json',...['index','kernel','executor','protocol','worker'].flatMap(n=>['dist/'+n+'.js','dist/'+n+'.d.ts']),...['core','kernel','protocol'].map(n=>'dist/worker-'+n+'.js')].sort(),
   webgl: ['LICENSE','NOTICE','README.md','package.json',...['index','atlas','shaders','effects','dom'].flatMap(n=>['dist/'+n+'.js','dist/'+n+'.d.ts'])].sort(),
@@ -43,7 +44,7 @@ export async function packSmoke() {
         assert(JSON.stringify(metadata.files.map(f => f.path).sort()) === JSON.stringify(files), 'Physical inventory differs');
         const manifest = JSON.parse(run('tar', ['-xOf',tarball,'package/package.json'], root));
         assert(manifest.name === `@liquid-glass-forge/${name}`, 'Unexpected manifest name');
-        auditPackage(manifest, files, { internalVersions: versions });
+        auditPackage(manifest, files, { internalVersions: versions, installedPeers: {react:'19.3.1','react-dom':'19.3.1'} });
         for (const notice of ['LICENSE','NOTICE','README.md']) assert(run('tar',['-xOf',tarball,`package/${notice}`],root).trim(), `Empty ${notice}`);
         receipt.artifacts.push({ package: name, iteration, tarball: path.relative(root,tarball),
           sha256: createHash('sha256').update(await readFile(tarball)).digest('hex'), npmIntegrity: metadata.integrity, files });
@@ -66,11 +67,13 @@ export async function packSmoke() {
       }
     }
     await writeFile(path.join(consumer,'smoke.mjs'), `import assert from 'node:assert/strict';
+await import('react');
 const descriptors = new Map();
 for (const name of ['window','document','navigator','Worker','OffscreenCanvas','requestAnimationFrame','queueMicrotask','ResizeObserver','IntersectionObserver','matchMedia','fetch','XMLHttpRequest','WebSocket','setTimeout','setInterval']) {
   descriptors.set(name,Object.getOwnPropertyDescriptor(globalThis,name));
   Object.defineProperty(globalThis,name,{ configurable:true,get(){throw new Error('Import touched '+name);} });
 }
+const adapter=await import('@liquid-glass-forge/react');assert.equal(typeof adapter.GlassSceneProvider,'function');assert.equal(typeof adapter.useGlassSurface,'function');
 const core = await import('@liquid-glass-forge/core');
 const gpu=await import('@liquid-glass-forge/webgl');
 const optical=await import('@liquid-glass-forge/webgl/dom');
@@ -81,13 +84,13 @@ const { SourceProvider, mapSourceRegion, createGlassScene, mountGlassHost, creat
 assert.equal(typeof createGlassScene,'function');assert.equal(typeof createCpuRenderer,'function');assert.equal(typeof mountGlassHost,'function');
 for (const [name, descriptor] of descriptors) { if(descriptor) Object.defineProperty(globalThis,name,descriptor); else delete globalThis[name]; }
 assert.equal(core.CONTRACT_VERSION,1);
-for (const name of ['core','cpu','dom','webgl']) await assert.rejects(import('@liquid-glass-forge/'+name+'/dist/index.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});
+for (const name of ['core','cpu','dom','webgl','react']) await assert.rejects(import('@liquid-glass-forge/'+name+'/dist/index.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});
 const pixel=core.createSource({contractVersion:1,width:1,height:1,revision:0,ownership:'borrowed',colorSpace:'srgb',alphaMode:'straight',data:new Uint8Array([20,40,60,255])});const prepared=prepareCpuSource(pixel);assert.deepEqual([...renderCpu(prepared,{id:'one',width:1,height:1,radius:0,strength:0})],[20,40,60,255]);disposeCpuSource(prepared);
 const bytes=new Uint8Array([10,20,30,255]), p=new SourceProvider({kind:'pixels',width:1,height:1,data:bytes});
 const pending=p.read();bytes[0]=99;assert.deepEqual([...(await pending).source.data],[10,20,30,255]);p.destroy();
 assert.equal(typeof mapSourceRegion,'function');
 assert.equal(mapSourceRegion({source:{width:1,height:1},box:{x:0,y:0,width:1,height:1},target:{x:0,y:0,width:1,height:1}}).ok,true);
-console.log('Four installed ESM/types surfaces, SSR import traps, deep exports and owned pixels passed');
+console.log('Five installed ESM/types surfaces, SSR import traps, deep exports and owned pixels passed');
 `);
     await writeFile(path.join(consumer,'consumer.mts'), `import { CpuExecutor, type CpuEffects } from '@liquid-glass-forge/cpu';
 import { CONTRACT_VERSION, type PixelSource, type FrameDescriptor } from '@liquid-glass-forge/core';
@@ -128,6 +131,6 @@ provider.destroy();
     receipt.status='passed';
   } catch (error) { receipt.status='failed';receipt.error=error.stack;throw error; }
   finally { if(consumer) await rm(consumer,{recursive:true,force:true}); receipt.completedAt=new Date().toISOString();await writeFile(path.join(dir,'receipt.json'),JSON.stringify(receipt,null,2)); }
-  console.log(`Four package smoke checks passed; receipt: ${path.relative(root,path.join(dir,'receipt.json'))}`); return receipt;
+  console.log(`Five package smoke checks passed; receipt: ${path.relative(root,path.join(dir,'receipt.json'))}`); return receipt;
 }
 if(process.argv[1] && import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href) packSmoke().catch(e=>{console.error(e);process.exitCode=1;});

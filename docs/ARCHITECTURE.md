@@ -1,6 +1,6 @@
 # Proposed architecture
 
-**Status: core, sources, host, CPU and WebGL implemented; named-device evidence and limits are recorded per renderer; frameworks remain pending.** The private experimental core follows [version 1 contracts](CONTRACTS.md). Names and interfaces may change before an initial release.
+**Status: core, sources, host, CPU and WebGL implemented; named-device evidence and limits are recorded per renderer; React is implemented; Vue/Angular remain pending.** The private experimental core follows [version 1 contracts](CONTRACTS.md). Names and interfaces may change before an initial release.
 
 ## Package boundaries
 
@@ -14,7 +14,7 @@
 | @liquid-glass-forge/vue | Vue component/composable |
 | @liquid-glass-forge/angular | Angular component/directive using Angular's distribution format |
 
-These are proposed workspace boundaries. Renderer subpath exports may replace separate public renderer packages if packaging validation supports that choice. Frameworks remain peer dependencies. Future motion, component and native modules are described in [the roadmap](FUTURE.md), not shipped as empty exports.
+Core, CPU, WebGL, DOM and React are implemented private workspace packages; Vue and Angular remain proposed boundaries. Renderer subpath exports may replace separate public renderer packages if packaging validation supports that choice. Frameworks remain peer dependencies. Future motion, component and native modules are described in [the roadmap](FUTURE.md), not shipped as empty exports.
 
 ESM imports must not read browser globals, create workers, fetch sources or start rendering. Published packages must include explicit exports, declarations, CSS/worker assets and notices, with no consumer build/install hook.
 
@@ -66,3 +66,10 @@ Batch geometry reads, coalesce invalidation, reject stale frames and stop schedu
 Use versioned data-only tokens, numerical fixtures and explicit shape/source capabilities. Motion and gestures resolve into one revisioned frame snapshot with one writer per property; the renderer consumes that snapshot. Joining SVG shapes does not automatically change optical coverage. Freeform morphing needs a later shared geometry/mask contract.
 
 React Native requires native adapters. Flutter requires a Dart implementation. Share specifications and fixtures where practical; web DOM/SVG code is not assumed portable.
+
+
+The [Phase 7 React binding](PHASE-7.md) retains template-owned div/canvas markup.
+Its provider owns scene lifetimes while source/renderer objects remain borrowed.
+Effects attach to supplied targets, preserve React children and clean up pending
+operations through the existing engine generation/settlement contract. The ESM
+entry retains `use client`; React and React DOM19.3.1 are exact external peers.

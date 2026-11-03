@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { copyFileSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
-for (const name of ['core', 'cpu', 'dom', 'webgl']) {
+for (const name of ['core', 'cpu', 'dom', 'webgl', 'react']) {
   rmSync(new URL(`../packages/${name}/dist/`, import.meta.url), { recursive: true, force: true });
   execFileSync(process.execPath, ['node_modules/typescript/bin/tsc', '-p', `packages/${name}/tsconfig.json`], { cwd: root, stdio: 'inherit', timeout: 60000 });
   const license = new URL('../LICENSE', import.meta.url), destination = new URL(`../packages/${name}/LICENSE`, import.meta.url);
@@ -22,4 +22,4 @@ for (const name of ['kernel', 'protocol']) {
 }
 const worker = new URL('worker.js', cpuDist);
 writeFileSync(worker, readFileSync(worker, 'utf8').replaceAll("'./protocol.js'", "'./worker-protocol.js'"));
-console.log('Built core, DOM, CPU and WebGL ESM/declarations/CSS; copied project licenses.');
+console.log('Built core, DOM, CPU, WebGL and React ESM/declarations/CSS; copied project licenses.');

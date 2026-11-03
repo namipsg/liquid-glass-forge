@@ -119,3 +119,9 @@ listeners, subscriptions and jobs, releases owned sources and restores hosts.
 Native View Transition update callbacks can await readiness without a rendering
 callback dependency. Capability availability is recorded by browser fixtures;
 this is not actual Safari/iOS or production rendering qualification.
+
+
+The [React adapter](PHASE-7.md) uses the supplied-target seam so React owns its
+stable decorative canvas and semantic children. Multiple surfaces under one
+provider share an engine/source subscription. Framework cleanup disposes only
+its scene/attachments, preserving caller-owned reusable source/renderer objects.

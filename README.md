@@ -1,16 +1,18 @@
 # Liquid Glass Forge
 
-An independent Liquid Glass project for the web, with JavaScript CPU/WebGL2 rendering and a vanilla host; React/Vue/Angular integrations remain planned.
+An independent Liquid Glass project for the web, with CPU/WebGL2 rendering,
+a vanilla host and React integration. Vue and Angular remain planned.
 
-**Status: Phase 5 CPU vertical slice qualified for the named A04s workload.** Private core,
-CPU, DOM and WebGL packages provide explicit sources, a JavaScript optical kernel,
-optional workers, a bounded vanilla CPU adapter and CSS/opaque fallback.
-The CPU model has independent numerical fixtures and real worker/packed-browser
-checks. Two main and two required-worker physical repetitions pass the original
-640×360 source / 320×180 output budgets on the Galaxy A04s; see the
-[measured scope and limits](docs/PHASE-5.md). Earlier failures are retained.
-The [Phase 1 Safari cadence waiver](docs/PHASE-1.md) and original guards remain
-unchanged. [Phase 6](docs/PHASE-6.md) adds WebGL2 optics, GPU blur, shared-atlas presentation and recovery, with installed-browser, A04s and actual Safari evidence. Its original exit evidence is complete; independent review and broader qualification remain separate. Broader device, compatibility, framework and publication work remains.
+**Status: Phase 7 React adapter implemented and verified.** Five private packages
+provide explicit sources, versioned optics, workers, shared scenes and readable
+CSS/opaque material. [Phase 7](docs/PHASE-7.md) records the React component, hook
+and provider with packed Vite/Next.js SSR, hydration and lifecycle checks.
+
+[Phase 5](docs/PHASE-5.md) retains the named A04s CPU workload qualification.
+[Phase 6](docs/PHASE-6.md) records GPU blur, atlas presentation, recovery and
+software/A04s/Safari evidence, including retained timing failures. The original
+[Safari cadence waiver](docs/PHASE-1.md) remains unchanged. Broader device,
+integrated framework/GPU and release qualification remain open.
 
 ## Local development
 
@@ -24,7 +26,7 @@ pnpm test
 ```
 
 The workspace contains `@liquid-glass-forge/core`, `@liquid-glass-forge/cpu` and
-`@liquid-glass-forge/dom` plus `@liquid-glass-forge/webgl`, all private at `0.0.0-dev`. Tests pack all four twice, install actual tarballs into
+`@liquid-glass-forge/dom` plus `@liquid-glass-forge/webgl` and `@liquid-glass-forge/react`, all private at `0.0.0-dev`. Tests pack all five twice, install actual tarballs into
 an independent offline consumer, check ESM/types/SSR, and import their packed
 modules in Chromium, Firefox and WebKit. Source and coordinate fixtures also
 run in all three engines. Raw artifacts remain ignored. See [source usage and
@@ -51,6 +53,7 @@ Future work includes Sileo-inspired React/SVG animation, Apple-inspired componen
 | [Phase 1 experiment](docs/PHASE-1.md) | Reproduction, measured scope and admission decisions |
 | [Phase 2 foundation](docs/PHASE-2.md) | Implemented contracts, packaging checks and limits |
 | [Phase 3 sources](docs/PHASE-3.md) | Source acquisition, coordinate mapping and verification |
+| [Phase 7 React](docs/PHASE-7.md) | Component/hook/provider, Strict Mode and packed Vite/Next.js SSR/hydration |
 | [Phase 6 WebGL](docs/PHASE-6.md) | Shared atlas, GPU blur, parity, recovery and measured scope |
 | [Phase 5 CPU](docs/PHASE-5.md) | Kernel, worker, vanilla adapter and named-device qualification |
 | [Phase 4 host](docs/PHASE-4.md) | Implemented vanilla host, lifecycle and verification |
