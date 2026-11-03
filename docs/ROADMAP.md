@@ -1,6 +1,6 @@
 # Foundation roadmap
 
-**Status: Phase 8 Vue adapter implemented and verified within its recorded scope.** [Core contracts and packaging](PHASE-2.md) and
+**Status: Phase 9 Angular adapter implemented within its recorded scope.** [Core contracts and packaging](PHASE-2.md) and
 [explicit source providers/coordinate mapping](PHASE-3.md) and the
 [vanilla host/lifecycle](PHASE-4.md) are implemented.
 The [phase 1 feasibility findings](PHASE-1.md), including the explicit unresolved
@@ -44,22 +44,30 @@ The next product layers are documented in [future development](FUTURE.md). Motio
 ## Current boundary — 3 November 2026
 
 Phase 4 adds stable decorative hosts, CSS/opaque material, bounded lifecycle and
-shared dirty/visibility scheduling. All six packages remain private at `0.0.0-dev`.
+shared dirty/visibility scheduling. All seven packages remain private at `0.0.0-dev`.
 See [phase 4 evidence and limits](PHASE-4.md). [Phase 5](PHASE-5.md) adds the CPU kernel, worker and bounded vanilla adapter.
 The original physical workload now passes two main and two required-worker
 repetitions on the A04s under unchanged service/cadence/age/image limits. Earlier
-failed measurements remain retained. [Phase 6](PHASE-6.md) implements WebGL2 optics, blur, shared atlas presentation and bounded recovery, with installed-browser and A04s evidence. Original Step06 exit evidence, including actual Safari26.6.2, is complete and frozen for independent review. Broader passing-performance qualification belongs to Step11/M32. Broader devices, framework adapters and release/distribution qualification remain future work.
+failed measurements remain retained. [Phase 6](PHASE-6.md) implements WebGL2 optics, blur, shared atlas presentation and bounded recovery, with installed-browser and A04s evidence. Original Step06 exit evidence, including actual Safari26.6.2, is complete and frozen for independent review. Broader passing-performance qualification belongs to Step11/M32. Broader devices, combined adapter/backend resilience and release/distribution qualification remain future work.
 The Safari cadence waiver does not turn failing measurements into passing evidence.
 
 
 [Phase 7 React](PHASE-7.md) now implements the original M19–M21 component, hook,
 shared-scene ownership, Strict Mode cleanup and packed production Vite/Next.js
 SSR/hydration boundary. React/React DOM19.3.1 is the tested peer combination.
-Angular remains future work. Actual WebGL-through-React coverage joins Step10;
+Actual WebGL-through-React coverage joins Step10;
 no new physical or broad performance support is inferred from these adapter tests.
 
 
 [Phase8 Vue](PHASE-8.md) implements original M22–M24 components/composables,
 reactive ownership, KeepAlive cancellation and packed production Vue/Nuxt SSR.
 Vue3.5.44 is the exact tested peer. Actual WebGL-through-Vue joins Step10.
-Angular, integrated resilience and broader qualification remain future phases.
+Integrated resilience and broader qualification remain future phases.
+
+
+[Phase9 Angular](PHASE-9.md) implements original M25–M27 standalone component/host
+directive/shared scene ownership, partial APF, zoneless lifecycle and packed
+production Angular CSR/eager SSR hydration. Exact Angular core/common22.2.4 and
+RxJS7.8.2 peers are declared. Deferred/incremental hydration is unqualified.
+Actual WebGL-through-Angular belongs to Step10; no broader physical/performance
+or distribution qualification is inferred. Step10 remains the next phase.

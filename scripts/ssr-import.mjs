@@ -7,12 +7,15 @@ const gpuEntry = pathToFileURL(fileURLToPath(new URL('../packages/webgl/dist/ind
 const adapterEntry = pathToFileURL(fileURLToPath(new URL('../packages/webgl/dist/dom.js', import.meta.url))).href;
 const reactEntry=pathToFileURL(fileURLToPath(new URL('../packages/react/dist/index.js',import.meta.url))).href;
 const vueEntry=pathToFileURL(fileURLToPath(new URL('../packages/vue/dist/index.js',import.meta.url))).href;
+const includeAngular=!process.argv.includes('--base');
+const angularEntry=pathToFileURL(fileURLToPath(new URL('../packages/angular/dist/fesm2022/liquid-glass-forge-angular.mjs',import.meta.url))).href;
 const code = `
 // React's development peer captures queueMicrotask at import; preload that external peer.
-await import('react');await import('vue');
+await import('react');await import('vue');${includeAngular?"await import('@angular/compiler');await import('@angular/core');await import('@angular/common');await import('@angular/core/rxjs-interop');":''}
 for (const name of ['window','document','navigator','Worker','OffscreenCanvas','requestAnimationFrame','queueMicrotask','ResizeObserver','IntersectionObserver','matchMedia','fetch','XMLHttpRequest','WebSocket','setTimeout','setInterval']) {
   Object.defineProperty(globalThis, name, { configurable: true, get() { throw new Error('Import touched ' + name); } });
 }
+${includeAngular?`const angular=await import(${JSON.stringify(angularEntry)});if(typeof angular.GlassSurfaceComponent!=='function')throw new Error('Missing Angular adapter');`:''}
 const vueAdapter=await import(${JSON.stringify(vueEntry)});if(typeof vueAdapter.useGlassSurface!=='function')throw new Error('Missing Vue adapter');
 const reactAdapter=await import(${JSON.stringify(reactEntry)});
 if(typeof reactAdapter.useGlassSurface!=='function')throw new Error('Missing React adapter');

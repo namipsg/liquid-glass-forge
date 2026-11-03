@@ -17,7 +17,7 @@
     "test:package-audit": "node --test tests/package-audit.test.mjs",
     "test:pack": "node scripts/pack-smoke.mjs",
     "test:browser-import": "node --test tests/browser-import.test.mjs",
-    "test": "pnpm check && pnpm test:unit && pnpm test:cpu && pnpm test:cpu-executor && pnpm test:cpu-worker-browser && pnpm test:cpu-host-browser && pnpm test:package-audit && pnpm test:pack && pnpm test:browser-import && pnpm test:sources-browser && pnpm test:host-browser && pnpm test:webgl && pnpm test:webgl-browser && pnpm test:react && pnpm test:vue",
+    "test": "pnpm check && pnpm test:unit && pnpm test:cpu && pnpm test:cpu-executor && pnpm test:cpu-worker-browser && pnpm test:cpu-host-browser && pnpm test:package-audit && pnpm test:pack && pnpm test:browser-import && pnpm test:sources-browser && pnpm test:host-browser && pnpm test:webgl && pnpm test:webgl-browser && pnpm test:react && pnpm test:vue && pnpm test:angular",
     "test:sources-browser": "node --test tests/sources-browser.test.mjs tests/dynamic-browser.test.mjs tests/mapping-browser.test.mjs",
     "test:host-browser": "node --test tests/host-browser.test.mjs tests/scene-browser.test.mjs",
     "test:cpu-host-browser": "node --test tests/cpu-host-browser.test.mjs",
@@ -27,8 +27,10 @@
     "bench:webgl": "node scripts/bench-webgl.mjs",
     "test:adapter": "node scripts/test-adapter.mjs",
     "test:react": "node scripts/test-react.mjs",
-    "test:base": "pnpm check && pnpm test:unit && pnpm test:cpu && pnpm test:cpu-executor && pnpm test:cpu-worker-browser && pnpm test:cpu-host-browser && pnpm test:package-audit && pnpm test:pack && pnpm test:browser-import && pnpm test:sources-browser && pnpm test:host-browser && pnpm test:webgl && pnpm test:webgl-browser && pnpm test:react",
-    "test:vue": "node scripts/test-vue.mjs"
+    "test:base": "pnpm check:base && pnpm test:unit && pnpm test:cpu && pnpm test:cpu-executor && pnpm test:cpu-worker-browser && pnpm test:cpu-host-browser && pnpm test:package-audit && node scripts/pack-smoke.mjs --base && pnpm test:browser-import && pnpm test:sources-browser && pnpm test:host-browser && pnpm test:webgl && pnpm test:webgl-browser && pnpm test:react",
+    "test:vue": "node scripts/test-vue.mjs",
+    "test:angular": "node scripts/test-angular.mjs",
+    "check:base": "node scripts/build.mjs --base && node scripts/ssr-import.mjs --base"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
@@ -42,6 +44,14 @@
     "vue": "3.5.44",
     "@vue/server-renderer": "3.5.44",
     "@vitejs/plugin-vue": "6.0.10",
-    "nuxt": "4.6.4"
+    "nuxt": "4.6.4",
+    "@angular/core": "22.2.4",
+    "@angular/common": "22.2.4",
+    "@angular/compiler": "22.2.4",
+    "@angular/platform-browser": "22.2.4",
+    "@angular/platform-server": "22.2.4",
+    "@angular/router": "22.2.4",
+    "rxjs": "7.8.2",
+    "tslib": "2.9.1"
   }
 }

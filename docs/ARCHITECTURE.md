@@ -1,6 +1,6 @@
 # Proposed architecture
 
-**Status: core, sources, host, CPU and WebGL implemented; named-device evidence and limits are recorded per renderer; React and Vue are implemented; Angular remains pending.** The private experimental core follows [version 1 contracts](CONTRACTS.md). Names and interfaces may change before an initial release.
+**Status: core, sources, host, CPU and WebGL implemented; named-device evidence and limits are recorded per renderer; React, Vue and Angular adapters are implemented within their recorded scopes.** The private experimental core follows [version 1 contracts](CONTRACTS.md). Names and interfaces may change before an initial release.
 
 ## Package boundaries
 
@@ -14,7 +14,7 @@
 | @liquid-glass-forge/vue | Vue component/composable |
 | @liquid-glass-forge/angular | Angular component/directive using Angular's distribution format |
 
-Core, CPU, WebGL, DOM, React and Vue are implemented private workspace packages; Angular remains a proposed boundary. Renderer subpath exports may replace separate public renderer packages if packaging validation supports that choice. Frameworks remain peer dependencies. Future motion, component and native modules are described in [the roadmap](FUTURE.md), not shipped as empty exports.
+Core, CPU, WebGL, DOM, React, Vue and Angular are implemented private workspace packages. Renderer subpath exports may replace separate public renderer packages if packaging validation supports that choice. Frameworks remain peer dependencies. Future motion, component and native modules are described in [the roadmap](FUTURE.md), not shipped as empty exports.
 
 ESM imports must not read browser globals, create workers, fetch sources or start rendering. Published packages must include explicit exports, declarations, CSS/worker assets and notices, with no consumer build/install hook.
 
@@ -57,7 +57,7 @@ Context loss stops GPU work. Recovery rebuilds resources rather than reusing inv
 
 Keep text, controls, selection and focus in normal DOM. Wrapper templates own stable decorative targets; rendering must not move or replace framework children. Server and first-client markup agree, with a readable CSS/solid material before optical activation.
 
-React must tolerate Strict Mode effect replay. Vue must handle unmount and KeepAlive. Angular requires its package format, hydration-safe markup and browser lifecycle setup; a render callback alone does not establish that hydration finished. Exact supported framework versions will be published after fixture validation. [Angular hydration](https://angular.dev/guide/hydration), [Render callback caveat](https://angular.dev/api/core/afterNextRender)
+React must tolerate Strict Mode effect replay. Vue must handle unmount and KeepAlive. Angular requires its package format, hydration-safe markup and browser lifecycle setup; a render callback alone does not establish that hydration finished. Exact tested framework/tool versions are recorded per adapter. [Angular hydration](https://angular.dev/guide/hydration), [Render callback caveat](https://angular.dev/api/core/afterNextRender)
 
 Batch geometry reads, coalesce invalidation, reject stale frames and stop scheduling when idle/hidden. Restore library-owned styles and release observers, listeners, workers, bitmaps and GPU resources on disposal.
 
@@ -80,3 +80,12 @@ Client lifecycle hooks attach only after mount. Providers own shared scene
 lifetimes and borrow opaque source/renderer descriptors. KeepAlive pauses cached
 providers; caching one child detaches that surface independently. Vue3.5.44 is an
 exact external peer. Nuxt SSR performs no engine/browser work during rendering.
+
+
+The [Phase9 Angular adapter](PHASE-9.md) ships partial APF through ng-packagr.
+Angular owns component/projection/directive-target DOM. Browser activation waits
+for local view readiness, a render callback and application stability; DestroyRef
+cancels the gate and owns cleanup. That boundary covers the tested eager
+hydration applications, not arbitrary deferred/incremental hydration. Source
+callbacks and bitmap work run outside Angular without per-frame signal writes.
+Angular core/common22.2.4 and RxJS7.8.2 remain exact external peers.

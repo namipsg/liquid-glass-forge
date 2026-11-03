@@ -1,0 +1,16 @@
+{
+  "$schema": "../../tools/angular/node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "dist",
+  "lib": {
+    "entryFile": "src/public-api.ts"
+  },
+  "allowedNonPeerDependencies": [
+    "@liquid-glass-forge/dom",
+    "tslib"
+  ],
+  "assets": [
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ]
+}

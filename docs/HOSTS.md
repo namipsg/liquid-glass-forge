@@ -131,3 +131,11 @@ The [Vue adapter](PHASE-8.md) uses supplied targets so Vue retains all semantic
 and decorative nodes. Shared providers pause with KeepAlive. Composables detach
 cached children independently and observe material/ref changes without replacing
 unrelated surfaces. Sources/renderers remain reusable caller-owned objects.
+
+
+The [Angular adapter](PHASE-9.md) exposes a standalone `lgf-surface` component,
+`lgfSurface` directive for a required template canvas and shared `lgfScene`.
+View readiness and application stability gate browser attachment; SSR retains
+projected native content and decorative material without engine activation.
+DestroyRef cancels pending gates and engine work. Bitmap completion does not
+write Angular signals. Sources/renderers remain caller-owned reusable objects.

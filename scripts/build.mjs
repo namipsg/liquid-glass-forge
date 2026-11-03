@@ -22,4 +22,6 @@ for (const name of ['kernel', 'protocol']) {
 }
 const worker = new URL('worker.js', cpuDist);
 writeFileSync(worker, readFileSync(worker, 'utf8').replaceAll("'./protocol.js'", "'./worker-protocol.js'"));
-console.log('Built core, DOM, CPU, WebGL, React and Vue ESM/declarations/CSS; copied project licenses.');
+const includeAngular = !process.argv.includes('--base');
+if(includeAngular)execFileSync(process.execPath,['tools/angular/node_modules/ng-packagr/src/cli/main.js','-p','packages/angular/ng-package.json','-c','packages/angular/tsconfig.lib.json'],{cwd:root,stdio:'inherit',timeout:120000});
+console.log(`Built core, DOM, CPU, WebGL, React and Vue ESM/declarations/CSS${includeAngular ? ' plus Angular APF' : ''}; copied project licenses.`);
