@@ -9,6 +9,12 @@ showcase artwork. The original local film, optional Simulator captures and priva
 receipts stay in ignored local directories. The npm links point to the exact
 published preview version.
 
+The public studio, examples, and support pages use a dedicated Google Analytics 4
+web stream. Visitors can opt in or out from Analytics settings in each footer.
+Reports show visits, referral and campaign sources, and `select_content` events
+for example changes and successful setup copies. Local builds and other hosts
+do not send traffic to this stream.
+
 A static, interactive Liquid Glass Forge showcase with real optical rendering,
 procedural canvas art, native backdrop typography, a draggable clear lens, three palettes, refraction and
 corner controls, explicit CPU/opaque choices, and framework examples.

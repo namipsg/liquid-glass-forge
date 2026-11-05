@@ -7,6 +7,8 @@ import{createSafariDemo}from'./safari-demo.mjs';
 import { createVideoDemo } from './video-demo.mjs';
 import { cover } from './example-art.mjs';
 import { landscapePhotos, loadLandscapePhotos } from './example-photos.mjs';
+import { mountAnalytics, trackAnalytics } from './analytics.mjs';
+mountAnalytics();
 const $=s=>document.querySelector(s),stage=$('#example-stage'),release=await fetch(new URL('./release.json',document.baseURI)).then(r=>r.json()).catch(()=>null),localCandidate=release?.localCandidate===true,localMedia=localCandidate&&!release?.publicShowcase;
 const paths={
  'player-play':'M7 4.5a.8.8 0 0 1 1.2-.7l12.2 7.5a.8.8 0 0 1 0 1.4L8.2 20.2A.8.8 0 0 1 7 19.5z',
@@ -213,7 +215,12 @@ async function select(kind){
  if(!constructors[kind])kind='safari';const current=++epoch;scope?.dispose();scope=lifecycle();active=undefined;currentKind=kind;errors=[];$('#demo-status').textContent='Preparing glass…';stage.dataset.example=kind;const m=metadata[kind];$('#example-title').textContent=m.title;$('#example-eyebrow').textContent=m.eyebrow;$('#example-description').textContent=m.description;$('#example-caption').textContent=m.caption;$('#example-instructions').replaceChildren(...m.instructions.map(text=>{const li=document.createElement('li');li.textContent=text;return li;}));document.querySelectorAll('[data-example]').forEach(b=>{if(b.tagName==='BUTTON'){if(b.dataset.example===kind)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');}});$('#device-controls').hidden=kind!=='safari';$('#native-review').hidden=true;const url=new URL(location.href);url.searchParams.set('example',kind);if(kind==='safari')url.searchParams.set('device',device);else url.searchParams.delete('device');history.replaceState(null,'',url);
  try{const instance=await constructors[kind](scope);if(current!==epoch){instance.root?.remove();return;}active=instance;await referenceControls();}catch(error){if(current!==epoch)return;errors.push(String(error));$('#demo-status').textContent='This example could not load. Try another example.';console.error(error);}
 }
-$('#example-chooser').addEventListener('click',e=>{const b=e.target.closest('[data-example]');if(b&&b.dataset.example!==currentKind)void select(b.dataset.example);});
+$('#example-chooser').addEventListener('click', event => {
+  const choice = event.target.closest('button[data-example]')?.dataset.example;
+  if (!choice || choice === currentKind) return;
+  void select(choice);
+  trackAnalytics('select_content', { content_type: 'live_example', content_id: choice });
+});
 $('#phone-view').addEventListener('click',()=>setDevice('iphone'));$('#tablet-view').addEventListener('click',()=>setDevice('ipad'));
 function setDevice(next){device=next;$('#phone-view').setAttribute('aria-pressed',String(next==='iphone'));$('#tablet-view').setAttribute('aria-pressed',String(next==='ipad'));void select('safari');}
 $('#device-scale').addEventListener('click',()=>{fullSize=!fullSize;$('#device-scale').setAttribute('aria-pressed',String(fullSize));$('#device-scale').textContent=fullSize?'Fit to view':'100% size';active?.fit?.();});

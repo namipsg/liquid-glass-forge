@@ -1,4 +1,6 @@
 import'./style.css';import'./sections.css';import{mountSiteComponents}from'./site-components.mjs';
+import { mountAnalytics } from './analytics.mjs';
+mountAnalytics();
 const $=s=>document.querySelector(s),text=(tag,value,cls)=>{const e=document.createElement(tag);e.textContent=value;if(cls)e.className=cls;return e;};
 try{const data=await fetch(new URL('./support/overview.json',document.baseURI)).then(r=>{if(!r.ok)throw Error('Support data unavailable');return r.json();});
  $('#support-release').append(text('strong',data.releaseStatus+' · '+data.version),text('p',data.localCandidate?(data.publicShowcase?'This showcase includes renderer work ahead of the npm preview.':'You are viewing a local material candidate. The published experimental packages retain their original bytes.'):'Experimental packages are available; device qualification remains open.'));

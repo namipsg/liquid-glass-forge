@@ -1,0 +1,58 @@
+#forge-analytics {
+  position: fixed;
+  z-index: 20;
+  inset-inline-end: max(16px, env(safe-area-inset-right));
+  inset-block-end: max(16px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  width: min(410px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--line, #a4a4ad);
+  border-radius: 16px;
+  background: var(--surface, Canvas);
+  color: var(--ink, CanvasText);
+  box-shadow: 0 8px 30px #0003;
+}
+
+#forge-analytics h2 {
+  margin: 0;
+  font: 650 16px/1.4 system-ui, sans-serif;
+}
+
+#forge-analytics p {
+  margin: 8px 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#forge-analytics a, .forge-analytics-settings {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.forge-analytics-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#forge-analytics button, .forge-analytics-settings {
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.forge-analytics-settings { border-color: transparent; padding-inline: 4px; }
+
+#forge-analytics :focus-visible, .forge-analytics-settings:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

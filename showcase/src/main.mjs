@@ -10,6 +10,8 @@ import { filmTime, getShowcaseFilm } from './showcase-film.mjs';
 import{mountSiteComponents}from'./site-components.mjs';
 import{mountEnuiAnnouncement}from'./enui-announcement.mjs';
 import { clearGlass } from './glass-material.mjs';
+import { mountAnalytics, trackAnalytics } from './analytics.mjs';
+mountAnalytics();
 const siteComponents=mountSiteComponents(document);
 const release=await fetch(new URL('./release.json',document.baseURI)).then(r=>r.ok?r.json():null).catch(()=>null),localCandidate=release?.localCandidate===true;
 const enuiAnnouncement=mountEnuiAnnouncement({localCandidate});
@@ -229,19 +231,21 @@ for (const link of document.querySelectorAll('[data-select-code]')) {
   link.addEventListener('click', () => selectCode(link.dataset.selectCode));
 }
 
-async function copySetup(text, success, fallback) {
+async function copySetup(text, success, fallback, contentType) {
+  const framework = example;
   try {
     await navigator.clipboard.writeText(text);
     $('#copy-status').textContent = success;
+    trackAnalytics('select_content', { content_type: contentType, content_id: framework });
   } catch {
     $('#copy-status').textContent = 'Select and copy the text with your keyboard.';
     $(fallback).focus();
   }
 }
 
-$('#copy-code').addEventListener('click', () => copySetup(integrations[example].source.trimEnd(), 'Starter copied.', '#code-example'));
-$('#copy-install').addEventListener('click', () => copySetup(installCommand, 'Install command copied.', '#install-command'));
-$('#copy-webgl').addEventListener('click', () => copySetup(webglCommand, 'WebGL install command copied.', '#webgl-command'));
+$('#copy-code').addEventListener('click', () => copySetup(integrations[example].source.trimEnd(), 'Starter copied.', '#code-example', 'starter_copy'));
+$('#copy-install').addEventListener('click', () => copySetup(installCommand, 'Install command copied.', '#install-command', 'install_copy'));
+$('#copy-webgl').addEventListener('click', () => copySetup(webglCommand, 'WebGL install command copied.', '#webgl-command', 'webgl_install_copy'));
 const initialFramework = new URL(location.href).searchParams.get('framework');
 selectCode(integrationNames.includes(initialFramework) ? initialFramework : 'vanilla');
 
