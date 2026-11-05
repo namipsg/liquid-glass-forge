@@ -1,0 +1,15 @@
+{
+  "title": "Sprite Fright",
+  "attribution": "(CC) Blender Foundation | studio.blender.org",
+  "source": "https://studio.blender.org/films/sprite-fright/",
+  "credits": "https://studio.blender.org/projects/sprite-fright/pages/about/",
+  "license": "https://creativecommons.org/licenses/by/1.0/",
+  "changes": "Re-encoded the full film for web playback and extracted a still at 00:16.",
+  "sourceSha256": "2bd1b2116f70a2ed61e6d2331370f7fb6774594ea8f847e56739542c4baca9c3",
+  "durationSeconds": 629.84,
+  "posterSeconds": 16,
+  "files": {
+    "sprite-fright.mp4": "1ca4faed32406aca7d80c9856ae154b91d9e17f5fe2cbee9b6bb311e10286e3d",
+    "sprite-fright-poster.jpg": "8adc52bfd55221206c8ab676698c6e92020947dea3b69daecf07a1171e449fda"
+  }
+}

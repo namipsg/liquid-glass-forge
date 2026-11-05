@@ -43,7 +43,7 @@ export async function createVideoDemo({ stage, scope, localMedia, optical, icon,
       </div>
       <img class="video-device-frame" src="./devices/${frame.file}" style="width:${caseHeight / caseWidth * 100}%;height:${caseWidth / caseHeight * 100}%" alt="" draggable="false">
     </div>
-    <figcaption class="video-credit">${film.supplied ? '<a href="https://studio.blender.org/films/sprite-fright/">Sprite Fright</a> · © Blender Foundation / Blender Studio · <a href="https://studio.blender.org/projects/sprite-fright/pages/about/">License and credits</a>' : 'Light Study · Original Forge motion study'}</figcaption>
+    <figcaption class="video-credit"><a href="https://studio.blender.org/films/sprite-fright/">Sprite Fright</a> · © Blender Foundation / Blender Studio · <a href="https://studio.blender.org/projects/sprite-fright/pages/about/">CC BY 1.0 and credits</a>${film.reencoded ? ' · Re-encoded for web playback' : ''}</figcaption>
     <p id="video-message" class="video-message" role="status"></p>
   </figure>`;
 

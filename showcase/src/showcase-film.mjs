@@ -1,9 +1,10 @@
-const originalFilm = {
-  title: 'Light Study',
-  file: './media/light-study.mp4',
-  poster: './media/light-study-poster.jpg',
-  duration: 16,
-  start: 0,
+const spriteFright = {
+  title: 'Sprite Fright',
+  file: './media/sprite-fright.mp4',
+  poster: './media/sprite-fright-poster.jpg',
+  duration: 629.84,
+  start: 16,
+  reencoded: true,
 };
 
 export async function getShowcaseFilm(localCandidate, signal) {
@@ -12,16 +13,14 @@ export async function getShowcaseFilm(localCandidate, signal) {
     const receipt = response?.ok ? await response.json().catch(() => null) : null;
     if (receipt?.localOnly === true && receipt.file === 'sprite-fright.mp4') {
       return {
-        title: 'Sprite Fright',
+        ...spriteFright,
         file: './media/local-film/sprite-fright.mp4',
         poster: './media/local-film/poster.jpg',
-        duration: 629.84,
-        start: 16,
-        supplied: true,
+        reencoded: false,
       };
     }
   }
-  return originalFilm;
+  return spriteFright;
 }
 
 export function filmTime(seconds) {

@@ -4,8 +4,8 @@
 
 The [Pages workflow](../.github/workflows/pages.yml) runs
 `pnpm showcase:build --pages` after building the workspace packages. Pages
-uses repository renderer code, the original procedural film and generated
-showcase artwork. The local film, optional Simulator captures and private
+uses repository renderer code, a web encode of *Sprite Fright* and generated
+showcase artwork. The original local film, optional Simulator captures and private
 receipts stay in ignored local directories. The npm links point to the exact
 published preview version.
 
@@ -114,7 +114,7 @@ a landscape gallery, an audio player and a street map explorer for fictional Por
 Only the selected example mounts a Forge scene. Switching scenes, hiding the
 page and teardown pause media and release owned renderers/sources. Generated
 photographs are recorded in `public/media/photography.json`. The original audio
-and fallback motion study are reproducible with `node scripts/generate-showcase-media.mjs`.
+and procedural motion study are reproducible with `node scripts/generate-showcase-media.mjs`.
 `public/media/provenance.json` records their hashes.
 The local static server supports video/audio MIME types and single-byte ranges.
 
@@ -128,12 +128,14 @@ Video and Safari use the same measured phone frame, rotated for the player.
 The Photos, Music and Maps demos use scene-specific Forge settings with subdued
 edges. Port Meridian is an original vector street map with fictional routes.
 
-To restore the supplied film after a local build, run
+To compare against the supplied source file after a local build, run
 `node scripts/install-local-showcase-film.mjs /path/to/720p.mp4`. It checks the
 original hash, installs the full clip and a frame at 00:16 into ignored local
 output, and leaves the input file in place. The landscape player displays the
-film’s source and credit. Builds without the local film use the original motion
-study.
+film’s source and credit. All builds default to the same 720p web encode,
+paused at 00:16. [Blender Studio's project page](https://studio.blender.org/projects/sprite-fright/pages/about/)
+documents the film’s CC BY 1.0 license. The [media manifest](public/media/sprite-fright.json)
+records the source and web asset checksums.
 
 `docs/SHOWCASE-EXAMPLES.md` retains acceptance criteria, including simulator pixel
 parity as an open measured target. Native reference screenshots may be installed

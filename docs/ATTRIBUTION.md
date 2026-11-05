@@ -4,6 +4,8 @@ Liquid Glass Forge is an independent project inspired by Apple's Liquid Glass de
 
 The project's independently authored materials are covered by the [MIT License](../LICENSE), whose copyright holder is Nami Poursafargholi. Design inspiration does not assign Apple copyright over this implementation or grant permission to copy Apple-owned materials.
 
+The showcase player and its poster use *Sprite Fright* by Blender Studio, © Blender Foundation. Forge re-encoded the film for web playback and extracted the poster from it. [Project license and credits](https://studio.blender.org/projects/sprite-fright/pages/about/) · [Media manifest](../showcase/public/media/sprite-fright.json).
+
 ## Design and implementation references
 
 - [Apple's Liquid Glass introduction](https://www.apple.com/newsroom/2025/06/apple-introduces-a-delightful-and-elegant-new-software-design/) and [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines) inform the material/component direction.
