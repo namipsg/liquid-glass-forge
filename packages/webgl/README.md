@@ -1,6 +1,8 @@
 # Liquid Glass Forge WebGL
 
-Private experimental package, `0.0.0-dev`. Shared persistent WebGL2 atlas,
+Experimental preview. API and device/performance qualification remain open; iPad is unqualified.
+
+Experimental preview package, `0.1.0-rc.1`. Shared persistent WebGL2 atlas,
 versioned optics, GPU blur and synchronous Canvas2D tile presentation.
 
 Use `WebGLAtlas` from `@liquid-glass-forge/webgl` for owned Canvas2D targets.

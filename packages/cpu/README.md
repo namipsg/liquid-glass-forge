@@ -1,6 +1,8 @@
 # @liquid-glass-forge/cpu
 
-Private experimental JavaScript CPU optics, version `0.0.0-dev`.
+Experimental preview. API and device/performance qualification remain open; iPad is unqualified.
+
+Experimental preview JavaScript CPU optics, version `0.1.0-rc.1`.
 Uses explicit core RGBA8 sources. Imports do not acquire browser resources.
 `prepareCpuSource` snapshots pixels into private linear premultiplied storage;
 `renderCpu` implements `rounded-refraction-v1`, optionally extending it with

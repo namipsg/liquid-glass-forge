@@ -1,0 +1,15 @@
+{
+  "kind": "original-procedural-showcase-media",
+  "generator": "scripts/generate-showcase-media.mjs",
+  "durationSeconds": 16,
+  "videoFPS": 30,
+  "audio": "original C3/E3/G3 sine chord, click to play",
+  "files": {
+    "light-study.mp4": "89c06e481d0c5ac68510423d28e404b836b324aaacff39ef52ea9fcaa19631cb",
+    "light-study-poster.jpg": "4397b7f03d64fc785fac9b9340e24cf41811cece104eb7ee0aa9484a5fd2160e",
+    "slow-light.wav": "1b681f429dd30feae09595cb1587989b8f72f2a9eeeee4f359cc36b936cbbb48",
+    "tidal.svg": "1b8c93bd61d8fb8591e905fa50e786db88ea2ab2027439d0867cb68eed146ebe",
+    "dunes.svg": "3e32cd04cec019bf0702a2eea20cfead22076368330a96a9015ebee233b6309c",
+    "violet.svg": "86b89945915859b2c7488137fbe70a05604682a782dfc1f4edc781bb7253d74c"
+  }
+}

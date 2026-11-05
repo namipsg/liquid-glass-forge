@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "original AI-generated illustrative PNG frames, not official Apple product artwork",
+  "iphone": {
+    "centerAlpha": 0,
+    "file": "phone-silver-v2.png",
+    "height": 1846,
+    "opening": {
+      "height": 1723,
+      "width": 752,
+      "x": 50,
+      "y": 61
+    },
+    "width": 852,
+    "sha256": "4ba55f01bd551a40c03f24ff30cb81aa24ca3be21b3c85d67fc17c5872571faa"
+  },
+  "ipad": {
+    "centerAlpha": 0,
+    "file": "tablet-silver-v2.png",
+    "height": 1491,
+    "opening": {
+      "height": 1334,
+      "width": 957,
+      "x": 49,
+      "y": 80
+    },
+    "width": 1055,
+    "sha256": "134a72a570fdb1a0e589c5f3825a2b005834f06736e0edb56afa334c7a0abf9b"
+  }
+}

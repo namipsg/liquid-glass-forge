@@ -13,9 +13,11 @@ export interface CpuRendererOptions {
   /** Omitted means sample the complete source. */
   readonly sourceRect?: SourceRect | ((request: RenderRequest) => SourceRect);
   readonly quality?: { readonly maxPixels?: number; readonly maxWidth?: number; readonly maxHeight?: number;
-    readonly maxUpdatesPerSecond?: number; readonly maxSourcePixels?: number };
+    readonly maxUpdatesPerSecond?: number; readonly maxSourcePixels?: number;
+    /** Explicit active-interaction policy; balanced/default retains its 30 Hz limit. */
+    readonly cadence?: 'balanced' | 'interactive' };
 }
-type Limits = Required<NonNullable<CpuRendererOptions['quality']>>;
+type Limits = Required<Omit<NonNullable<CpuRendererOptions['quality']>, 'cadence'>>;
 type Size = Readonly<{ width: number; height: number }>;
 function object(input: unknown, keys: readonly string[], name: string): void {
   if (!input || typeof input !== 'object' || Array.isArray(input) || Reflect.ownKeys(input).some(k => typeof k !== 'string' || !keys.includes(k))) {
@@ -58,6 +60,7 @@ export class CpuRenderer implements GlassRenderer {
   readonly #effects: CpuEffects | undefined;
   readonly #sourceRect: CpuRendererOptions['sourceRect'];
   readonly #quality: Limits;
+  readonly #cadence: 'balanced' | 'interactive';
   #executor: CpuExecutor | undefined;
   #pacer: CpuDeadlineScheduler | undefined;
   #cleanup: (() => void) | undefined;
@@ -80,7 +83,9 @@ export class CpuRenderer implements GlassRenderer {
     this.#surface = typeof surface === 'function' ? surface : surfaceOptions(surface); this.#effects = snapshotCpuEffects(options.effects);
     this.#sourceRect = typeof options.sourceRect === 'function' || options.sourceRect === undefined ? options.sourceRect : sourceRect(options.sourceRect);
     const quality = options.quality === undefined ? {} : options.quality;
-    object(quality, ['maxPixels', 'maxWidth', 'maxHeight', 'maxUpdatesPerSecond', 'maxSourcePixels'], 'quality');
+    object(quality, ['maxPixels', 'maxWidth', 'maxHeight', 'maxUpdatesPerSecond', 'maxSourcePixels', 'cadence'], 'quality');
+    if (quality.cadence !== undefined && !['balanced','interactive'].includes(quality.cadence)) throw new CpuError('INVALID_OPTIONS', 'Invalid CPU cadence policy');
+    this.#cadence = quality.cadence ?? 'balanced';
     const q = { maxPixels: quality.maxPixels === undefined ? 57600 : quality.maxPixels,
       maxWidth: quality.maxWidth === undefined ? 320 : quality.maxWidth, maxHeight: quality.maxHeight === undefined ? 180 : quality.maxHeight,
       maxUpdatesPerSecond: quality.maxUpdatesPerSecond === undefined ? 30 : quality.maxUpdatesPerSecond,
@@ -89,7 +94,7 @@ export class CpuRenderer implements GlassRenderer {
       finite(q[key], 1, MAX_PIXELS, key);
       if (!Number.isSafeInteger(q[key])) throw new CpuError('INVALID_OPTIONS', `${key} must be an integer`);
     }
-    finite(q.maxUpdatesPerSecond, 1, 30, 'maxUpdatesPerSecond'); this.#quality = Object.freeze(q);
+    finite(q.maxUpdatesPerSecond, 1, this.#cadence === 'interactive' ? 60 : 30, 'maxUpdatesPerSecond'); this.#quality = Object.freeze(q);
   }
   private executorDiagnostics() { return this.#executor!.diagnostics; }
   get diagnostics() {
@@ -99,7 +104,7 @@ export class CpuRenderer implements GlassRenderer {
       requestedWidth: this.#requested?.width, requestedHeight: this.#requested?.height,
       effectiveWidth: this.#effective?.width, effectiveHeight: this.#effective?.height,
       qualityReduced: this.#reasons.length > 0, reasons: this.#reasons, quality: this.#quality,
-      timings: this.#timings, surface: this.#lastSurface, executor });
+      ...(this.#cadence === 'interactive' ? { cadencePolicy: this.#cadence } : {}), timings: this.#timings, surface: this.#lastSurface, executor });
   }
   initialize(signal: AbortSignal): () => void {
     if (this.#disposed) throw new CpuError('DISPOSED', 'CPU renderer disposed');
@@ -150,7 +155,13 @@ export class CpuRenderer implements GlassRenderer {
       const effectiveSurface = frame.surfaces[0]!;
       this.#lastSurface = Object.freeze({ radius: effectiveSurface.radius, bevel: effectiveSurface.bevel, strength: effectiveSurface.strength });
       this.#requested = Object.freeze({ width: request.width, height: request.height }); this.#effective = size;
-      const notBefore = this.#lastStart === undefined ? 0 : this.#lastStart + 1000 / this.#quality.maxUpdatesPerSecond;
+      const period = 1000 / this.#quality.maxUpdatesPerSecond;
+      // Reserve measured computation time before the next presentation. Fast
+      // kernels should wait before execution instead of spending a whole frame
+      // in presentation smoothing. Source capture and cancellation stay owned.
+      const computeMargin = Math.min(period, Math.max(4, (this.#timings?.roundTripMs ?? 0) * 1.25 + 1));
+      const notBefore = this.#lastStart === undefined ? 0 : Math.max(this.#lastStart + period,
+        (this.#lastReady ?? 0) + period - computeMargin);
       const paceOutput = this.#lastStart !== undefined && performance.now() - this.#lastStart < 2000 / this.#quality.maxUpdatesPerSecond;
       current(); this.#reasons = Object.freeze([...reasons]);
       // The executor captures owned bytes synchronously before its deferred start.
@@ -162,11 +173,10 @@ export class CpuRenderer implements GlassRenderer {
       const batch = await pending;
       try {
         current();
-        // Keep completion cadence and a minimum execution-relative phase: a
-        // delayed start must not collapse the next frame's smoothing margin.
+        // Keep completion cadence without an unconditional execution-relative
+        // delay. The next execution already reserves its measured compute time.
         const presentationWaitMs = paceOutput && this.#lastReady !== undefined
-          ? await pacer.waitUntil(Math.max(this.#lastReady + 1000 / this.#quality.maxUpdatesPerSecond,
-            (batch.timings.startedAt ?? performance.now()) + 28), controller.signal) : 0;
+          ? await pacer.waitUntil(this.#lastReady + period, controller.signal) : 0;
         current(); const output = batch.surfaces[0]!, rateWaitMs = batch.timings.scheduledWaitMs ?? 0;
         if (rateWaitMs > 0 || presentationWaitMs > 0) reasons.push('maxUpdatesPerSecond'); this.#reasons = Object.freeze(reasons);
         this.#timings = Object.freeze({ ...batch.timings, captureMs: 0, rateWaitMs, presentationWaitMs });

@@ -1,8 +1,8 @@
 {
   "name": "@liquid-glass-forge/dom",
-  "version": "0.0.0-dev",
+  "version": "0.1.0-rc.1",
   "description": "Experimental explicit sources, coordinates and vanilla host lifecycle for Liquid Glass Forge",
-  "private": true,
+  "private": false,
   "type": "module",
   "sideEffects": [
     "./dist/styles.css"
@@ -26,12 +26,15 @@
     "README.md"
   ],
   "dependencies": {
-    "@liquid-glass-forge/core": "0.0.0-dev",
-    "@liquid-glass-forge/cpu": "0.0.0-dev"
+    "@liquid-glass-forge/core": "0.1.0-rc.1",
+    "@liquid-glass-forge/cpu": "0.1.0-rc.1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namipsg/liquid-glass-forge.git",
     "directory": "packages/dom"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

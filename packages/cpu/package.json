@@ -1,8 +1,8 @@
 {
   "name": "@liquid-glass-forge/cpu",
-  "version": "0.0.0-dev",
+  "version": "0.1.0-rc.1",
   "description": "Experimental JavaScript CPU optics for explicit Liquid Glass Forge pixel sources",
-  "private": true,
+  "private": false,
   "type": "module",
   "sideEffects": [
     "./dist/worker.js"
@@ -26,7 +26,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@liquid-glass-forge/core": "0.0.0-dev"
+    "@liquid-glass-forge/core": "0.1.0-rc.1"
   },
   "repository": {
     "type": "git",
@@ -38,5 +38,8 @@
     "dist/worker-protocol.js",
     "dist/worker-kernel.js",
     "dist/worker-core.js"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

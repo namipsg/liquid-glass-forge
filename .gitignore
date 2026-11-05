@@ -161,3 +161,6 @@ vite.config.ts.timestamp-*
 playwright-report/
 test-results/
 blob-report/
+
+# Generated showcase support data
+/showcase/public/support/

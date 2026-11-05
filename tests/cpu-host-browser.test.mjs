@@ -92,16 +92,18 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
         const startDeadlines = [];
         for (const mode of ['off', 'required']) {
           const limited = createCpuRenderer({ executor: { worker: mode }, surface: { radius: 0, strength: 0 } });
-          const life = new AbortController(), end = limited.initialize(life.signal); let lastStart;
+          const life = new AbortController(), end = limited.initialize(life.signal); let lastStart, lastReturned;
           try {
             for (let i = 0; i < 3; i++) {
               const active = lastStart !== undefined && performance.now() - lastStart < 2000 / 30;
               const output = await limited.render(request, life.signal), timings = limited.diagnostics.timings;
               if (lastStart !== undefined && timings.startedAt < lastStart + 1000 / 30) throw new Error('CPU start exceeded30Hz limit');
-              if (active && performance.now() < timings.startedAt + 28) throw new Error('Active output lost minimum completion phase');
+              // Completion pacing is relative to the previous successful output;
+              // fast kernels reserve their compute phase before execution.
+              if (active && lastReturned !== undefined && performance.now() - lastReturned < 1000 / 30 - 1.1) throw new Error('Active output exceeded the completion cadence');
               if (mode === 'required' && timings.transferCopyMs !== 0) throw new Error('Required worker copied owned capture twice');
               startDeadlines.push({ mode, startedAt: timings.startedAt, rateWaitMs: timings.rateWaitMs });
-              lastStart = timings.startedAt; output.release();
+              lastStart = timings.startedAt; lastReturned = performance.now(); output.release();
             }
           } finally { end(); limited.dispose(); }
           if (limited.diagnostics.executor.leasedBytes || limited.diagnostics.executor.pooledBytes) throw new Error('Rate-limited renderer retained buffers after disposal');

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An independent Liquid Glass material for the web. Explore real refraction, optical blur, native controls, and vanilla, React, Vue and Angular integrations.">
+  <meta name="theme-color" content="#f5f5f7"><link rel="icon" type="image/svg+xml" href="./mark.svg">
+  <title>Liquid Glass Forge — A different kind of surface.</title>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header wrap" id="top">
+    <a class="brand" href="#" aria-label="Liquid Glass Forge home"><img src="./mark.svg" alt="" width="34" height="34"><strong>Liquid Glass Forge</strong></a>
+    <button class="site-menu-toggle" id="site-menu-toggle" aria-controls="site-navigation" aria-expanded="false" data-site-glass>Menu <span aria-hidden="true">＋</span></button>
+    <nav id="site-navigation" aria-label="Main navigation" data-site-glass><a href="#playground">Playground</a><a href="#project">Project</a><a href="#examples">Examples</a><a href="#support">Support</a><a href="#developers">Developers</a></nav>
+    <a class="source-link" data-site-glass href="https://github.com/namipsg/liquid-glass-forge">GitHub <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="hero-kicker">Liquid Glass Forge</p>
+        <h1 id="hero-title">A different kind of surface.</h1>
+        <p class="hero-summary">Optical glass for the web. Real refraction with native controls.</p>
+        <div class="hero-actions">
+          <a class="button primary" data-site-glass href="#playground">Try the playground</a>
+          <a class="button secondary" data-site-glass href="./examples.html">Explore examples</a>
+        </div>
+      </div>
+      <div id="playground" class="studio" aria-label="Interactive optical material playground">
+        <div class="studio-top"><span class="studio-label">LIVE MATERIAL / <span id="scene-name">TIDAL</span></span><span class="studio-label" id="engine-status" role="status">Preparing the material…</span></div>
+        <div class="stage" id="stage">
+          <canvas id="source-art" width="640" height="360" aria-hidden="true"></canvas>
+          <div class="backdrop-title" aria-hidden="true"><span>Light is</span><span>a material.</span></div>
+          <p class="backdrop-note" aria-hidden="true">Light bends. The words stay connected.</p>
+          <p class="sr-only">The backdrop reads “Light is a material.” Drag the clear glass lens across the lettering to see it bend.</p>
+          <section class="glass-tool" id="glass-tool" aria-label="Movable glass lens">
+            <button class="drag-handle" id="drag-handle" aria-label="Move glass lens over the lettering. Drag or use arrow keys."><span class="lens-label">Liquid Glass <span aria-hidden="true">↗</span></span><span class="lens-grip" aria-hidden="true">⠿</span></button>
+          </section>
+          <p class="stage-hint"><span aria-hidden="true">✥</span> Drag across the type. See the edges bend.</p>
+          <div class="glass-toolbar" id="glass-toolbar" role="group" aria-label="Backdrop controls rendered with Liquid Glass Forge">
+            <button id="reset-position" aria-label="Center the glass lens"><span aria-hidden="true">↺</span> Center lens</button>
+            <button id="play-light" aria-pressed="false"><span aria-hidden="true">▶</span> Animate backdrop</button>
+          </div>
+        </div>
+        <div class="scene-controls">
+          <label class="material-choice">Material <select id="material"><option value="clear">Clear</option><option value="regular">Regular</option></select></label>
+          <div class="scene-options" role="group" aria-label="Background scene"><button data-scene="tidal" aria-pressed="true"><i class="swatch tidal" aria-hidden="true"></i>Tidal</button><button data-scene="bloom" aria-pressed="false"><i class="swatch bloom" aria-hidden="true"></i>Bloom</button><button data-scene="dusk" aria-pressed="false"><i class="swatch dusk" aria-hidden="true"></i>Dusk</button></div>
+        </div>
+        <div class="studio-controls">
+          <div class="backend-options" role="group" aria-label="Rendering mode"><button data-backend="webgl" aria-pressed="true">Optical / WebGL</button><button data-backend="cpu" aria-pressed="false">CPU</button><button data-backend="opaque" aria-pressed="false">Opaque</button></div>
+          <label class="range-control" for="refraction">Refraction <input type="range" id="refraction" min="0" max="120" value="72"><output for="refraction" id="refraction-value">72</output></label>
+          <label class="range-control" for="dispersion" title="Chromatic aberration: separates red and blue at refracting edges">Dispersion <input type="range" id="dispersion" min="0" max="30" value="8"><output for="dispersion" id="dispersion-value">8</output></label>
+          <label class="range-control" for="rounding">Corners <input type="range" id="rounding" min="8" max="100" value="96"><output for="rounding" id="rounding-value">96</output></label>
+        </div>
+      </div>
+      <div class="studio-caption"><p id="material-description">Clear center. Deep edges. A live lens and working glass toolbar.</p><p id="preference-note">Keyboard friendly · Motion is optional</p></div>
+    </section>
+    <section class="project-story wrap" id="project" aria-labelledby="project-title">
+      <div class="story-intro"><p class="eyebrow">MEET LIQUID GLASS FORGE</p><h2 id="project-title">A material engine.<br><em>Your interface.</em></h2><p class="story-lead">Light that moves with your interface.</p><p>Liquid Glass Forge is an open-source material engine for the web. It refracts and diffuses an image, canvas, video or pixel source while your buttons, forms and links remain ordinary HTML.</p><p>Give the material something to see. Shape its edges, tune its clarity, then bring it into the framework you already use.</p><a class="text-link story-action" href="#developers" data-site-glass>See how it fits together <span aria-hidden="true">↗</span></a><p class="author-line">Created by <strong>Nami Poursafargholi</strong><span>AKA <strong>Zenixev</strong></span></p></div>
+      <div class="story-details"><div class="material-path" aria-label="An explicit source passes through the Forge material to your native controls"><div><span class="path-symbol source-symbol" aria-hidden="true">▧</span><strong>Your source</strong><p>Image · canvas · video · pixels</p></div><span class="path-arrow" aria-hidden="true">↓</span><div class="path-material"><span class="path-symbol" aria-hidden="true">◈</span><strong>The Forge material</strong><p>Refraction · diffusion · dispersion</p></div><span class="path-arrow" aria-hidden="true">↓</span><div><span class="path-symbol controls-symbol" aria-hidden="true">↗</span><strong>Your interface</strong><p>Native buttons, text and inputs</p></div></div>
+      <div class="project-questions"><details><summary data-site-glass>What makes the glass optical?</summary><div class="disclosure-body"><p>Forge displaces and samples a known source through a shaped surface. The WebGL renderer and bounded CPU renderer provide refraction and color dispersion, alongside blur, tint and edge highlights.</p></div></details><details><summary data-site-glass>Can it capture any HTML background?</summary><div class="disclosure-body"><p>The optical renderer needs an explicit source; Forge does not automatically rasterize arbitrary DOM content. This site uses known artwork and media for the optical examples, and Forge’s CSS material for ordinary page controls.</p></div></details><details><summary data-site-glass>What happens when transparency is unsuitable?</summary><div class="disclosure-body"><p>Opaque material follows reduced-transparency and increased-contrast preferences. You can also select CPU optics or a CSS material fallback. The original controls keep their browser behavior.</p></div></details></div></div>
+    </section>
+    <section class="live-examples wrap" id="examples" aria-labelledby="examples-title"><div class="examples-intro"><div><p class="eyebrow">FIVE WAYS TO MAKE IT REAL.</p><h2 id="examples-title">From a material<br>to an <em>experience.</em></h2></div><p>Working interfaces, made with Forge.<br>Pick a world. Try the controls.</p></div><div class="example-cards">
+<a data-site-glass class="example-card browser-preview" href="./examples.html?example=safari"><div class="card-art"><div class="mini-phone png-preview"><img class="card-device-frame" src="./devices/phone-silver-v2.png" alt="" loading="lazy"><i class="mini-island" aria-hidden="true"></i><div class="mini-browser-content"><span>Apple.com</span></div><div class="mini-browser-bar">〈 <span>apple.com</span> •••</div></div><div class="mini-tablet png-preview"><img class="card-device-frame" src="./devices/tablet-silver-v2.png" alt="" loading="lazy"><div class="mini-tablet-content"><div class="mini-tablet-bar">〈 <span>apple.com</span> ＋</div><strong>Apple.com</strong></div></div></div><div class="card-copy"><span><strong>Safari</strong><small>iPhone + iPad · working browser study</small></span><span aria-hidden="true">↗</span></div></a>
+<a data-site-glass class="example-card video-preview" href="./examples.html?example=video"><div class="card-art"><img id="video-card-poster" src="./media/light-study-poster.jpg" alt="Video preview" loading="lazy"><div class="mini-transport"><span>▷</span><i></i><span id="video-card-duration">0:16</span></div></div><div class="card-copy"><span><strong>Video</strong><small>Real playback · glass transport</small></span><span aria-hidden="true">↗</span></div></a>
+<a data-site-glass class="example-card photos-preview" href="./examples.html?example=photos"><div class="card-art"><img src="./media/sandstone-trail.jpg" alt="Sandstone canyon at sunset" loading="lazy"><div class="mini-photo-title">The landscape<br>collection.</div><div class="mini-photo-controls">〈 <span>2 / 3</span> 〉</div></div><div class="card-copy"><span><strong>Photos</strong><small>Explore · favorite · zoom</small></span><span aria-hidden="true">↗</span></div></a>
+<a data-site-glass class="example-card music-preview" href="./examples.html?example=music"><div class="card-art"><img class="mini-album" src="./media/slow-light-studio.jpg" alt="Recording studio album artwork" loading="lazy"><div class="mini-music-controls"><strong>Slow Light</strong><small>Forge Sessions</small><div>≪　▷　≫</div></div></div><div class="card-copy"><span><strong>Music</strong><small>Original audio · live player</small></span><span aria-hidden="true">↗</span></div></a>
+<a data-site-glass class="example-card maps-preview" href="./examples.html?example=maps"><div class="card-art"><img src="./media/port-meridian-streets.svg" alt="Street map of the fictional Port Meridian waterfront" loading="lazy"></div><div class="card-copy"><span><strong>Maps</strong><small>Pan · search · find a route</small></span><span aria-hidden="true">↗</span></div></a>
+</div></section>
+    <section class="support-section wrap" id="support" aria-labelledby="support-title"><div class="section-heading"><div><p class="eyebrow">FRAMEWORKS &amp; DEVICES</p><h2 id="support-title">Your stack.<br><em>The same material.</em></h2></div><p>Four framework integrations, one source and material system.<br>Experimental packages are available now.</p></div><div class="framework-support-grid">
+      <a href="#developers" data-select-code="vanilla" class="framework-support-card" data-site-glass><span class="framework-glyph" aria-hidden="true">JS</span><strong>Vanilla</strong><p>Semantic HTML.<br>The DOM scene API.</p><span>View integration ↗</span></a><a href="#developers" data-select-code="react" class="framework-support-card" data-site-glass><span class="framework-glyph" aria-hidden="true">⚛</span><strong>React</strong><p>Providers and surfaces.<br>Your native content.</p><span>View integration ↗</span></a><a href="#developers" data-select-code="vue" class="framework-support-card" data-site-glass><span class="framework-glyph" aria-hidden="true">V</span><strong>Vue</strong><p>Familiar components.<br>A shared material engine.</p><span>View integration ↗</span></a><a href="#developers" data-select-code="angular" class="framework-support-card" data-site-glass><span class="framework-glyph" aria-hidden="true">A</span><strong>Angular</strong><p>Scene directives.<br>Application-owned controls.</p><span>View integration ↗</span></a>
+      </div><div class="support-note"><p><strong>Experimental preview · 0.1.0-rc.1</strong><br>Framework availability and physical-device qualification are separate. The studio also includes renderer work ahead of the npm preview.</p><a class="text-link" href="./support.html" data-site-glass>Read the full support guide <span aria-hidden="true">↗</span></a></div>
+      <div class="device-support"><div><p class="eyebrow">KNOW WHERE IT STANDS</p><h3>Device coverage.</h3><p>WebGL2 optics, bounded CPU rendering and CSS or opaque materials offer different ways to run. Device tiers stay experimental until their original checks are complete.</p></div><div class="device-status-list"><div><strong>Mac</strong><span>Experimental</span></div><div><strong>Windows</strong><span>Experimental</span></div><div><strong>Android</strong><span>Experimental</span></div><div><strong>iPhone</strong><span>Experimental</span></div><div><strong>iPad</strong><span>Physically unqualified</span></div></div></div>
+    </section>
+    <section class="inside wrap" id="inside" aria-labelledby="inside-title"><div class="section-intro"><p class="eyebrow">BEAUTY, WITH SOMETHING BEHIND IT.</p><h2 id="inside-title">More than<br>a blur filter.</h2><p>Pixels have a source. Light has a path.<br>And your content has the final say.</p></div><div class="principles"><article><span class="principle-number">01 /</span><div><h3>Give light something to work with.</h3><p>An image, a canvas, a video, or your own pixels. Glass refracts an explicit, origin-clean source, so you know exactly what is being rendered.</p></div><span aria-hidden="true">↗</span></article><article><span class="principle-number">02 /</span><div><h3>Shape the material.</h3><p>Rounded edges, refraction, optical blur and subtle highlights. A shared WebGL atlas or a bounded JavaScript CPU renderer does the optical work.</p></div><span aria-hidden="true">↗</span></article><article><span class="principle-number">03 /</span><div><h3>Keep the interface human.</h3><p>Your buttons, labels and inputs stay native DOM. An opaque material preserves readable controls when transparency isn't the right choice.</p></div><span aria-hidden="true">↗</span></article></div></section>
+    <section class="developers wrap" id="developers" aria-labelledby="developers-title"><div class="developer-copy"><p class="eyebrow">A SMALL SURFACE. A LOT OF POSSIBILITY.</p><h2 id="developers-title">Bring your<br>own interface.</h2><p>One material system, four ways in. Start with a semantic surface, then add the source and renderer that fit your application.</p><a class="text-link" id="docs-link" href="https://github.com/namipsg/liquid-glass-forge/tree/main/docs">Explore the documentation <span aria-hidden="true">↗</span></a><div class="release-note"><span class="status-dot"></span><p id="release-status">Development preview. Package publication and broader device qualification are in progress.</p></div><div id="install-preview" class="install-preview" hidden><p class="tiny-install-label">INSTALL THE EXPERIMENTAL PREVIEW</p><code id="install-command"></code><button id="copy-install" data-site-glass type="button">Copy install command</button><div id="package-links" aria-label="Published npm packages"></div></div></div><div class="code-card"><div class="code-tabs" data-site-glass role="tablist" aria-label="Integration example"><button role="tab" id="tab-vanilla" aria-controls="code-example" data-code="vanilla" aria-selected="true">Vanilla</button><button role="tab" id="tab-react" aria-controls="code-example" data-code="react" aria-selected="false" tabindex="-1">React</button><button role="tab" id="tab-vue" aria-controls="code-example" data-code="vue" aria-selected="false" tabindex="-1">Vue</button><button role="tab" id="tab-angular" aria-controls="code-example" data-code="angular" aria-selected="false" tabindex="-1">Angular</button></div><div class="editor-titlebar"><span aria-hidden="true">&lt;/&gt;</span><span id="code-filename">scene.js</span></div><pre id="code-example" role="tabpanel" aria-labelledby="tab-vanilla" tabindex="0"><span class="code-gutter" id="code-gutter" aria-hidden="true"></span><code id="code-text"></code></pre><div class="code-footer"><span>Ordinary content. An extraordinary surface.</span><button id="copy-code" data-site-glass>Copy example <span aria-hidden="true">⧉</span></button></div><p id="copy-status" class="sr-only" role="status"></p></div></section>
+    <section class="enui-section wrap" id="enui" aria-labelledby="enui-title"><p class="enui-one-more">ONE MORE THING.</p><div class="enui-announcement"><div class="enui-copy"><span class="enui-upcoming">UPCOMING UI LIBRARY</span><img class="enui-logo" src="./brand/enui-logo-n-v3.png" alt="ENUI — a bold N monogram" width="2172" height="724" loading="lazy"><h2 id="enui-title">Interfaces, with<br>Forge at their core.</h2><p><span class="enui-name">E<strong>N</strong>UI</span> is an upcoming UI library built on <strong>Liquid Glass Forge</strong>. The material is the foundation; ENUI will bring it into a considered collection of interface components.</p><p class="enui-signature">A personal signature: <strong>N for Nami.</strong></p><a class="enui-foundation-link" href="#project" data-site-glass>Explore the Forge foundation <span aria-hidden="true">↗</span></a><p class="enui-credit">By <strong>Nami Poursafargholi</strong> · AKA <strong>Zenixev</strong></p></div><div class="enui-visual"><div class="enui-preview demo-root" id="enui-preview" role="img" aria-label="A refractive glass lens over an N and flowing lines in Sierra blue"><canvas id="enui-source" width="560" height="500" aria-hidden="true"></canvas><p class="enui-study-label">A FORGE MATERIAL STUDY</p><div class="enui-glass-sample" data-glass data-refraction="28" aria-hidden="true"></div></div><p class="enui-preview-caption">The material, live today.<br>The ENUI component collection, coming next.</p></div></div></section>
+  </main>
+  <footer class="site-directory">
+    <div class="wrap">
+      <div class="directory-intro">
+        <div>
+          <p class="directory-brand">Liquid Glass Forge</p>
+          <p>An open-source material engine for the web.</p>
+        </div>
+        <a class="button secondary" data-site-glass href="#top">Back to top <span aria-hidden="true">↑</span></a>
+      </div>
+      <nav class="directory-links" aria-label="Footer navigation">
+        <section aria-labelledby="footer-explore">
+          <h2 id="footer-explore">Explore</h2>
+          <ul>
+            <li><a href="#playground">Playground</a></li>
+            <li><a href="./examples.html?example=safari">Safari</a></li>
+            <li><a href="./examples.html?example=video">Video</a></li>
+            <li><a href="./examples.html?example=photos">Photos</a></li>
+            <li><a href="./examples.html?example=music">Music</a></li>
+            <li><a href="./examples.html?example=maps">Maps</a></li>
+          </ul>
+        </section>
+        <section aria-labelledby="footer-build">
+          <h2 id="footer-build">Build</h2>
+          <ul>
+            <li><a href="#developers" data-select-code="vanilla">Vanilla</a></li>
+            <li><a href="#developers" data-select-code="react">React</a></li>
+            <li><a href="#developers" data-select-code="vue">Vue</a></li>
+            <li><a href="#developers" data-select-code="angular">Angular</a></li>
+          </ul>
+        </section>
+        <section aria-labelledby="footer-project">
+          <h2 id="footer-project">Project</h2>
+          <ul>
+            <li><a href="#project">About Forge</a></li>
+            <li><a href="./support.html">Framework and device support</a></li>
+            <li><a href="#enui">ENUI announcement</a></li>
+          </ul>
+        </section>
+        <section aria-labelledby="footer-resources">
+          <h2 id="footer-resources">Resources</h2>
+          <ul>
+            <li><a href="https://github.com/namipsg/liquid-glass-forge">Source on GitHub</a></li>
+            <li><a href="https://www.npmjs.com/package/@liquid-glass-forge/dom">Experimental packages</a></li>
+            <li><a href="https://github.com/namipsg/liquid-glass-forge/issues">Issue tracker</a></li>
+            <li><a href="https://github.com/namipsg/liquid-glass-forge/blob/main/LICENSE">MIT License</a></li>
+          </ul>
+        </section>
+      </nav>
+      <div class="directory-credit">
+        <p>Created by <strong>Nami Poursafargholi</strong> · AKA <strong>Zenixev</strong></p>
+        <p>An independent project inspired by Apple's Liquid Glass. Not affiliated with, sponsored by or endorsed by Apple Inc.</p>
+      </div>
+    </div>
+  </footer>
+  <noscript><p class="wrap">The material playground needs JavaScript. Documentation and source links remain available.</p></noscript>
+  <script type="module" src="./src/main.mjs"></script>
+</body></html>

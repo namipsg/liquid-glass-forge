@@ -57,7 +57,6 @@ export class WebGLAtlas {
   #textures = new Set<WebGLTexture>(); #fbos = new Set<WebGLFramebuffer>(); #programs = new Set<WebGLProgram>(); #shaders = new Set<WebGLShader>();
   #optics: Program | undefined; #blur: Program | undefined; #source: WebGLTexture | undefined; #encoding: WebGLTexture | undefined;
   #output: WebGLTexture | undefined; #fbo: WebGLFramebuffer | undefined; #blurTextures: WebGLTexture[] = []; #blurFbos: WebGLFramebuffer[] = [];
-  #snapshot: HTMLCanvasElement | undefined; #snapshotCtx: CanvasRenderingContext2D | undefined;
   #width = 0; #height = 0; #sourceWidth = 0; #sourceHeight = 0; #blurPixels = 0;
   #sourceLinear=false; #decodeProbeError:number|undefined;
   #maxSize = 0; #maxViewport: Int32Array = new Int32Array(2); #quantizeUp = false;
@@ -79,7 +78,7 @@ export class WebGLAtlas {
       renderCount: this.#draws, batchCount: this.#batches, uploadCount: this.#uploads, targetBytes: this.#targetBytes,
       requestedAttributes: WEBGL_ATTRIBUTES, attributes: this.#entry?.gl.getContextAttributes(), pool: webglContextPoolDiagnostics(),
       resources: Object.freeze({ contexts: this.#entry ? 1 : 0, textures: this.#textures.size, framebuffers: this.#fbos.size, programs: this.#programs.size, shaders: this.#shaders.size, buffers: 0, vertexArrays: 0 }),
-      ownedImageBytes: this.#sourceWidth*this.#sourceHeight*4 + (this.#entry ? this.#entry.canvas.width*this.#entry.canvas.height*4 : 0) + this.#width*this.#height*4 + (this.#snapshot ? this.#snapshot.width*this.#snapshot.height*4 : 0) + (this.#encoding ? 65536 : 0) + this.#blurPixels*32,
+      ownedImageBytes: this.#sourceWidth*this.#sourceHeight*4 + (this.#entry ? this.#entry.canvas.width*this.#entry.canvas.height*4 : 0) + this.#width*this.#height*4 + (this.#encoding ? 65536 : 0) + this.#blurPixels*32,
       lastBatch: Object.freeze({ ...this.#lastBatch, completedAt: Object.freeze([...this.#lastBatch.completedAt]) }),
       sourceDecoding:this.#sourceLinear?'calibrated-srgb-texture':'explicit-shader',decodeProbeMaxByteError:this.#decodeProbeError,
       colorConvention: 'straight sRGB upload; manual linear-premultiplied sampling/blur; calibrated premultiplied sRGB byte presentation', storageProfile: this.#quantizeUp ? 'upward' : 'nearest' });
@@ -102,9 +101,6 @@ export class WebGLAtlas {
       this.#entry.canvas.addEventListener('webglcontextlost',this.#lost);
       this.#entry.canvas.addEventListener('webglcontextrestored',this.#restored);
       this.#quantizeUp = storageProfile(this.#entry.canvas.ownerDocument);
-      this.#snapshot = this.#entry.canvas.ownerDocument.createElement('canvas'); this.#snapshot.width = this.#snapshot.height = 1;
-      this.#snapshotCtx = this.#snapshot.getContext('2d',{ alpha: true, willReadFrequently: true }) ?? undefined;
-      if (!this.#snapshotCtx) throw new WebGLError('TARGET_UNAVAILABLE','Snapshot Canvas2D unavailable');
       this.#build(); this.#state = 'ready';
     } catch (cause) { this.#failure = cause instanceof WebGLError ? cause.code : 'INITIALIZATION_FAILED'; this.#state = 'unavailable'; this.#release(); throw cause; }
   }
@@ -139,7 +135,7 @@ export class WebGLAtlas {
     const gl = this.#entry!.gl, a = gl.getContextAttributes();
     if (!a || Object.entries(WEBGL_ATTRIBUTES).some(([k,v]) => a[k as keyof WebGLContextAttributes] !== v)) throw new WebGLError('ATTRIBUTES_UNSUPPORTED','Required context attributes not granted');
     this.#maxSize = gl.getParameter(gl.MAX_TEXTURE_SIZE); this.#maxViewport = gl.getParameter(gl.MAX_VIEWPORT_DIMS);
-    this.#optics = this.#program(OPTICS,['Source','Encoding','Size','Origin','Rect','Radius','Bevel','Strength','Prepared','QuantizeUp','SourceLinear','Calibration','Dispersion','Tint','Light','Rim','Specular']);
+    this.#optics = this.#program(OPTICS,['Source','Encoding','Size','Origin','Rect','Radius','Bevel','Strength','Prepared','QuantizeUp','SourceLinear','Calibration','Dispersion','Tint','Light','Rim','Specular','LensProfile']);
     this.#blur = this.#program(BLUR,['Source','Encoding','Axis','Radius','Prepared','SourceLinear']);
     this.#source = this.#texture(); this.#encoding = this.#texture();
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,64,64,0,gl.RGBA,gl.FLOAT,encodingTextureData());
@@ -168,7 +164,7 @@ export class WebGLAtlas {
     this.#blurTextures = []; this.#blurFbos = []; this.#width = this.#height = this.#sourceWidth = this.#sourceHeight = this.#blurPixels = 0; this.#invalidate();
   }
   #release(): void {
-    this.#dropHandles(true); this.#snapshotCtx = undefined; if (this.#snapshot) this.#snapshot.width = this.#snapshot.height = 0; this.#snapshot = undefined;
+    this.#dropHandles(true);
     if (this.#entry) { const { canvas,gl } = this.#entry; canvas.removeEventListener('webglcontextlost',this.#lost); canvas.removeEventListener('webglcontextrestored',this.#restored); canvas.width = canvas.height = 1; this.#entry.busy = false; if (this.#options.canvasFactory) gl.getExtension('WEBGL_lose_context')?.loseContext(); }
     this.#entry = undefined; this.#targetBytes = 0;
   }
@@ -225,12 +221,12 @@ export class WebGLAtlas {
     const maxW = Math.min(this.#maxSize,this.#maxViewport[0]!), maxH = Math.min(this.#maxSize,this.#maxViewport[1]!);
     for (let columns=1;columns<=tiles.length;columns++) { const width=columns*cellW,height=Math.ceil(tiles.length/columns)*cellH; if (width>maxW || height>maxH || width*height>MAX_PIXELS) continue; if (!layout || width*height<layout.width*layout.height || (width*height===layout.width*layout.height && Math.max(width,height)<Math.max(layout.width,layout.height))) layout={width,height,columns}; }
     if (!layout || source.width>this.#maxSize || source.height>this.#maxSize) throw new WebGLError('SIZE_UNSUPPORTED','Source/atlas exceeds device or core pixel limits');
-    const bytes = source.width*source.height*(4+(e.blur?32:0)) + layout.width*layout.height*12 + 65536;
-    const oldAtlas=this.#width*this.#height,newAtlas=layout.width*layout.height,oldSnapshot=(this.#snapshot?.width??0)*(this.#snapshot?.height??0);
+    const bytes = source.width*source.height*(4+(e.blur?32:0)) + layout.width*layout.height*8 + 65536;
+    const oldAtlas=this.#width*this.#height,newAtlas=layout.width*layout.height;
     const oldBlur=this.#blurPixels*32,newBlur=e.blur?source.width*source.height*32:0,sourceBytes=Math.max(source.width*source.height,this.#sourceWidth*this.#sourceHeight)*4;
     const peak = Math.max(bytes,
-      sourceBytes+oldBlur+oldAtlas*8+oldSnapshot*4+(newAtlas!==oldAtlas?newAtlas*4:0)+65536,
-      source.width*source.height*4+newAtlas*8+oldSnapshot*4+newBlur+(e.blur&&this.#blurPixels===source.width*source.height?0:oldBlur)+65536);
+      sourceBytes+oldBlur+oldAtlas*8+(newAtlas!==oldAtlas?newAtlas*4:0)+65536,
+      source.width*source.height*4+newAtlas*8+newBlur+(e.blur&&this.#blurPixels===source.width*source.height?0:oldBlur)+65536);
     if (peak>this.#options.maxBytes) throw new WebGLError('BUDGET','GPU image storage including resize overlap exceeds maxBytes');
     const layoutKey = JSON.stringify([layout,tiles.map(t=>[t.surface.id,t.surface.width,t.surface.height])]);
     const sourceKey = `${generation}/${source.revision}/${source.width}/${source.height}`, effectKey = JSON.stringify(e);
@@ -252,25 +248,25 @@ export class WebGLAtlas {
       gl.bindFramebuffer(gl.FRAMEBUFFER,this.#fbo!); gl.enable(gl.SCISSOR_TEST); gl.useProgram(program.handle);
       gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,texture);gl.uniform1i(u.Source!,0);
       gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,this.#encoding!);gl.uniform1i(u.Encoding!,1);
-      gl.uniform1i(u.SourceLinear!,this.#sourceLinear?1:0);gl.uniform1i(u.Prepared!,e.blur?1:0);gl.uniform1i(u.QuantizeUp!,this.#quantizeUp?1:0);gl.uniform1f(u.Dispersion!,e.dispersion);gl.uniform4f(u.Tint!,...e.tint);gl.uniform2f(u.Light!,...e.light);gl.uniform1f(u.Rim!,e.rim);gl.uniform1f(u.Specular!,e.specular);
+      gl.uniform1i(u.SourceLinear!,this.#sourceLinear?1:0);gl.uniform1i(u.Prepared!,e.blur?1:0);gl.uniform1i(u.QuantizeUp!,this.#quantizeUp?1:0);gl.uniform1i(u.LensProfile!,e.lens?1:0);gl.uniform1f(u.Dispersion!,e.dispersion);gl.uniform4f(u.Tint!,...e.tint);gl.uniform2f(u.Light!,...e.light);gl.uniform1f(u.Rim!,e.rim);gl.uniform1f(u.Specular!,e.specular);
       for (const t of tiles) if (dirty.has(t.surface.id)) {
         const s=t.surface,bottom=layout.height-t.y-s.height;gl.viewport(t.x,bottom,s.width,s.height);gl.scissor(t.x,bottom,s.width,s.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
         gl.uniform2f(u.Size!,s.width,s.height);gl.uniform2f(u.Origin!,t.x,bottom);gl.uniform4f(u.Rect!,s.sourceRect.x,s.sourceRect.y,s.sourceRect.width,s.sourceRect.height);gl.uniform1f(u.Radius!,s.radius);gl.uniform1f(u.Bevel!,Math.max(s.bevel,1.17549435e-38));gl.uniform1f(u.Strength!,s.strength);gl.drawArrays(gl.TRIANGLES,0,3);this.#draws++;
       }
       gl.disable(gl.SCISSOR_TEST);gl.bindFramebuffer(gl.READ_FRAMEBUFFER,this.#fbo!);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);gl.blitFramebuffer(0,0,layout.width,layout.height,0,0,layout.width,layout.height,gl.COLOR_BUFFER_BIT,gl.NEAREST);this.#check('Atlas draw/blit');
-      const drawnAt=performance.now(), snapshot=this.#snapshot!, ctx=this.#snapshotCtx!;
-      if(snapshot.width!==layout.width)snapshot.width=layout.width;if(snapshot.height!==layout.height)snapshot.height=layout.height;
-      ctx.globalCompositeOperation='copy';ctx.imageSmoothingEnabled=false;ctx.drawImage(this.#entry!.canvas,0,0);
-      const snapshotAt=performance.now(),completedAt:number[]=[];
+      // Copy the completed default framebuffer directly into each owned target
+      // before yielding. Retaining a second full atlas in Canvas2D exceeded the
+      // dynamic-scene image budget when source acquisition was included.
+      const drawnAt=performance.now(),completedAt:number[]=[];
       for(const t of tiles)if(dirty.has(t.surface.id)){
         if(options.signal?.aborted)throw new WebGLError('ABORTED','GPU presentation aborted');
         if(t.target.width!==t.surface.width)t.target.width=t.surface.width;if(t.target.height!==t.surface.height)t.target.height=t.surface.height;
         if(typeof t.ctx.reset==='function')t.ctx.reset();else t.target.width=t.surface.width;
-        t.ctx.globalCompositeOperation='copy';t.ctx.imageSmoothingEnabled=false;t.ctx.drawImage(snapshot,t.x,t.y,t.surface.width,t.surface.height,0,0,t.surface.width,t.surface.height);completedAt.push(performance.now());
+        t.ctx.globalCompositeOperation='copy';t.ctx.imageSmoothingEnabled=false;t.ctx.drawImage(this.#entry!.canvas,t.x,t.y,t.surface.width,t.surface.height,0,0,t.surface.width,t.surface.height);completedAt.push(performance.now());
       }
       this.#check('Synchronous tile copies');this.#layoutKey=layoutKey;this.#sourceKey=sourceKey;this.#effectKey=effectKey;this.#surfaceKeys=keys;this.#targets=new Map(tiles.map(t=>[t.surface.id,t.target]));
       this.#lastGeneration=generation;this.#lastRevision=revision;this.#lastSourceRevision=source.revision;this.#batches++;this.#targetBytes=tiles.reduce((sum,t)=>sum+t.surface.width*t.surface.height*4,0);
-      this.#lastBatch={dirty:dirty.size,gpuSnapshots:1,uploadMs:uploadedAt-begin,drawMs:drawnAt-uploadedAt,snapshotMs:snapshotAt-drawnAt,copyMs:performance.now()-snapshotAt,batchMs:performance.now()-begin,completedAt};return this.diagnostics.lastBatch;
+      this.#lastBatch={dirty:dirty.size,gpuSnapshots:dirty.size,uploadMs:uploadedAt-begin,drawMs:drawnAt-uploadedAt,snapshotMs:0,copyMs:performance.now()-drawnAt,batchMs:performance.now()-begin,completedAt};return this.diagnostics.lastBatch;
     }catch(cause){this.#invalidate();throw cause;}
   }
 }

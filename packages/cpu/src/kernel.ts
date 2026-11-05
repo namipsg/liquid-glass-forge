@@ -2,8 +2,9 @@ import { ContractError, MAX_PIXELS, decodeSrgb, encodeSrgb, validateSource } fro
 import type { PixelSource, SurfaceInput, SurfaceDescriptor } from '@liquid-glass-forge/core';
 
 export const CPU_MATERIAL_MODEL = 'rounded-material-v1' as const;
+export const CPU_LENS_MODEL = 'refractive-lens-v2' as const;
 export interface CpuEffects {
-  readonly model: typeof CPU_MATERIAL_MODEL;
+  readonly model: typeof CPU_MATERIAL_MODEL | typeof CPU_LENS_MODEL;
   readonly blurRadius?: number;
   readonly dispersion?: number;
   readonly tint?: readonly [number, number, number, number];
@@ -187,10 +188,10 @@ function surfaceOptions(input: SurfaceInput, source: PreparedCpuSource): Surface
   if (rect.x + rect.width > source.width || rect.y + rect.height > source.height) throw new ContractError('Source rectangle exceeds source');
   return { id: input.id, width, height, radius, bevel, strength, sourceRect: rect };
 }
-function effectOptions(input?: CpuEffects): { blurRadius: number; dispersion: number; tint: readonly number[]; rim: number; specular: number; light: readonly number[] } {
+function effectOptions(input?: CpuEffects): { lens: boolean; blurRadius: number; dispersion: number; tint: readonly number[]; rim: number; specular: number; light: readonly number[] } {
   if (input !== undefined) {
     object(input, ['model', 'blurRadius', 'dispersion', 'tint', 'rim', 'specular', 'light'], 'effects');
-    if (input.model !== CPU_MATERIAL_MODEL) throw new ContractError('Unsupported CPU material model');
+    if (input.model !== CPU_MATERIAL_MODEL && input.model !== CPU_LENS_MODEL) throw new ContractError('Unsupported CPU material model');
   }
   const blurRadius = input?.blurRadius === undefined ? 0 : input.blurRadius, dispersion = input?.dispersion === undefined ? 0 : input.dispersion;
   const rim = input?.rim === undefined ? 0 : input.rim, specular = input?.specular === undefined ? 0 : input.specular;
@@ -205,7 +206,7 @@ function effectOptions(input?: CpuEffects): { blurRadius: number; dispersion: nu
   const scale = Math.max(Math.abs(light[0]!), Math.abs(light[1]!));
   if (scale === 0) throw new ContractError('Light direction must be nonzero');
   const lx = light[0]! / scale, ly = light[1]! / scale, length = Math.hypot(lx, ly);
-  return { blurRadius, dispersion, tint: [decodeSrgb(tint[0]!), decodeSrgb(tint[1]!), decodeSrgb(tint[2]!), tint[3]!], rim, specular, light: [lx / length, ly / length] };
+  return { lens: input?.model === CPU_LENS_MODEL, blurRadius, dispersion, tint: [decodeSrgb(tint[0]!), decodeSrgb(tint[1]!), decodeSrgb(tint[2]!), tint[3]!], rim, specular, light: [lx / length, ly / length] };
 }
 /** Validate and freeze a data-only snapshot before asynchronous execution. */
 export function snapshotCpuEffects(input?: CpuEffects): CpuEffects | undefined {
@@ -317,12 +318,17 @@ function renderClassifiedOpaque(prepared: PreparedCpuSource, surface: SurfaceDes
 export function renderCpu(prepared: PreparedCpuSource, input: SurfaceInput, effects?: CpuEffects, output?: Uint8ClampedArray): Uint8ClampedArray {
   const s = live(prepared), surface = surfaceOptions(input, prepared), e = effectOptions(effects);
   const { width, height, radius, bevel, strength, sourceRect: rect } = surface;
+  // A bevel wider than the corner's curvature reaches the SDF medial axis,
+  // where the nearest edge (and its normal) changes discontinuously. Keep the
+  // v2 ray profile outside that axis; a sharp corner has only subpixel bevel.
+  // The versioned v1 material retains its original geometry.
+  const opticalBevel = e.lens ? Math.min(bevel, Math.max(radius, .5)) : bevel;
   if (output === undefined) output = new Uint8ClampedArray(width * height * 4);
   try { byteLength.call(output.buffer); } catch { throw new ContractError('CPU output requires an attached unshared buffer'); }
   if (byteBrand.call(output) !== 'Uint8ClampedArray' || output.byteLength !== width * height * 4) throw new ContractError('Invalid CPU output storage');
   const data = blurred(prepared, s, e.blurRadius), scaleX = rect.width / width, scaleY = rect.height / height;
   const encoding = getColourTables();
-  const baseline = e.blurRadius===0 && e.dispersion===0 && e.tint[3]===0 && e.rim===0 && e.specular===0;
+  const baseline = !e.lens && e.blurRadius===0 && e.dispersion===0 && e.tint[3]===0 && e.rim===0 && e.specular===0;
   const preferResampling = baseline && s.opaque && scaleX === 2 && scaleY === 2 && Number.isInteger(rect.x) && Number.isInteger(rect.y);
   const geo = baseline ? geometryCache(s,width,height,radius,bevel,preferResampling) : undefined;
   const sourceRgb = geo?.sourceResampling ? resampledSourceRgb(prepared, data, surface, geo, encoding) : undefined;
@@ -342,10 +348,18 @@ export function renderCpu(prepared: PreparedCpuSource, input: SurfaceInput, effe
       if(ex<geo.n&&ey<geo.n){const i=(ey*geo.n+ex)*4;coverage=geo.corners[i]!;normalX=geo.corners[i+1]!*Math.sign(px);normalY=geo.corners[i+2]!*Math.sign(py);weight=geo.corners[i+3]!;}
       else if(Math.abs(px)-width/2>Math.abs(py)-height/2){normalX=Math.sign(px);weight=geo.xs[x]!;}
       else{normalY=Math.sign(py);weight=geo.ys[y]!;}
-    }else{const g=geometry(width,height,radius,bevel,x,y);coverage=g.coverage;normalX=g.normalX;normalY=g.normalY;weight=g.weight;}
+    }else{const g=geometry(width,height,radius,opticalBevel,x,y);coverage=g.coverage;normalX=g.normalX;normalY=g.normalY;weight=g.weight;}
     if (coverage === 0) { output.fill(0, index, index + 4); continue; }
     const baseX = rect.x + (x + .5) * scaleX - .5, baseY = rect.y + (y + .5) * scaleY - .5;
-    const dx = normalX * strength * weight * scaleX, dy = normalY * strength * weight * scaleY;
+    // Opt-in v2: trace an air-to-glass ray through an elliptical bevel
+    // (eta = 1 / 1.5). Backdrop sampling bends inward; v1 remains unchanged.
+    let displacement = weight;
+    if (e.lens && weight > 0) {
+      const u = Math.sqrt(weight), nz = Math.sqrt(Math.max(0, 1 - u * u)), eta = 2 / 3;
+      const bend = Math.sqrt(1 - eta * eta * u * u) - eta * nz;
+      displacement = -u * bend / (eta + bend * nz);
+    }
+    const dx = normalX * strength * displacement * scaleX, dy = normalY * strength * displacement * scaleY;
     if (sourceRgb && dx === 0 && dy === 0) {
       output[index + 3] = Math.round(coverage * 255);
       const at = (y * width + x) * 3;

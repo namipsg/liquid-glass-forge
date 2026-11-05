@@ -1,0 +1,324 @@
+:root {
+  --site-gutter: clamp(16px, 4vw, 48px);
+  --section-space: clamp(56px, 8vw, 112px);
+  --section-gap: clamp(24px, 4vw, 48px);
+  --section-title: clamp(32px, 4.4vw, 58px);
+}
+
+body .wrap {
+  width: min(1240px, calc(100% - 2 * var(--site-gutter)));
+}
+
+.site-header.wrap {
+  min-height: 64px;
+  height: auto;
+  padding-block: 8px;
+  gap: 16px;
+}
+
+.site-header .brand {
+  gap: 9px;
+}
+
+.site-header .brand strong {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.site-header #site-navigation a,
+.site-header .source-link {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hero.wrap {
+  padding-top: 0;
+}
+
+.hero .hero-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: center;
+  justify-items: center;
+  gap: 12px;
+  padding: clamp(36px, 5vw, 72px) 0 var(--section-gap);
+  text-align: center;
+}
+
+.hero-kicker {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.hero h1 {
+  max-width: 900px;
+  font-size: clamp(39px, 6vw, 76px);
+  font-weight: 650;
+  letter-spacing: -.045em;
+  line-height: 1.03;
+  text-wrap: balance;
+}
+
+.hero-summary {
+  max-width: 50ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.button.primary,
+.button.secondary {
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.button.primary {
+  transform: none;
+}
+
+.button.secondary {
+  border: 1px solid currentColor;
+  color: var(--accent);
+  background: transparent;
+}
+
+.button.secondary:hover {
+  background: color-mix(in srgb, var(--accent) 8%, var(--paper));
+}
+
+.hero-actions .button {
+  font-size: 16px;
+}
+
+.studio .backend-options {
+  background: var(--secondary-surface);
+}
+
+.studio .backend-options button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 4px #0002, inset 0 0 0 1px var(--line);
+}
+
+.studio .scene-controls .scene-options button[aria-pressed="true"] {
+  background: var(--secondary-surface);
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.studio .material-choice,
+.studio .material-choice select,
+.studio .backend-options button,
+.studio .scene-options button {
+  font-size: 13px;
+}
+
+.project-story.wrap,
+.live-examples.wrap,
+.support-section.wrap,
+.developers.wrap,
+.enui-section.wrap {
+  padding-block: var(--section-space);
+}
+
+.project-story.wrap,
+.developers.wrap {
+  gap: var(--section-gap);
+}
+
+.examples-intro,
+.section-heading {
+  gap: var(--section-gap);
+  margin-bottom: 32px;
+}
+
+.story-intro h2,
+.examples-intro h2,
+.section-heading h2,
+.developers h2,
+.enui-copy h2,
+.support-document h1,
+.examples-heading h1 {
+  font-size: var(--section-title);
+  line-height: 1.05;
+  letter-spacing: -.045em;
+  font-weight: 650;
+}
+
+.story-intro h2 em,
+.examples-intro h2 em,
+.section-heading h2 em,
+.developers h2 em,
+.support-document h1 em {
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.story-intro > p:not(.eyebrow, .author-line),
+.examples-intro > p,
+.section-heading > p,
+.enui-copy > p:not(.enui-upcoming, .enui-credit) {
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.material-path,
+.framework-support-card,
+.example-card.site-glass {
+  background: var(--secondary-surface);
+}
+
+#enui-preview .enui-glass-sample {
+  position: absolute;
+  top: 53%;
+  right: 9%;
+  width: 47%;
+  height: 24%;
+  border-radius: 999px;
+  isolation: isolate;
+  --lgf-tint: var(--example-tint, var(--showcase-glass-tint));
+  --lgf-blur: var(--showcase-glass-blur);
+  box-shadow: var(--showcase-glass-edge);
+}
+
+.site-directory {
+  border-top: 1px solid var(--line);
+  background: var(--secondary-surface);
+  padding-block: 32px 24px;
+}
+
+.directory-intro,
+.directory-credit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.directory-intro {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.directory-intro p,
+.directory-credit p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.directory-intro .directory-brand {
+  margin-bottom: 4px;
+  color: var(--ink);
+  font-size: 19px;
+  font-weight: 650;
+}
+
+.directory-links {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px 32px;
+  padding-block: 24px;
+}
+
+.directory-links h2 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.directory-links ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.directory-links a {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 32px;
+  padding-block: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.directory-links a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.directory-credit {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+
+@media (max-width: 700px) {
+  .hero .hero-copy {
+    padding-top: 32px;
+  }
+
+  .examples-intro,
+  .section-heading {
+    margin-bottom: 24px;
+  }
+
+  .section-heading h2 {
+    margin-bottom: 12px;
+  }
+
+  .studio .backend-options button {
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+
+  .directory-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 24px;
+  }
+
+  .directory-links a {
+    min-height: 44px;
+  }
+}
+
+@media (forced-colors: active) {
+  .button.secondary {
+    color: ButtonText;
+    background: ButtonFace;
+  }
+
+  #enui-preview .enui-glass-sample {
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}
+
+.png-preview .mini-browser-content,
+.png-preview .mini-tablet-content {
+  background: linear-gradient(#eaf2fcdd, #dceafa00 55%), url('/media/pacific-coast.jpg') center / cover;
+}
+
+.maps-preview .card-art > img { width: 100%; height: 100%; object-fit: cover; }

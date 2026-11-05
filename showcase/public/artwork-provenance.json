@@ -1,0 +1,27 @@
+{
+  "kind": "original-generated-project-artwork",
+  "generationMode": "built-in imagegen",
+  "officialAppleArtwork": false,
+  "assets": [
+    {
+      "file": "brand/enui-logo-n-v3.png",
+      "sha256": "3ce7a88d74a553a75d596268d3118c005f04a39c24a3e7356f2070b17c9803e4",
+      "width": 2172,
+      "height": 724
+    },
+    {
+      "file": "devices/phone-silver-v2.png",
+      "sha256": "4ba55f01bd551a40c03f24ff30cb81aa24ca3be21b3c85d67fc17c5872571faa",
+      "width": 852,
+      "height": 1846
+    },
+    {
+      "file": "devices/tablet-silver-v2.png",
+      "sha256": "134a72a570fdb1a0e589c5f3825a2b005834f06736e0edb56afa334c7a0abf9b",
+      "width": 1055,
+      "height": 1491
+    }
+  ],
+  "brandRule": "ENUI: E/U/I thin, only N bold; symbol is a single prominent N",
+  "prompts": "See docs/SHOWCASE-ARTWORK.md in the project repository"
+}

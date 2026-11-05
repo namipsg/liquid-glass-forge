@@ -1,6 +1,8 @@
 # @liquid-glass-forge/core
 
-Unpublished, experimental phase 2 contracts. This package validates explicit RGBA8
+Experimental preview. API and device/performance qualification remain open; iPad is unqualified.
+
+Experimental preview of the versioned core contracts. This package validates explicit RGBA8
 source/frame descriptors and provides small color-reference functions. It does not
 render glass, read DOM content, create workers, or provide framework adapters.
 

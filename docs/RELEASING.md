@@ -1,6 +1,10 @@
 # Distribution and release procedure
 
-**Current state: private rehearsal; publication held.** The npm organization
+**Qualified-release state: held.** The owner has separately requested an
+experimental `next` preview while deferring further tests and repository updates.
+See [the preview decision and status](PREVIEW.md). The qualified procedure below
+retains its gates; the interactive preview does not claim CI provenance or a
+support freeze. The npm organization
 [`liquid-glass-forge`](https://www.npmjs.com/org/liquid-glass-forge) is owned by
 `namipsg`. Scope creation does not authorize package publication or establish
 trademark clearance. [Phase 11](PHASE-11.md) remains incomplete and its
@@ -45,7 +49,7 @@ permission and no publication step. It produces an immutable artifact for its
 exact commit. No hosted execution or repository protection configuration is
 claimed by merely committing that workflow.
 
-## Before any publication
+## Before qualified-candidate publication
 
 The strict command is `pnpm release:verify --manifest <bundle>/manifest.json --release`.
 It must reject the current development set. Release requires a clean matching

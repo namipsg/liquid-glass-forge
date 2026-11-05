@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1080" viewBox="0 0 960 720">
+  <title>Port Meridian street map</title>
+  <desc>Original fictional waterfront with a street grid, gardens, buildings, piers and a river.</desc>
+  <defs>
+    <path id="avenues" d="M-20 328H771Q826 328 868 357L980 430M345-20V422Q345 475 394 475H599Q630 475 655 457L716 413Q750 388 790 390L980 420"/>
+    <path id="streets" d="M33-20V383L12 493M113-20V425Q113 488 80 519M186-20V393Q186 450 156 492M250-20V154M292 267V365Q292 435 265 476M415-20V475M491-20V475M568-20V328L590 475M650-20V319L674 439M744-20V211L771 328V389M843-20V210L868 357M925-20V399M-20 65H980M-20 134H980M-20 193H980M-20 261H113M294 261H750L848 245H980M-20 389H345L415 413H582L650 387H754M-20 453H113L155 441H286M345 351H576M-20 524H64Q104 524 146 503Q222 460 265 476H345"/>
+  </defs>
+  <path fill="#a8d5ed" d="M0 0h960v720H0z"/>
+  <path fill="#f2f1eb" stroke="#93c2d8" stroke-width="2" d="M0 0h960v486q-87-22-144-42-53-17-84 9l-66 54q-34 28-80 21l-130-15q-114-16-169-9-73 8-139 47Q82 591 0 584z"/>
+  <path fill="#dcebd1" d="M122 145h168v111l-52 24-44 39h-72zM685 454l54-46q27-20 60-11l72 26 48 53-103-32q-53-17-84 9l-66 54-25 14zM755 73h79v50h-79zM13 397h91v48H13zM925 267h35v63h-24z"/>
+  <path fill="#ece6dc" d="M199 72h42v53h-42zM421 199h61v54h-61zM501 141h60v44h-60zM661 73h74v51h-74zM752 268h80l15 52h-72zM418 423h65v43h-65zM119 399h60v38h-60z"/>
+  <path fill="#e5e3db" d="M44 75h56v21H44zm0 28h44v22H44zm78-20h55v39h-55zm79-53h37v26h-37zm62 47h67v46h-67zm94 1h46v20h-46zm0 28h46v18h-46zm69-75h52v25h-52zm3 44h50v27h-50zm73-42h57v22h-57zm2 43h51v19h-51zm-3 27h51v20h-51zm79-21h54v40h-54zm80 64h70v38h-70zm97 2h75v31h-75zm97-72h56v45h-56zm0 70h56v37h-56zM45 205h58v46H45zm-1 69h58v42H44zm-1 67h58v36H43zm80 2h56v36h-56zm81 0h35v38h-35zm46 0h33v38h-33zm50-75h34v49h-34zm57 5h47v43h-47zm70 3h50v41h-50zm75-68h54v44h-54zm0 69h54v39h-54zm79-72h57v42h-57zm3 69h55v43h-55zm77-64h65l14 40h-79zm4 63h63l13 45h-76zm222 2h34v47h-23zm-299 74h53l-22 34h-30zm-157 17h49v35h-49zm-70 41h43v48h-43zm-158-5h47v37h-47zm-77 54h29l-27 29h-28z"/>
+  <path d="M132 175h105v55h-86v40h54l40-29h28v-88M151 230l53-52M205 270l37 0M705 471l40-36 51-11 39 11M11 424h87" fill="none" stroke="#f7faf2" stroke-width="3" stroke-linecap="round"/>
+  <path d="M133 201q14-18 38-8l23 14-17 16-24 1z" fill="#b6dcee"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <use href="#streets" stroke="#dddcd4" stroke-width="10"/>
+    <use href="#streets" stroke="#fff" stroke-width="8"/>
+    <use href="#avenues" stroke="#d8d5c9" stroke-width="17"/>
+    <use href="#avenues" stroke="#fffdf8" stroke-width="14"/>
+    <path d="M302 496q80-8 150 3l134 16q44 6 74-18l67-55m-727 126q74 8 140-34l74-35" stroke="#f9fbf4" stroke-width="5"/>
+    <path d="M428 512l-5 64h11l7-61m57 6-7 82h13l8-80m59 6-7 47h13l7-46m257-77-26 59 13 5 26-60m38 12-16 44 10 4 18-44" fill="#e5ded1" stroke="#c7c2b6" stroke-width="2"/>
+  </g>
+  <g font-family="system-ui, sans-serif" text-anchor="middle" fill="#686e72" font-size="9" font-weight="550">
+    <text x="154" y="63">North Street</text><text x="466" y="132">Market Street</text><text x="749" y="191">Museum Street</text><text x="123" y="326">Meridian Avenue</text><text x="648" y="326">Meridian Avenue</text><text x="481" y="473">Quayside Drive</text><text x="796" y="383">East Quay</text><text x="98" y="518" transform="rotate(-18 98 518)">Marina Walk</text><text x="343" y="220" transform="rotate(-90 343 220)">Cedar Avenue</text><text x="489" y="297" transform="rotate(-90 489 297)">Union Street</text>
+  </g>
+  <g font-family="system-ui, sans-serif" text-anchor="middle">
+    <text x="192" y="293" fill="#466743" font-size="11" font-weight="650">CONSERVATORY PARK</text>
+    <text x="776" y="451" fill="#466743" font-size="11" font-weight="650">EAST QUAY PARK</text>
+    <text x="422" y="118" fill="#626975" font-size="14" font-weight="650" letter-spacing="2.4">OLD MERIDIAN</text>
+    <text x="620" y="588" fill="#386883" font-size="17" font-weight="500" letter-spacing="2.6" transform="rotate(-8 620 588)">MERIDIAN RIVER</text>
+  </g>
+</svg>

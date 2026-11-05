@@ -35,8 +35,10 @@ export class CpuDeadlineScheduler {
         if (signal?.aborted) { abort(); return; }
         const remaining = deadline - performance.now();
         if (remaining <= 0) { finish(); return; }
-        if (remaining > 4 || typeof MessageChannel !== 'function') {
-          timer = setTimeout(check, Math.max(1, Math.floor(remaining - 1))); return;
+        if (remaining > 8 || typeof MessageChannel !== 'function') {
+          // Leave room for browser timer coalescing before the active-only
+          // posted-task tail. No ports or callbacks run once a wait settles.
+          timer = setTimeout(check, Math.max(1, Math.floor(remaining - 8))); return;
         }
         if (!this.#channel) {
           this.#channel = new MessageChannel();

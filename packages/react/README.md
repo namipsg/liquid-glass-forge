@@ -1,6 +1,8 @@
 # Liquid Glass Forge React
 
-Private experimental `0.0.0-dev`. Tested peers: React and React DOM **19.3.1**.
+Experimental preview. API and device/performance qualification remain open; iPad is unqualified.
+
+Experimental preview `0.1.0-rc.1`. Pinned peers: React and React DOM **19.3.1**.
 Framework peers are imported, never bundled into this package. The ESM entry
 retains `use client` for Next.js client boundaries and has public JSX declarations.
 

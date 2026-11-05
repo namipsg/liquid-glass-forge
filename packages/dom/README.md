@@ -1,6 +1,8 @@
 # Liquid Glass Forge DOM sources
 
-Private experimental `0.0.0-dev` sources, coordinate mapping and vanilla host/lifecycle.
+Experimental preview. API and device/performance qualification remain open; iPad is unqualified.
+
+Experimental preview `0.1.0-rc.1` sources, coordinate mapping and vanilla host/lifecycle.
 Requires exact matching core/CPU package versions. ESM and TypeScript
 declarations are included; imports are SSR-safe and start no timers or network.
 

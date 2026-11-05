@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "kind": "experimental-preview",
+  "ownerDecisionDate": "2026-11-03",
+  "ownerDirective": "your approach to tests is too aggressive. skip tests are do the rest, then we will do tests and update the repo.",
+  "scope": "@liquid-glass-forge",
+  "owner": "namipsg",
+  "version": "0.1.0-rc.1",
+  "tag": "next",
+  "access": "public",
+  "packages": ["core", "cpu", "dom", "webgl", "react", "vue", "angular"],
+  "testsDeferred": true,
+  "repositoryUpdateDeferred": true,
+  "qualifiedRelease": false,
+  "authentication": "Owner interactive npm login; task-specific userconfig removed after publication",
+  "provenance": "No CI provenance claimed for the initial interactive preview",
+  "qualifiedPublisher": "release/policy.json and its existing qualification/protection gates remain unchanged"
+}

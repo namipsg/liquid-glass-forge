@@ -20,7 +20,15 @@ export function assertFrozenPlan(plan) {
   }
   if(!Number.isSafeInteger(plan.soakMinimumMs)||plan.soakMinimumMs<1800000||!Number.isSafeInteger(plan.lifecycleCycles)||plan.lifecycleCycles<100)throw Error('Reduced or missing lifecycle/soak requirement');
   for(const [key,expected]of [['requiredAdapters',['vanilla','react','vue','angular']],['requiredBackends',['cpu','worker','webgl']]])if(!Array.isArray(plan[key])||plan[key].length!==expected.length||expected.some(value=>!plan[key].includes(value)))throw Error('Reduced '+key+' matrix');
-  for(const id of ['mac-chrome-m4','mac-safari-m4','android-a04s','iphone','ipad','additional-desktop-gpu'])if(!plan.requiredEnvironments?.some(e=>e.id===id&&e.physical===true))throw Error('Missing physical environment '+id);
+  const ids=['mac-chrome-m4','mac-safari-m4','android-a04s','iphone','ipad','additional-desktop-gpu'];
+  if(plan.schemaVersion===2) {
+    if(plan.scopeDecision?.date!=='2026-11-03'||plan.scopeDecision?.quote!=='Release with iPad explicitly unqualified; keep that work open'||JSON.stringify(plan.scopeDecision.excludedEnvironmentIds)!=='["ipad"]')throw Error('Missing exact owner-approved first-release scope decision');
+    const deferred=plan.deferredEnvironments;
+    if(deferred?.length!==1||deferred[0].id!=='ipad'||deferred[0].physical!==true||deferred[0].supported!==false||deferred[0].status!=='unqualified'||deferred[0].workOpen!==true||plan.requiredEnvironments?.some(e=>e.id==='ipad'))throw Error('iPad must remain explicitly unqualified with its work open');
+    ids.splice(ids.indexOf('ipad'),1);
+  }else if(plan.schemaVersion!==1)throw Error('Unknown qualification scope schema');
+  if(plan.requiredEnvironments?.length!==ids.length||new Set(plan.requiredEnvironments.map(e=>e.id)).size!==ids.length)throw Error('Unexpected physical environment matrix');
+  for(const id of ids)if(!plan.requiredEnvironments?.some(e=>e.id===id&&e.physical===true))throw Error('Missing physical environment '+id);
 }
 export function originalBenchmarkPass(run,backend,plan) {
   const limit=plan[backend],frames=run?.rawFrames;
@@ -66,7 +74,7 @@ export function soakGates(receipt,backend,plan,artifacts) {
     if(!summary||summary.frames<90||!finite(summary.ageP95Ms)||summary.ageP95Ms>limit.ageMs||!finite(summary.intervalP95Ms)||summary.intervalP95Ms>limit.intervalMs||!finite(summary.knownImageBytesMax)||summary.knownImageBytesMax>limit.bytes)reasons.push(adapter+' soak budgets missing or failing');
     if(!receipt.cycles?.some(c=>c.backend===backend&&c.count>=plan.lifecycleCycles&&c.adapters?.includes(adapter)))reasons.push(adapter+' 100-cycle evidence missing');
     if(!cleanup||cleanup.active||cleanup.subscriptions||cleanup.workers||cleanup.leased)reasons.push(adapter+' cleanup not proven');
-    if(!receipt.samples?.length||receipt.samples.some(s=>{const a=s.adapters?.find(a=>a.adapter===adapter);return !a||a.visibility!=='visible'||a.active!==1||a.subscriptions!==1||a.errors?.length||a.targets?.length!==limit.count||a.targets.some(t=>t.width!==limit.width||t.height!==limit.height);}))reasons.push(adapter+' soak visibility/workload geometry not proven');
+    if(!receipt.samples?.length||receipt.samples.some(s=>{const a=s.adapters?.find(a=>a.adapter===adapter);return !a||a.visibility!=='visible'||a.active!==1||a.subscriptions!==1||a.errors?.length||a.targets?.length!==limit.count||a.targets.some(t=>t.width!==limit.width||t.height!==limit.height||t.fullyOnScreen!==true);}))reasons.push(adapter+' soak visibility/workload geometry not proven');
   }
   return [...new Set(reasons)];
 }
@@ -83,5 +91,5 @@ export function qualificationMatrix(plan,candidate,devices,soaks,visualRows=[]) 
     const backends=plan.requiredBackends.map(backend=>({backend,reasons:soakGates(soaks.find(s=>s.environmentId===environment.id&&s.backend===backend),backend,plan,candidate.artifacts)}));
     return {...environment,status:reasons.length||visualReasons.length||backends.some(b=>b.reasons.length)?'held':'qualified',reasons,visualReasons,soaks:backends};
   });
-  return {schemaVersion:1,status:environments.every(e=>e.status==='qualified')?'qualified-beta-candidate':'hold',betaFrozen:environments.every(e=>e.status==='qualified'),environments};
+  return {schemaVersion:1,status:environments.every(e=>e.status==='qualified')?'qualified-beta-candidate':'hold',betaFrozen:environments.every(e=>e.status==='qualified'),environments,...(plan.schemaVersion===2?{scopeDecision:plan.scopeDecision,deferredEnvironments:plan.deferredEnvironments,originalQualificationStillOpen:true}:{})};
 }

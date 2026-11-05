@@ -1,6 +1,8 @@
 # Liquid Glass Forge Vue
 
-Private experimental `0.0.0-dev`. The exact tested Vue peer is **3.5.44**.
+Experimental preview. API and device/performance qualification remain open; iPad is unqualified.
+
+Experimental preview `0.1.0-rc.1`. The pinned Vue peer is **3.5.44**.
 Vue remains external; the package ships ESM and declarations without bundling it.
 
 Import `GlassSurface`, `GlassSceneProvider` and `useGlassSurface` from

@@ -54,7 +54,15 @@ export function qualificationRun(backend) {
   run.renderer = {
     initialize(signal) { run.active++; run.initialized++; let clean; try { clean = renderer.initialize(signal); } catch (e) { run.active--; throw e; }
       let closed = false; return () => { if (!closed) { closed = true; clean(); batch = undefined; run.active--; run.cleaned++; } }; },
-    renderBatch(requests, signal) { observePresentation(run); batch = { sequence: run.sequence, start: run.tickStarted ?? performance.now(), count: requests.length, seen: new Set() }; return renderer.renderBatch(requests, signal); },
+    renderBatch(requests, signal) {
+      // Freeze the original measured backing workload on both DPR=1 desktops
+      // and high-DPR phones. CSS targets remain 320x180; device DPR is reported
+      // unchanged. The qualification adapter, not a browser setting, explicitly
+      // requests the canonical output resolution from the real renderer.
+      const canonical = requests.map(request => ({ ...request, width: backend === 'webgl' ? 640 : 320, height: backend === 'webgl' ? 360 : 180 }));
+      observePresentation(run); batch = { sequence: run.sequence, start: run.tickStarted ?? performance.now(), count: canonical.length, seen: new Set() };
+      return renderer.renderBatch(canonical, signal);
+    },
     render(request, signal) { return Promise.resolve(this.renderBatch([request], signal)).then(frames => frames[0]); },
     releaseSurface: id => renderer.releaseSurface(id),
   };

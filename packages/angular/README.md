@@ -1,6 +1,8 @@
 # Liquid Glass Forge Angular
 
-Private experimental `0.0.0-dev`. Exact tested peers: Angular core/common22.2.4
+Experimental preview. API and device/performance qualification remain open; iPad is unqualified.
+
+Experimental preview `0.1.0-rc.1`. Pinned peers: Angular core/common22.2.4
 and RxJS7.8.2. The ng-packagr output uses Angular Package Format, partial
 compilation, FESM2022 and bundled declarations. Angular/RxJS remain external.
 Pack the prepared `packages/angular/dist` directory, not this source directory.

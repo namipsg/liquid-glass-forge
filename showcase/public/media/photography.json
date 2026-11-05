@@ -1,0 +1,42 @@
+{
+  "mode": "built-in ImageGen",
+  "usage": "Original generated photographs for the local showcase",
+  "assets": [
+    {
+      "file": "pacific-coast.jpg",
+      "sourceImage": "exec-fddab09f-c2bf-4c98-9a63-438d1b7b9555.png",
+      "prompt": "Use case: photorealistic-natural. Create an original fine-art editorial landscape photograph for a browser and Photos glass-controls demo. Rugged Pacific Northwest coastline seen from a low bluff, deep blue water, foamy surf curling around dark slate rock, dune grass in foreground, lightly overcast morning with cool natural light. Vertical 4:5 composition with detail across the lower half so refraction is visible. Camera-realistic textures, restrained contrast, believable depth. No people, lettering, logos, watermarks, illustration or UI.",
+      "sha256": "42c475a0c978a358ee9bb3fe2e6751958adb1a0d42fc912a59cdc0516c4c9520"
+    },
+    {
+      "file": "sandstone-trail.jpg",
+      "sourceImage": "exec-01695529-eddd-4ee1-931d-1fb3f9c128a7.png",
+      "prompt": "Use case: photorealistic-natural. Original editorial landscape photograph for a Photos demo, portrait 4:5. Warm late-afternoon sandstone canyon with layered rock faces, a winding narrow trail, sparse hardy shrubs, subdued dusty terracotta and pale blue sky. Real geological textures and restrained camera color, crisp detail through the middle and lower thirds. No people, buildings, typography, watermarks, illustration or UI.",
+      "sha256": "0c81b57c97a0e4fa6cb04216143cac498f556c3fb0ffc8dd63d1d17289b281ef"
+    },
+    {
+      "file": "alpine-blue-hour.jpg",
+      "sourceImage": "exec-645b90a7-2bf4-47be-a843-4a8b7eb68cf5.png",
+      "prompt": "Use case: photorealistic-natural. Original portrait 4:5 editorial landscape photo for a Photos demo. Alpine lake at blue hour, distant blue-violet ridgeline, reflected mountains broken by small ripples, a dark rocky shore with fine natural textures. Realistic exposure, cinematic but understated, still and spacious. No people, typography, watermark, illustration or UI.",
+      "sha256": "4af56c364af244961d8c1fd22e4cc2c3881c4d26dfef7d7a369afa85b49d1fcf"
+    },
+    {
+      "file": "slow-light-studio.jpg",
+      "sourceImage": "exec-695579eb-90e0-4d7e-96e5-5def6e7133c3.png",
+      "prompt": "Use case: photorealistic-natural. Square original photographic album cover for an ambient track called Slow Light, with zero typography. A quiet modern recording studio at twilight, close-up of the edge of an unbranded vinyl record and a single softly glowing frosted lamp, blue-violet window light, warm reflections, fine grain, camera-real materials and subdued highlights. Tactile composition that reads at thumbnail size. No words, logos, watermarks, illustration or UI.",
+      "sha256": "4c82e54e3ae537f2e8c2d3079966ab917e4b1ce7b9aa2440ff46c9e9c2ad7ada"
+    },
+    {
+      "file": "port-meridian-aerial.jpg",
+      "sourceImage": "exec-897ece35-2125-48f2-ba1b-ff2e83ba3467.png",
+      "prompt": "Use case: photorealistic-natural. Create an original orthographic aerial photograph, 4:3 landscape, for a fictional city navigation demo called Port Meridian. Nadir 90-degree straight-down view with no perspective horizon. A small Pacific Northwest river town with a deep blue gently curving river running top to bottom along the right quarter of the image. On the left and center, a coherent dense grid of streets, planted blocks, low-rise brick buildings, one botanical park with a large rectangular glass greenhouse near the upper-left middle, and a waterfront promenade just inland from the river. Crisp realistic geographic detail at every scale, muted natural satellite color and soft overcast daylight. No labels, letters, pins, map UI, borders, logos, illustration or watermarks.",
+      "sha256": "b121da3e08469f189b7a75d03b906f9f381ff03a581a6ac9ee4c6f8f87e18976"
+    },
+    {
+      "file": "port-meridian-waterfront.jpg",
+      "sourceImage": "exec-735278cc-0ccd-4ff0-b7b4-9930514a2221.png",
+      "prompt": "Use case: photorealistic-natural. Original wide editorial aerial photograph for a web Maps showcase card. Fictional Pacific Northwest waterfront neighborhood Port Meridian, with a leafy urban botanical garden and a rectangular glass conservatory, believable low-rise brick blocks, a pedestrian quay, and a blue river along the right. Slight oblique drone perspective from above, natural overcast daylight, calm green and blue palette, authentic city planning and photographic textures. No labels, letters, logos, pins, map UI, illustration or watermarks.",
+      "sha256": "650ca2d3388a035a48282fe4d9dcc7664d9f67362960a5276e34503369e0d00f"
+    }
+  ]
+}
