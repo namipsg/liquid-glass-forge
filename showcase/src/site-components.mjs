@@ -1,6 +1,14 @@
 import{createGlassScene}from'@liquid-glass-forge/dom';
 import'./site-components.css';
 import'./site-theme.css';
+
+// Safari can evaluate the entry module before linked stylesheets are applied.
+// Glass hosts need their styled display type before they can be attached.
+if (document.readyState !== 'complete' &&
+    [...document.querySelectorAll('link[rel="stylesheet"]')].some(link => !link.sheet)) {
+  await new Promise(resolve => window.addEventListener('load', resolve, { once: true }));
+}
+
 function animateDisclosures(root, signal) {
  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
  for (const details of root.querySelectorAll('.project-questions > details, details.support-records')) {

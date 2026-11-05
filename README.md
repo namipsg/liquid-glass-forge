@@ -8,7 +8,8 @@ Integrate it with vanilla JavaScript, React, Vue, or Angular.
 [Examples](https://namipsg.github.io/liquid-glass-forge/examples.html) ·
 [Framework and device support](https://namipsg.github.io/liquid-glass-forge/support.html) ·
 [Performance](#performance) ·
-[Install by framework](#quick-start)
+[Install by framework](#quick-start) ·
+[Roadmap](#roadmap)
 
 [![npm preview](https://img.shields.io/npm/v/%40liquid-glass-forge%2Fdom/next?label=npm%20preview)](https://www.npmjs.com/package/@liquid-glass-forge/dom/v/0.1.0-rc.1)
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -102,6 +103,21 @@ repository build, including optics work ahead of the npm package. API stability,
 sustained performance, and broad device qualification remain open. The iPad
 example is a Simulator-based study, and physical iPad qualification is pending.
 See the [preview notes](docs/PREVIEW.md) and [qualification record](docs/SUPPORT.json).
+
+## Roadmap
+
+The web rendering engine is available as an experimental npm preview for
+vanilla JavaScript, React, Vue, and Angular.
+
+| Upcoming | Direction |
+| --- | --- |
+| [ENUI](https://namipsg.github.io/liquid-glass-forge/#enui) | A web UI library built on Forge, starting with controls such as a glass button and segmented control. |
+| Flutter | A Dart implementation with Flutter widgets. |
+| Kotlin | A Kotlin implementation. |
+
+Release dates and supported platforms will be documented with each preview.
+See the [website roadmap](https://namipsg.github.io/liquid-glass-forge/#roadmap)
+and [development notes](docs/FUTURE.md).
 
 ## Documentation
 

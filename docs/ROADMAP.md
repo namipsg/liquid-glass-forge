@@ -1,6 +1,6 @@
 # Foundation roadmap
 
-**Status: Phase 12 distribution preparation implemented; qualification and publication held.**
+**Status: The experimental `0.1.0-rc.1` npm preview is published. Qualification for beta and stable releases remains open.**
 [Distribution rehearsal and limits](PHASE-12.md) record npm ownership, immutable
 artifacts and the protected release design. Phase 11 acceptance remains incomplete.
 [Physical evidence and remaining gates](PHASE-11.md) include one full worker soak,
@@ -44,9 +44,9 @@ These milestones describe acceptance boundaries, not announced release versions.
 
 For each change, specify one observable behavior, reproduce a failure or run a falsifiable experiment, implement the smallest change, verify it and retain evidence. Split changes that cannot be reviewed or independently validated. Changes to equations, tolerances, source capabilities or published support require an explicit design decision.
 
-The next product layers are documented in [future development](FUTURE.md). Motion, component catalogs, React Native and Flutter remain separately scoped work.
+The next product layers are documented in [future development](FUTURE.md). Motion, component catalogs, React Native, Flutter and Kotlin remain separately scoped work.
 
-## Current boundary — 3 November 2026
+## Qualification record — 3 November 2026
 
 Phase 4 adds stable decorative hosts, CSS/opaque material, bounded lifecycle and
 shared dirty/visibility scheduling. All seven packages remain private at `0.0.0-dev`.

@@ -23,15 +23,16 @@
 @media(max-width:850px){.browser-preview .mini-tablet.png-preview{right:-46px;width:230px;height:325px;top:60px}}
 @media(max-width:540px){.browser-preview .mini-tablet.png-preview{right:-15px;width:230px;height:325px;top:60px}}
 
-.performance-section {
+.performance-section, .roadmap-section {
   padding-block: var(--section-space);
   scroll-margin-top: 30px;
 }
-.performance-grid, .performance-notes {
+.roadmap-section { border-top: 1px solid var(--line); }
+.performance-grid, .performance-notes, .roadmap-grid {
   display: grid;
   gap: clamp(14px, 2vw, 24px);
 }
-.performance-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.performance-grid, .roadmap-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .performance-card {
   display: flex;
   flex-direction: column;
@@ -45,6 +46,7 @@
   font-size: 16px;
   font-weight: 650;
 }
+.roadmap-grid h3 { margin-bottom: 8px; }
 .performance-stat {
   margin: 18px 0 3px;
   font-size: clamp(27px, 3.25vw, 45px);
@@ -89,6 +91,6 @@
 .performance-notes h3 { margin-bottom: 8px; }
 .performance-guide { margin-top: 4px; }
 @media (max-width: 800px) {
-  .performance-grid, .performance-notes { grid-template-columns: 1fr; }
+  .performance-grid, .performance-notes, .roadmap-grid { grid-template-columns: 1fr; }
   .performance-stat { margin-top: 12px; }
 }

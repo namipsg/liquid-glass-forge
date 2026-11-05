@@ -12,6 +12,7 @@
 | Component systems | Independently authored Apple-inspired controls | components-dom, components-react, components-vue and components-angular packages |
 | React Native | Native source, drawing and motion adapters, qualified on iOS/Android | @liquid-glass-forge/react-native |
 | Flutter | Dart implementation and platform-qualified widgets/materials | liquid_glass_forge on pub.dev |
+| Kotlin | Kotlin implementation with its own rendering and source integration | To be determined |
 
 Names denote proposed boundaries, not reserved names or available packages. Unqualified names in the table use the @liquid-glass-forge scope.
 
@@ -33,6 +34,7 @@ One driver owns each animated value. The renderer consumes a revisioned frame sn
 | Component pilots | Notification/toast, glass button and segmented selection control | Correct keyboard/touch/focus/announcement behavior with motion disabled and opaque fallback |
 | React Native | Native material APIs versus explicit-source drawing, source access and lifecycle | Clean consumer builds, actual iOS/Android evidence and explicit platform capability tiers |
 | Flutter | Portable specification/fixtures in Dart, drawing strategy and animation lifecycle | Widget/numerical checks, clean package consumer and physical-device qualification |
+| Kotlin | Portable optical fixtures, source access and rendering on the target platforms | Clean consumer build and platform-specific verification |
 
 Component pilots can later lead to toolbars, tab bars, sidebars, search surfaces, menus, popovers, dialogs/sheets, switches, sliders and feedback elements. Each component needs its own semantic and accessibility contract. These are independent counterparts inspired by public Apple guidance, not Apple-authored web components or an Apple-endorsed SDK.
 
