@@ -18,6 +18,24 @@ try{
  for(const a of receipt.artifacts){const folder=path.join(consumer,'node_modules/@liquid-glass-forge',a.name);if((await lstat(folder)).isSymbolicLink())throw Error('Expected physical package');const manifest=JSON.parse(await readFile(path.join(folder,'package.json')));a.version=manifest.version;const inspected=inspectTarball(path.join(root,a.file),a.name,a.version);for(const [file,expected]of Object.entries(inspected.fileSha256))if(sha(await readFile(path.join(folder,file)))!==expected)throw Error('Installed showcase bytes differ: '+a.name+'/'+file);}
  await cp(path.join(consumer,'package-lock.json'),path.join(dir,'package-lock.json'));
  await command(process.execPath,['node_modules/vite/bin/vite.js','build','--base','./'],'build.txt');
- const version=receipt.artifacts[0].version;let installable=publicShowcase||!localCandidate;try{if(installable)for(const name of ['core','cpu','dom','webgl','react','vue','angular']){const response=await fetch('https://registry.npmjs.org/@liquid-glass-forge%2f'+name+'/'+encodeURIComponent(version),{signal:AbortSignal.timeout(10000)});if(!response.ok){installable=false;break;}const record=await response.json();if(record.version!==version||(preview&&record.dist?.integrity!==preview.bundle.artifacts.find(a=>a.name===name).integrity)){installable=false;break;}}}catch{installable=false;}
- await writeFile(path.join(consumer,'dist/release.json'),JSON.stringify({version,installable,localCandidate,publicShowcase}));await cp(path.join(consumer,'dist'),path.join(dir,'www'),{recursive:true});await rm('showcase/dist',{recursive:true,force:true});await cp(path.join(dir,'www'),'showcase/dist',{recursive:true});receipt.pass=true;receipt.assets=path.relative(root,path.join(dir,'www'));receipt.version=version;receipt.installable=installable;
+ const version=receipt.artifacts[0].version;
+ const names=['core','cpu','dom','webgl','react','vue','angular'];
+ async function published(candidate){
+  try{
+   const responses=await Promise.all(names.map(name=>fetch('https://registry.npmjs.org/@liquid-glass-forge%2f'+name+'/'+encodeURIComponent(candidate),{signal:AbortSignal.timeout(10000)})));
+   if(responses.some(r=>!r.ok))return false;
+   const records=await Promise.all(responses.map(r=>r.json()));
+   return records.every((record,i)=>record.version===candidate&&(!preview||record.dist?.integrity===preview.bundle.artifacts.find(a=>a.name===names[i]).integrity));
+  }catch{return false;}
+ }
+ let installVersion;
+ if(publicShowcase||!localCandidate){
+  if(await published(version))installVersion=version;
+  else if(publicShowcase){
+   const initial=JSON.parse(await readFile('release/preview-policy.json')).version;
+   if(initial!==version&&await published(initial))installVersion=initial;
+  }
+ }
+ const installable=!!installVersion;
+ await writeFile(path.join(consumer,'dist/release.json'),JSON.stringify({version,installable,installVersion,localCandidate,publicShowcase}));await cp(path.join(consumer,'dist'),path.join(dir,'www'),{recursive:true});await rm('showcase/dist',{recursive:true,force:true});await cp(path.join(dir,'www'),'showcase/dist',{recursive:true});receipt.pass=true;receipt.assets=path.relative(root,path.join(dir,'www'));receipt.version=version;receipt.installable=installable;
 }catch(error){receipt.error=error.stack;process.exitCode=1;}finally{if(previous===undefined)delete process.env.LGF_DISTRIBUTION_MANIFEST;else process.env.LGF_DISTRIBUTION_MANIFEST=previous;await rm(consumer,{recursive:true,force:true});receipt.endedAt=new Date().toISOString();await writeFile(path.join(dir,'receipt.json'),JSON.stringify(receipt,null,2));console.log(JSON.stringify({dir,pass:receipt.pass,error:receipt.error}));}

@@ -1,6 +1,6 @@
 {
   "name": "@liquid-glass-forge/react",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0-rc.2",
   "private": false,
   "type": "module",
   "sideEffects": false,
@@ -22,12 +22,13 @@
     "README.md"
   ],
   "dependencies": {
-    "@liquid-glass-forge/dom": "0.1.0-rc.1"
+    "@liquid-glass-forge/dom": "0.1.0-rc.2"
   },
   "peerDependencies": {
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
+  "homepage": "https://namipsg.github.io/liquid-glass-forge/?framework=react#developers",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namipsg/liquid-glass-forge.git",

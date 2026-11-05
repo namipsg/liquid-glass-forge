@@ -10,6 +10,38 @@ support freeze. The npm organization
 trademark clearance. [Phase 11](PHASE-11.md) remains incomplete and its
 [support candidate](SUPPORT.json) remains held.
 
+## Experimental npm releases from GitHub
+
+The [npm preview workflow](https://github.com/namipsg/liquid-glass-forge/actions/workflows/npm-preview.yml)
+has a manual prepare step and a separate manual stage step. The staging job
+uses GitHub OIDC. It submits the synchronized prerelease to npm for maintainer
+review with the `next` tag. The qualified-release policy below remains separate.
+
+1. In the settings for each of the seven [npm packages](https://www.npmjs.com/org/liquid-glass-forge),
+   add a GitHub Actions trusted publisher. Set the owner to `namipsg`, repository
+   to `liquid-glass-forge`, workflow to `npm-preview.yml`, and environment to
+   `npm-preview`. Keep the permissions stage-only. Restrict that GitHub
+   environment to `main`.
+2. Synchronize the workspace and all package versions and internal dependencies
+   before preparing a release. Run the workflow on `main` with `operation=prepare`.
+   It runs focused software checks, builds and packs twice, and uploads the seven
+   tarballs and their manifest. The workflow summary provides the manifest digest.
+3. Review the tarballs and copy the successful run ID and manifest digest.
+   Dispatch `operation=stage` on the same `main` commit. It checks the digest,
+   commit, package bytes, and registry version availability before submitting.
+4. Review all seven staged packages on npm and approve them with 2FA in
+   dependency order (core, cpu, dom, webgl, react, vue, angular).
+   If staging stops partway, compare the receipt with npm’s staged list before
+   retrying. npm requires a staged version to be resolved before resubmission.
+5. Verify the seven exact versions and their `next` tags. Rerun the Pages
+   workflow to refresh its pinned install links after the full set is public.
+
+The npm README embeds the same public GIF across all seven packages. Using the
+shared URL keeps the runtime tarballs small. npm displays the new README and
+homepage when the staged version is approved and processed. See
+[npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) and
+[npm staged publishing](https://docs.npmjs.com/staged-publishing/).
+
 ## Build and review immutable artifacts
 
 Use Node **24.21.0**, npm **11.19.0** and pnpm **10.34.5**. From a clean identified
@@ -88,7 +120,7 @@ gates, refuses token fallback, and publishes the original tarballs with `next`,
 public access and provenance. It never rebuilds after approval. Before any write,
 all seven registry versions are checked for collisions. An existing byte-identical
 version can be retained during partial-set recovery; a collision aborts the plan.
-No release workflow template is active and no package has been published.
+The qualified publication workflow remains inactive.
 
 ## Verify the registry before promotion
 

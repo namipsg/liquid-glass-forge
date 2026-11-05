@@ -1,8 +1,23 @@
 # @liquid-glass-forge/cpu
 
-Experimental preview. API and device/performance qualification remain open; iPad is unqualified.
+Bounded JavaScript glass rendering with optional worker execution.
 
-Experimental preview JavaScript CPU optics, version `0.1.0-rc.1`.
+[![A live glass lens bends the lettering beneath it](https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/docs/assets/glass-playground.gif)](https://namipsg.github.io/liquid-glass-forge/#playground)
+
+[Live showcase](https://namipsg.github.io/liquid-glass-forge/#playground) · [Examples](https://namipsg.github.io/liquid-glass-forge/examples.html) · [Documentation](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-5.md) · [Support](https://namipsg.github.io/liquid-glass-forge/support.html)
+
+## Install
+
+```sh
+npm install @liquid-glass-forge/cpu@0.1.0-rc.2
+```
+
+Keep the Forge packages at matching versions. This is an experimental preview.
+The [support guide](https://namipsg.github.io/liquid-glass-forge/support.html) describes browser and device qualification.
+
+## Usage
+
+Experimental preview JavaScript CPU optics, version `0.1.0-rc.2`.
 Uses explicit core RGBA8 sources. Imports do not acquire browser resources.
 `prepareCpuSource` snapshots pixels into private linear premultiplied storage;
 `renderCpu` implements `rounded-refraction-v1`, optionally extending it with

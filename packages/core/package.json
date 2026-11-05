@@ -1,6 +1,6 @@
 {
   "name": "@liquid-glass-forge/core",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0-rc.2",
   "description": "Experimental, renderer-independent Liquid Glass Forge contracts and color reference functions",
   "private": false,
   "type": "module",
@@ -22,6 +22,7 @@
     "NOTICE",
     "README.md"
   ],
+  "homepage": "https://namipsg.github.io/liquid-glass-forge/#playground",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namipsg/liquid-glass-forge.git",

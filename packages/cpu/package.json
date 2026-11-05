@@ -1,6 +1,6 @@
 {
   "name": "@liquid-glass-forge/cpu",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0-rc.2",
   "description": "Experimental JavaScript CPU optics for explicit Liquid Glass Forge pixel sources",
   "private": false,
   "type": "module",
@@ -26,8 +26,9 @@
     "README.md"
   ],
   "dependencies": {
-    "@liquid-glass-forge/core": "0.1.0-rc.1"
+    "@liquid-glass-forge/core": "0.1.0-rc.2"
   },
+  "homepage": "https://namipsg.github.io/liquid-glass-forge/#playground",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namipsg/liquid-glass-forge.git",

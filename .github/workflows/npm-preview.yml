@@ -1,0 +1,85 @@
+name: Stage experimental packages on npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Prepare tarballs or submit approved tarballs to npm staging
+        type: choice
+        options: [prepare, stage]
+        default: prepare
+      preparation_run:
+        description: Successful prepare run ID (stage only)
+        type: string
+      manifest_sha256:
+        description: Reviewed manifest SHA-256 (stage only)
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    if: github.repository == 'namipsg/liquid-glass-forge' && github.ref == 'refs/heads/main' && inputs.operation == 'prepare'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - run: npm install --global npm@11.19.0 pnpm@10.34.5 --ignore-scripts
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm check && pnpm test:unit && pnpm test:cpu && pnpm test:webgl && pnpm test:qualification
+      - run: pnpm release:prepare --output private/npm-stage
+      - run: pnpm release:verify --manifest private/npm-stage/manifest.json
+      - name: Record review digest
+        run: sha256sum private/npm-stage/manifest.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: npm-preview-${{ github.sha }}
+          path: private/npm-stage/
+          if-no-files-found: error
+          retention-days: 14
+
+  stage:
+    if: github.repository == 'namipsg/liquid-glass-forge' && github.ref == 'refs/heads/main' && inputs.operation == 'stage'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: npm-preview
+    concurrency:
+      group: npm-preview-stage
+      cancel-in-progress: false
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - run: npm install --global npm@11.19.0 --ignore-scripts
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.preparation_run }}
+          name: npm-preview-${{ github.sha }}
+          path: private/npm-stage
+      - name: Submit for npm maintainer review
+        env:
+          APPROVED_MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+        run: node scripts/stage-npm-preview.mjs private/npm-stage/manifest.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: npm-stage-receipt
+          path: private/npm-stage/staging-receipt.json
+          if-no-files-found: ignore
+          retention-days: 14

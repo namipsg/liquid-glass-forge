@@ -1,6 +1,6 @@
 {
   "name": "@liquid-glass-forge/angular",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0-rc.2",
   "private": false,
   "type": "module",
   "sideEffects": false,
@@ -14,9 +14,10 @@
     "rxjs": "7.8.2"
   },
   "dependencies": {
-    "@liquid-glass-forge/dom": "0.1.0-rc.1",
+    "@liquid-glass-forge/dom": "0.1.0-rc.2",
     "tslib": "2.9.1"
   },
+  "homepage": "https://namipsg.github.io/liquid-glass-forge/?framework=angular#developers",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namipsg/liquid-glass-forge.git",

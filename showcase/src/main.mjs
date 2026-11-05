@@ -230,11 +230,12 @@ let installCommand='';
 $('#copy-install').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(installCommand);$('#copy-install').textContent='Copied ✓';}catch{$('#copy-status').textContent='Select the install command and copy it with your keyboard.';}});
 Promise.resolve(release).then(release=>{
   if(release?.localCandidate&&!release.publicShowcase){$('#release-status').textContent='Local material candidate. The revised lens and interactive CPU policy are unpublished and awaiting review.';return;}
-  if(!release?.installable||!/^\d+\.\d+\.\d+-rc\.\d+$/.test(release.version))return;
-  $('#release-status').textContent='Experimental '+release.version+' is on npm. '+(release.publicShowcase?'This showcase includes newer renderer work. ':'')+'Device and performance qualification remain open.';
-  installCommand='npm install @liquid-glass-forge/dom@'+release.version+' @liquid-glass-forge/webgl@'+release.version;
+  const version=release?.installVersion??release?.version;
+  if(!release?.installable||!/^\d+\.\d+\.\d+-rc\.\d+$/.test(version))return;
+  $('#release-status').textContent='Experimental '+version+' is on npm. '+(release.publicShowcase?'This showcase includes newer renderer work. ':'')+'Device and performance qualification remain open.';
+  installCommand='npm install @liquid-glass-forge/dom@'+version+' @liquid-glass-forge/webgl@'+version;
   $('#install-command').textContent=installCommand;$('#install-preview').hidden=false;
-  for(const name of ['core','cpu','dom','webgl','react','vue','angular']){const link=document.createElement('a');link.href='https://www.npmjs.com/package/@liquid-glass-forge/'+name+'/v/'+release.version;link.textContent=name;$('#package-links').append(link);}
+  for(const name of ['core','cpu','dom','webgl','react','vue','angular']){const link=document.createElement('a');link.href='https://www.npmjs.com/package/@liquid-glass-forge/'+name+'/v/'+version;link.textContent='@liquid-glass-forge/'+name;$('#package-links').append(link);}
 }).catch(()=>{});
 window.lgfShowcase={get diagnostics(){return{...diagnostics,localCandidate,material,backend,toolbarBackend:toolbar.dataset.opaque==='true'?'opaque':backend==='cpu'?'css':'webgl',renderer:renderer?.diagnostics,playing,disposed};},center,dispose(){if(disposed)return;disposed=true;generation++;stopAnimation();clearTimeout(materialTimer);cancelAnimationFrame(pendingFrame);resize.disconnect();intersection.disconnect();siteComponents.dispose();enuiAnnouncement.dispose();scene?.dispose();toolbarScene?.dispose();renderer?.dispose();source.destroy();}};
 window.addEventListener('pagehide',event=>{if(event.persisted){stopAnimation();scene?.pause();toolbarScene?.pause();}else window.lgfShowcase.dispose();});
