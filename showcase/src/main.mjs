@@ -5,6 +5,7 @@ import './style.css';
 import './sections.css';
 import './code-editor.css';
 import { renderCodeEditor } from './code-editor.mjs';
+import { frameworkGuide, integrations } from './integration-examples.mjs';
 import { filmTime, getShowcaseFilm } from './showcase-film.mjs';
 import{mountSiteComponents}from'./site-components.mjs';
 import{mountEnuiAnnouncement}from'./enui-announcement.mjs';
@@ -170,73 +171,97 @@ for(const preference of [motion,transparency,contrast,forced])preference.addEven
 document.addEventListener('visibilitychange',()=>{if(disposed)return;if(document.hidden){stopAnimation();scene?.pause();toolbarScene?.pause();}else{scene?.resume();toolbarScene?.resume();}});
 const resize=new ResizeObserver(()=>{position(host.offsetLeft,host.offsetTop);scheduleInvalidation(true);});resize.observe(stage);
 const intersection=new IntersectionObserver(entries=>{if(entries[0].isIntersecting){if(!document.hidden){scene?.resume();toolbarScene?.resume();}}else{stopAnimation();scene?.pause();toolbarScene?.pause();}},{threshold:.05});intersection.observe(stage);
-const examples={
-vanilla:`import { createGlassScene } from '@liquid-glass-forge/dom';
-import { createOpticalRenderer } from '@liquid-glass-forge/webgl/dom';
-import '@liquid-glass-forge/dom/styles.css';
+const integrationNames = Object.keys(integrations);
+const version = release?.installVersion ?? release?.version;
+const installable = release?.installable && /^\d+\.\d+\.\d+-rc\.\d+$/.test(version);
+let example;
+let installCommand = '';
+let webglCommand = '';
 
-// source is an explicit image, canvas, video or pixel provider.
-const renderer = createOpticalRenderer({ backend: 'webgl' });
-const scene = createGlassScene({ source, renderer });
-const glass = scene.attach(document.querySelector('.toolbar'));
+function installPackages(packages) {
+  return 'npm install ' + packages.map(name => '@liquid-glass-forge/' + name + '@' + version).join(' ');
+}
 
-// Your semantic content stays in the toolbar.
-await scene.ready;
-// On teardown: scene.dispose(); renderer.dispose();`,
-react:`import { GlassSceneProvider, GlassSurface }
-  from '@liquid-glass-forge/react';
-import '@liquid-glass-forge/dom/styles.css';
+function selectCode(name, focus = false) {
+  example = name;
+  const integration = integrations[name];
+  for (const button of document.querySelectorAll('[data-code]')) {
+    const active = button.dataset.code === name;
+    button.setAttribute('aria-selected', String(active));
+    button.tabIndex = active ? 0 : -1;
+    if (active && focus) button.focus();
+  }
+  $('#framework-setup').setAttribute('aria-labelledby', 'tab-' + name);
+  $('#framework-install-title').textContent = '1. Install for ' + integration.label;
+  const requirements = $('#framework-requirements');
+  requirements.hidden = !integration.requirements;
+  requirements.textContent = integration.requirements ? 'Requires ' + integration.requirements + '.' : '';
+  $('#framework-setup-note').textContent = integration.setup;
+  $('#framework-guide').href = frameworkGuide + '#' + name;
+  $('#webgl-guide').href = frameworkGuide + (name === 'react' ? '#react-with-webgl-refraction' : '#add-webgl-refraction');
+  renderCodeEditor(integration.filename, integration.source.trimEnd());
+  if (installable) {
+    installCommand = installPackages(integration.packages);
+    $('#install-command').textContent = installCommand;
+    webglCommand = installPackages([...integration.packages, 'webgl']);
+    $('#webgl-command').textContent = webglCommand;
+  }
+  $('#copy-status').textContent = '';
+}
 
-// Keep the caller-owned source and renderer stable.
-<GlassSceneProvider source={source} renderer={renderer}>
-  <GlassSurface className="toolbar">
-    <button onClick={save}>Save your work</button>
-  </GlassSurface>
-</GlassSceneProvider>
+for (const button of document.querySelectorAll('[data-code]')) {
+  button.addEventListener('click', () => selectCode(button.dataset.code));
+  button.addEventListener('keydown', event => {
+    const i = integrationNames.indexOf(example);
+    const next = {
+      ArrowRight: integrationNames[(i + 1) % integrationNames.length],
+      ArrowLeft: integrationNames[(i + integrationNames.length - 1) % integrationNames.length],
+      Home: integrationNames[0],
+      End: integrationNames.at(-1),
+    }[event.key];
+    if (!next) return;
+    event.preventDefault();
+    selectCode(next, true);
+  });
+}
 
-// React owns the controls. Glass owns the optical pixels.`,
-vue:`<script setup>
-import { GlassSceneProvider, GlassSurface }
-  from '@liquid-glass-forge/vue';
-import '@liquid-glass-forge/dom/styles.css';
-</script>
+for (const link of document.querySelectorAll('[data-select-code]')) {
+  link.addEventListener('click', () => selectCode(link.dataset.selectCode));
+}
 
-<template>
-  <GlassSceneProvider :source="source" :renderer="renderer">
-    <GlassSurface class="toolbar">
-      <button @click="save">Save your work</button>
-    </GlassSurface>
-  </GlassSceneProvider>
-</template>`,
-angular:`import { GlassSceneDirective, GlassSurfaceComponent }
-  from '@liquid-glass-forge/angular';
+async function copySetup(text, success, fallback) {
+  try {
+    await navigator.clipboard.writeText(text);
+    $('#copy-status').textContent = success;
+  } catch {
+    $('#copy-status').textContent = 'Select and copy the text with your keyboard.';
+    $(fallback).focus();
+  }
+}
 
-// Include both in your standalone component imports.
-// Load @liquid-glass-forge/dom/styles.css in your stylesheet.
+$('#copy-code').addEventListener('click', () => copySetup(integrations[example].source.trimEnd(), 'Starter copied.', '#code-example'));
+$('#copy-install').addEventListener('click', () => copySetup(installCommand, 'Install command copied.', '#install-command'));
+$('#copy-webgl').addEventListener('click', () => copySetup(webglCommand, 'WebGL install command copied.', '#webgl-command'));
+const initialFramework = new URL(location.href).searchParams.get('framework');
+selectCode(integrationNames.includes(initialFramework) ? initialFramework : 'vanilla');
 
-<div lgfScene [lgfSource]="source" [lgfRenderer]="renderer">
-  <lgf-surface class="toolbar">
-    <button (click)="save()">Save your work</button>
-  </lgf-surface>
-</div>
+if (installable) {
+  $('#install-preview').hidden = $('#webgl-preview').hidden = false;
+  $('#release-status').textContent = 'Experimental ' + version + ' is on npm. ' + (release.publicShowcase ? 'This showcase includes newer renderer work. ' : '') + 'Device and performance qualification remain open.';
+  for (const name of ['core', 'cpu', 'dom', 'webgl', 'react', 'vue', 'angular']) {
+    const link = document.createElement('a');
+    link.href = 'https://www.npmjs.com/package/@liquid-glass-forge/' + name + '/v/' + version;
+    link.textContent = '@liquid-glass-forge/' + name;
+    $('#package-links').append(link);
+  }
+} else if (localCandidate) {
+  $('#release-status').textContent = 'Local material candidate. Find the published install commands in the quick start guide.';
+}
 
-// Native Angular content, shared optical scene.`};
-let example='vanilla';function selectCode(name,focus=false){example=name;for(const b of document.querySelectorAll('[data-code]')){const active=b.dataset.code===name;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;if(active&&focus)b.focus();}renderCodeEditor(name,examples[name]);$('#code-example').setAttribute('aria-labelledby','tab-'+name);}
-for(const button of document.querySelectorAll('[data-code]')){button.addEventListener('click',()=>selectCode(button.dataset.code));button.addEventListener('keydown',event=>{const keys=Object.keys(examples),i=keys.indexOf(example);let target;if(event.key==='ArrowRight')target=keys[(i+1)%keys.length];if(event.key==='ArrowLeft')target=keys[(i+keys.length-1)%keys.length];if(event.key==='Home')target=keys[0];if(event.key==='End')target=keys.at(-1);if(target){event.preventDefault();selectCode(target,true);}});}
-$('#copy-code').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(examples[example]);$('#copy-status').textContent='Example copied.';$('#copy-code').textContent='Copied ✓';}catch{$('#copy-status').textContent='Select the example and copy it with your keyboard.';$('#code-example').focus();}});
-for(const link of document.querySelectorAll('[data-select-code]'))link.addEventListener('click',()=>selectCode(link.dataset.selectCode));
-const initialFramework=new URL(location.href).searchParams.get('framework');selectCode(['vanilla','react','vue','angular'].includes(initialFramework)?initialFramework:'vanilla');if(localCandidate){$('#dispersion').value=3;$('#dispersion-value').value=3;}paint();center();preferences();
-let installCommand='';
-$('#copy-install').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(installCommand);$('#copy-install').textContent='Copied ✓';}catch{$('#copy-status').textContent='Select the install command and copy it with your keyboard.';}});
-Promise.resolve(release).then(release=>{
-  if(release?.localCandidate&&!release.publicShowcase){$('#release-status').textContent='Local material candidate. The revised lens and interactive CPU policy are unpublished and awaiting review.';return;}
-  const version=release?.installVersion??release?.version;
-  if(!release?.installable||!/^\d+\.\d+\.\d+-rc\.\d+$/.test(version))return;
-  $('#release-status').textContent='Experimental '+version+' is on npm. '+(release.publicShowcase?'This showcase includes newer renderer work. ':'')+'Device and performance qualification remain open.';
-  installCommand='npm install @liquid-glass-forge/dom@'+version+' @liquid-glass-forge/webgl@'+version;
-  $('#install-command').textContent=installCommand;$('#install-preview').hidden=false;
-  for(const name of ['core','cpu','dom','webgl','react','vue','angular']){const link=document.createElement('a');link.href='https://www.npmjs.com/package/@liquid-glass-forge/'+name+'/v/'+version;link.textContent='@liquid-glass-forge/'+name;$('#package-links').append(link);}
-}).catch(()=>{});
+if (localCandidate) { $('#dispersion').value = 3; $('#dispersion-value').value = 3; }
+paint();
+center();
+preferences();
 window.lgfShowcase={get diagnostics(){return{...diagnostics,localCandidate,material,backend,toolbarBackend:toolbar.dataset.opaque==='true'?'opaque':backend==='cpu'?'css':'webgl',renderer:renderer?.diagnostics,playing,disposed};},center,dispose(){if(disposed)return;disposed=true;generation++;stopAnimation();clearTimeout(materialTimer);cancelAnimationFrame(pendingFrame);resize.disconnect();intersection.disconnect();siteComponents.dispose();enuiAnnouncement.dispose();scene?.dispose();toolbarScene?.dispose();renderer?.dispose();source.destroy();}};
 window.addEventListener('pagehide',event=>{if(event.persisted){stopAnimation();scene?.pause();toolbarScene?.pause();}else window.lgfShowcase.dispose();});
 window.addEventListener('pageshow',event=>{if(event.persisted&&!disposed){scene?.resume();toolbarScene?.resume();}});

@@ -1,8 +1,6 @@
 const tokens = /(?<comment>\/\/[^\n]*|<!--[\s\S]*?-->)|(?<string>"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|(?<tag><\/?[A-Za-z][\w-]*)|(?<keyword>\b(?:import|from|const|await)\b)|(?<call>\b[A-Za-z_$][\w$]*(?=\())|(?<attribute>[:@\w-]+(?==))|(?<type>\bGlass\w+\b)|(?<punctuation>[{}<>()[\];])/g;
-const filenames = { vanilla: 'scene.js', react: 'Scene.jsx', vue: 'Scene.vue', angular: 'scene.html' };
-
-export function renderCodeEditor(framework, source) {
-  document.querySelector('#code-filename').textContent = filenames[framework];
+export function renderCodeEditor(filename, source) {
+  document.querySelector('#code-filename').textContent = filename;
   document.querySelector('#code-gutter').textContent = source.split('\n').map((_, index) => index + 1).join('\n');
   const fragment = document.createDocumentFragment();
   let start = 0;

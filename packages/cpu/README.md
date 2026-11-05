@@ -4,7 +4,7 @@ Bounded JavaScript glass rendering with optional worker execution.
 
 [![A live glass lens bends the lettering beneath it](https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/docs/assets/glass-playground.gif)](https://namipsg.github.io/liquid-glass-forge/#playground)
 
-[Live showcase](https://namipsg.github.io/liquid-glass-forge/#playground) · [Examples](https://namipsg.github.io/liquid-glass-forge/examples.html) · [Documentation](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-5.md) · [Support](https://namipsg.github.io/liquid-glass-forge/support.html)
+[Live showcase](https://namipsg.github.io/liquid-glass-forge/#playground) · [Examples](https://namipsg.github.io/liquid-glass-forge/examples.html) · [Documentation](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-5.md) · [Support](https://namipsg.github.io/liquid-glass-forge/support.html) · [Install by framework](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/QUICKSTART.md)
 
 ## Install
 

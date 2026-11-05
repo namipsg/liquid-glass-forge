@@ -4,16 +4,56 @@ A rendering engine for refractive glass on the web. Use a readable image, canvas
 video, or pixel source to bend the content behind ordinary HTML controls.
 Integrate it with vanilla JavaScript, React, Vue, or Angular.
 
-[![A glass lens moving across text and bending the lettering underneath](docs/assets/glass-playground.gif)](https://namipsg.github.io/liquid-glass-forge/#playground)
-
 [Live playground](https://namipsg.github.io/liquid-glass-forge/#playground) ·
 [Examples](https://namipsg.github.io/liquid-glass-forge/examples.html) ·
 [Framework and device support](https://namipsg.github.io/liquid-glass-forge/support.html) ·
-[API documentation](#documentation)
+[Install by framework](#quick-start)
 
 [![npm preview](https://img.shields.io/npm/v/%40liquid-glass-forge%2Fdom/next?label=npm%20preview)](https://www.npmjs.com/package/@liquid-glass-forge/dom/v/0.1.0-rc.1)
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![GitHub Pages](https://github.com/namipsg/liquid-glass-forge/actions/workflows/pages.yml/badge.svg)](https://github.com/namipsg/liquid-glass-forge/actions/workflows/pages.yml)
+
+## Quick start
+
+Choose your framework. These commands install the published experimental
+preview and the packages needed by the corresponding starter.
+
+| Framework | Install in your app |
+| --- | --- |
+| <img src="showcase/public/frameworks/react.svg" width="18" height="18" alt=""> [React](docs/QUICKSTART.md#react) | `npm install @liquid-glass-forge/react@0.1.0-rc.1 @liquid-glass-forge/dom@0.1.0-rc.1` |
+| <img src="showcase/public/frameworks/vue.svg" width="18" height="18" alt=""> [Vue](docs/QUICKSTART.md#vue) | `npm install @liquid-glass-forge/vue@0.1.0-rc.1 @liquid-glass-forge/dom@0.1.0-rc.1` |
+| <img src="showcase/public/frameworks/angular.svg" width="18" height="18" alt=""> [Angular](docs/QUICKSTART.md#angular) | `npm install @liquid-glass-forge/angular@0.1.0-rc.1 @liquid-glass-forge/dom@0.1.0-rc.1` |
+| <img src="showcase/public/frameworks/vanilla.svg" width="18" height="18" alt=""> [Vanilla JS](docs/QUICKSTART.md#vanilla) | `npm install @liquid-glass-forge/dom@0.1.0-rc.1` |
+
+[![A glass lens moving across text and bending the lettering underneath](docs/assets/glass-playground.gif)](https://namipsg.github.io/liquid-glass-forge/#playground)
+
+### React example
+
+Use this as `App.jsx` in an existing React app. The preview expects React and
+React DOM **19.3.1**. For Next.js App Router, keep `'use client'` on the component
+and put the global CSS import in `app/layout.jsx` if your app manages it there.
+
+```jsx
+'use client';
+
+import { GlassSurface } from '@liquid-glass-forge/react';
+import '@liquid-glass-forge/dom/styles.css';
+
+export default function App() {
+  return (
+    <main style={{ padding: 48, background: 'linear-gradient(130deg, #bde7ff, #8495ea)' }}>
+      <GlassSurface style={{ display: 'inline-block', padding: 16, borderRadius: 24 }}>
+        <button type="button">Continue</button>
+      </GlassSurface>
+    </main>
+  );
+}
+```
+
+This uses the CSS glass material. To bend pixels from an image or canvas, follow
+the [React refraction example](docs/QUICKSTART.md#react-with-webgl-refraction).
+The [website installer](https://namipsg.github.io/liquid-glass-forge/?framework=react#developers)
+has copy buttons and the current published version.
 
 ## What it does
 
@@ -22,72 +62,9 @@ Integrate it with vanilla JavaScript, React, Vue, or Angular.
 - **Material fallbacks.** Use a CSS backdrop material or opaque surface when an optical source is unavailable or the interface calls for more contrast.
 - **Live examples.** Explore the playground, Safari-inspired browser controls, video transport, photo viewer, music player, and an interactive street map.
 
-## Quick start
-
-Install the exact experimental version with a bundler that supports ESM and CSS imports.
-
-```sh
-npm install @liquid-glass-forge/dom@0.1.0-rc.1 @liquid-glass-forge/webgl@0.1.0-rc.1
-```
-
-Give the artwork and the glass control explicit positions. In this example, the
-canvas displays at its backing size and the toolbar starts at source coordinates
-`(40, 80)`.
-
-```html
-<div style="position:relative;width:480px;height:240px">
-  <canvas id="artwork" width="480" height="240"></canvas>
-  <div id="toolbar" style="position:absolute;left:40px;top:80px;width:240px;
-       height:64px;border-radius:32px;display:grid;place-items:center">
-    <button type="button">Continue</button>
-  </div>
-</div>
-```
-
-```js
-import { SourceProvider, createGlassScene } from '@liquid-glass-forge/dom';
-import { createOpticalRenderer } from '@liquid-glass-forge/webgl/dom';
-import '@liquid-glass-forge/dom/styles.css';
-
-const artwork = document.querySelector('#artwork');
-const context = artwork.getContext('2d');
-const color = context.createLinearGradient(0, 0, 480, 240);
-color.addColorStop(0, '#91caff');
-color.addColorStop(1, '#293c84');
-context.fillStyle = color;
-context.fillRect(0, 0, 480, 240);
-context.fillStyle = '#14243f';
-context.font = 'bold 64px system-ui';
-context.fillText('Liquid glass', 24, 134);
-
-const source = new SourceProvider({ kind: 'canvas', value: artwork });
-const renderer = createOpticalRenderer({
-  backend: 'auto',
-  fallback: 'material',
-  surface: { radius: 32, bevel: 14, strength: 24 },
-  sourceRect: { x: 40, y: 80, width: 240, height: 64 },
-});
-const scene = createGlassScene({ source, renderer });
-scene.attach(document.querySelector('#toolbar'));
-await scene.ready;
-
-// Call source.invalidate() after repainting the canvas.
-// On unmount, release the scene and its caller-owned inputs.
-function dispose() {
-  scene.dispose();
-  renderer.dispose();
-  source.destroy();
-}
-```
-
-Use [source mapping](docs/SOURCES.md) for responsive layouts, crop and fit rules,
-and display scaling. Readable canvas or media sources must be origin-clean.
-The renderer samples that explicit source. The CSS material can use the browser’s
-live backdrop without a pixel provider.
-
 ## Packages
 
-All packages share version **`0.1.0-rc.1`**.
+The published package set shares version **`0.1.0-rc.1`**.
 
 | Package | Purpose |
 | --- | --- |

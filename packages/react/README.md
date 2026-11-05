@@ -1,19 +1,41 @@
-# @liquid-glass-forge/react
+# <img src="https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/showcase/public/frameworks/react.svg" width="20" height="20" alt=""> @liquid-glass-forge/react
 
 Integrate Forge scenes and glass surfaces into React.
 
-[![A live glass lens bends the lettering beneath it](https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/docs/assets/glass-playground.gif)](https://namipsg.github.io/liquid-glass-forge/?framework=react#developers)
-
 [Live showcase](https://namipsg.github.io/liquid-glass-forge/?framework=react#developers) · [Examples](https://namipsg.github.io/liquid-glass-forge/examples.html) · [Documentation](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-7.md) · [Support](https://namipsg.github.io/liquid-glass-forge/support.html)
 
-## Install
+## Install in React
 
 ```sh
-npm install @liquid-glass-forge/react@0.1.0-rc.2
+npm install @liquid-glass-forge/react@next @liquid-glass-forge/dom@next
 ```
 
-Keep the Forge packages at matching versions. This is an experimental preview.
-The [support guide](https://namipsg.github.io/liquid-glass-forge/support.html) describes browser and device qualification.
+The starter uses CSS glass and expects React and React DOM 19.3.1. Keep the Forge packages at matching versions.
+The [live installer](https://namipsg.github.io/liquid-glass-forge/?framework=react#developers)
+shows verified exact versions and has a copy button.
+
+[Open the React starter](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/QUICKSTART.md#react) · [Add WebGL refraction](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/QUICKSTART.md#react-with-webgl-refraction)
+
+### App.jsx
+
+```jsx
+'use client';
+
+import { GlassSurface } from '@liquid-glass-forge/react';
+import '@liquid-glass-forge/dom/styles.css';
+
+export default function App() {
+  return (
+    <main style={{ padding: 48, background: 'linear-gradient(130deg, #bde7ff, #8495ea)' }}>
+      <GlassSurface style={{ display: 'inline-block', padding: 16, borderRadius: 24 }}>
+        <button type="button">Continue</button>
+      </GlassSurface>
+    </main>
+  );
+}
+```
+
+[![A live glass lens bends the lettering beneath it](https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/docs/assets/glass-playground.gif)](https://namipsg.github.io/liquid-glass-forge/?framework=react#developers)
 
 ## Usage
 
@@ -40,5 +62,5 @@ material data attribute, `aria-hidden`, presentation role and negative tab index
 React owns both DOM nodes. Do not concurrently control canvas backing dimensions
 or draw into its context while mounted.
 
-See the [integration guide](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-7.md) and repository `docs/PHASE-7.md` for usage, Strict Mode ownership, exact Vite/Next
-consumer evidence and remaining integration limits. No registry package is published.
+See the [integration guide](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-7.md) for usage, Strict Mode ownership, exact Vite/Next
+consumer evidence and remaining integration limits.

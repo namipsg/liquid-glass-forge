@@ -1,19 +1,22 @@
-# @liquid-glass-forge/vue
+# <img src="https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/showcase/public/frameworks/vue.svg" width="20" height="20" alt=""> @liquid-glass-forge/vue
 
 Integrate Forge scenes and glass surfaces into Vue.
 
-[![A live glass lens bends the lettering beneath it](https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/docs/assets/glass-playground.gif)](https://namipsg.github.io/liquid-glass-forge/?framework=vue#developers)
-
 [Live showcase](https://namipsg.github.io/liquid-glass-forge/?framework=vue#developers) · [Examples](https://namipsg.github.io/liquid-glass-forge/examples.html) · [Documentation](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-8.md) · [Support](https://namipsg.github.io/liquid-glass-forge/support.html)
 
-## Install
+## Install in Vue
 
 ```sh
-npm install @liquid-glass-forge/vue@0.1.0-rc.2
+npm install @liquid-glass-forge/vue@next @liquid-glass-forge/dom@next
 ```
 
-Keep the Forge packages at matching versions. This is an experimental preview.
-The [support guide](https://namipsg.github.io/liquid-glass-forge/support.html) describes browser and device qualification.
+The starter uses CSS glass and expects Vue 3.5.44. Keep the Forge packages at matching versions.
+The [live installer](https://namipsg.github.io/liquid-glass-forge/?framework=vue#developers)
+shows verified exact versions and has a copy button.
+
+[Open the Vue starter](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/QUICKSTART.md#vue) · [Add WebGL refraction](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/QUICKSTART.md#add-webgl-refraction)
+
+[![A live glass lens bends the lettering beneath it](https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/docs/assets/glass-playground.gif)](https://namipsg.github.io/liquid-glass-forge/?framework=vue#developers)
 
 ## Usage
 
@@ -39,5 +42,5 @@ renderer identity changes replace the scene. Inactive changes wait for activatio
 direct canvas child with decorative class/attributes. Vue owns both nodes. Do not
 control its backing dimensions or draw into its context while attached.
 
-See the [integration guide](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-8.md) and repository `docs/PHASE-8.md` for ownership, KeepAlive, exact Vite/Nuxt consumer
-verification and remaining limits. No registry package has been published.
+See the [integration guide](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-8.md) for ownership, KeepAlive, exact Vite/Nuxt consumer
+verification and remaining limits.

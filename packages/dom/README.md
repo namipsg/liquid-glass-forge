@@ -1,19 +1,22 @@
-# @liquid-glass-forge/dom
+# <img src="https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/showcase/public/frameworks/vanilla.svg" width="20" height="20" alt=""> @liquid-glass-forge/dom
 
 Render glass on native HTML controls with explicit media sources and shared scenes.
 
-[![A live glass lens bends the lettering beneath it](https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/docs/assets/glass-playground.gif)](https://namipsg.github.io/liquid-glass-forge/#playground)
-
 [Live showcase](https://namipsg.github.io/liquid-glass-forge/#playground) · [Examples](https://namipsg.github.io/liquid-glass-forge/examples.html) · [Documentation](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/HOSTS.md) · [Support](https://namipsg.github.io/liquid-glass-forge/support.html)
 
-## Install
+## Install in Vanilla JS
 
 ```sh
-npm install @liquid-glass-forge/dom@0.1.0-rc.2
+npm install @liquid-glass-forge/dom@next
 ```
 
-Keep the Forge packages at matching versions. This is an experimental preview.
-The [support guide](https://namipsg.github.io/liquid-glass-forge/support.html) describes browser and device qualification.
+The starter uses CSS glass. Keep the Forge packages at matching versions.
+The [live installer](https://namipsg.github.io/liquid-glass-forge/?framework=vanilla#developers)
+shows verified exact versions and has a copy button.
+
+[Open the Vanilla JS starter](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/QUICKSTART.md#vanilla) · [Add WebGL refraction](https://github.com/namipsg/liquid-glass-forge/blob/main/docs/QUICKSTART.md#add-webgl-refraction)
+
+[![A live glass lens bends the lettering beneath it](https://raw.githubusercontent.com/namipsg/liquid-glass-forge/main/docs/assets/glass-playground.gif)](https://namipsg.github.io/liquid-glass-forge/#playground)
 
 ## Usage
 

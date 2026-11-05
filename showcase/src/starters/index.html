@@ -1,0 +1,15 @@
+<main style="padding: 48px; background: linear-gradient(130deg, #bde7ff, #8495ea)">
+  <div id="glass" style="display: inline-block; padding: 16px; border-radius: 24px">
+    <button type="button">Continue</button>
+  </div>
+</main>
+
+<script type="module">
+  import { createGlassScene } from '@liquid-glass-forge/dom';
+  import '@liquid-glass-forge/dom/styles.css';
+
+  const scene = createGlassScene();
+  scene.attach(document.querySelector('#glass'));
+  await scene.ready;
+  // Call scene.dispose() if you remove the surface.
+</script>

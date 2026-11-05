@@ -15,7 +15,9 @@
 /* Utility copy stays readable at the smallest supported layout. */
 .tiny-label,.tool-content .tiny-label,.art-caption small,.framework-band>p,.eyebrow,.code-footer,.site-footer small{font-size:11px}
 
-.install-preview{margin-top:24px;max-width:100%;padding:18px 0;border-top:1px solid var(--line)}.install-preview[hidden]{display:none}.tiny-install-label{font:11px/1.6 ui-monospace,monospace;letter-spacing:.06em}.install-preview code{display:block;font:12px/1.7 ui-monospace,monospace;overflow-wrap:anywhere;user-select:all}.install-preview button{min-height:44px;margin-top:12px;border:1px solid var(--line);border-radius:24px;background:var(--surface);color:var(--ink);padding:9px 15px;font-size:12px}.install-preview #package-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px}.install-preview a{font-size:12px;text-decoration:underline;text-underline-offset:4px;min-height:32px;display:inline-flex;align-items:center}
+#package-links{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px}
+#package-links a{font-size:12px;text-decoration:underline;text-underline-offset:4px;min-height:32px;display:inline-flex;align-items:center}
+
 
 /* The lens is optically clear. Contrast belongs to its small label, rather than
    a full-panel scrim that hides the very backdrop this playground demonstrates. */

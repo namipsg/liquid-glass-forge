@@ -79,3 +79,27 @@
   #code-text span, .code-gutter { color: CanvasText; }
   .code-card .code-tabs button[aria-selected="true"] { outline: 1px solid Highlight; }
 }
+
+.code-card .code-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.setup-step {
+  padding: 14px 16px;
+  border-bottom: 1px solid #37373b;
+}
+.setup-step[hidden], .setup-command[hidden] { display: none; }
+.setup-step h3 { margin: 0 0 8px; font-size: 14px; color: #f5f5f5; }
+.setup-step p { margin: 0; font-size: 13px; line-height: 1.5; }
+.setup-step a { display: inline-block; margin-top: 8px; color: #9cdcfe; text-decoration: underline; font-size: 13px; }
+.setup-command { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.setup-command code { flex: 1 1 15rem; padding: 10px 12px; background: #151515; border-radius: 8px; overflow-wrap: anywhere; font-size: 12px; line-height: 1.6; }
+.setup-command button { min-height: 44px; padding: 8px 12px; border: 1px solid #57575e; border-radius: 10px; color: #f5f5f5; background: #29292d; font-size: 12px; }
+.setup-command button:hover { background: #383840; }
+@media (max-width: 480px) {
+  .code-card .code-tabs { gap: 1px; }
+  .code-card .code-tabs button { gap: 4px; padding-inline: 6px; }
+  .code-card .code-tabs img { width: 14px; height: 14px; }
+}
