@@ -11,6 +11,9 @@ import { chromium, firefox, webkit } from '@playwright/test';
 import { auditPackage } from '../scripts/package-audit.mjs';
 import { packageFiles } from '../scripts/pack-smoke.mjs';
 const root = fileURLToPath(new URL('../', import.meta.url));
+const { version } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+const packages = ['core', 'cpu', 'dom'];
+const internalVersions = Object.fromEntries(packages.map(name => ['@liquid-glass-forge/' + name, version]));
 const base = new URL('../private/phase-3/browser-import/', import.meta.url); await mkdir(base, { recursive: true });
 const artifacts = await mkdtemp(new URL('run-', base));
 const modules = new Map(), receipts = { tarballs: [], engines: [] };
@@ -18,15 +21,16 @@ const consumer = await mkdtemp(path.join(tmpdir(),'lgf-vanilla-installed-'));
 after(async()=>rm(consumer,{recursive:true,force:true}));
 await writeFile(path.join(consumer,'package.json'),JSON.stringify({name:'vanilla-packed-browser',private:true,type:'module'}));
 const tarballs=[];
-for (const name of ['core','cpu','dom']) {
+for (const name of packages) {
   const packed = JSON.parse(execFileSync('npm',['pack','--json','--ignore-scripts','--pack-destination',artifacts],
     { cwd: fileURLToPath(new URL(`../packages/${name}/`,import.meta.url)),encoding:'utf8',timeout:30000 }))[0];
-  assert.equal(packed.filename, `liquid-glass-forge-${name}-0.0.0-dev.tgz`);
+  assert.equal(packed.filename, `liquid-glass-forge-${name}-${version}.tgz`);
   const tarball = `${artifacts}/${packed.filename}`;tarballs.push(tarball);
   const files = execFileSync('tar',['-tzf',tarball],{encoding:'utf8'}).trim().split('\n').map(f=>{assert.ok(f.startsWith('package/'));return f.slice(8);}).sort();
   assert.deepEqual(files,packageFiles[name]);
   const manifest = JSON.parse(execFileSync('tar',['-xOf',tarball,'package/package.json'],{encoding:'utf8'}));
-  auditPackage(manifest,files,{internalVersions:{'@liquid-glass-forge/core':'0.0.0-dev','@liquid-glass-forge/dom':'0.0.0-dev','@liquid-glass-forge/cpu':'0.0.0-dev'}});
+  assert.equal(manifest.version, version);
+  auditPackage(manifest,files,{internalVersions});
   for(const file of files.filter(f=>f.endsWith('.js')||f.endsWith('.css'))) {
     const bytes=execFileSync('tar',['-xOf',tarball,`package/${file}`],{timeout:15000});
     assert.deepEqual(bytes,await readFile(new URL(`../packages/${name}/${file}`,import.meta.url)));
