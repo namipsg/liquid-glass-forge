@@ -7,6 +7,7 @@ Integrate it with vanilla JavaScript, React, Vue, or Angular.
 [Live playground](https://namipsg.github.io/liquid-glass-forge/#playground) ·
 [Examples](https://namipsg.github.io/liquid-glass-forge/examples.html) ·
 [Framework and device support](https://namipsg.github.io/liquid-glass-forge/support.html) ·
+[Performance](#performance) ·
 [Install by framework](#quick-start)
 
 [![npm preview](https://img.shields.io/npm/v/%40liquid-glass-forge%2Fdom/next?label=npm%20preview)](https://www.npmjs.com/package/@liquid-glass-forge/dom/v/0.1.0-rc.1)
@@ -61,6 +62,23 @@ has copy buttons and the current published version.
 - **Native controls.** The optical layer is decorative. Buttons, inputs, links, and text stay in the DOM with their normal keyboard and accessibility behavior.
 - **Material fallbacks.** Use a CSS backdrop material or opaque surface when an optical source is unavailable or the interface calls for more contrast.
 - **Live examples.** Explore the playground, Safari-inspired browser controls, video transport, photo viewer, music player, and an interactive street map.
+
+## Performance
+
+| Recorded workload | Result |
+| --- | --- |
+| Galaxy A04s, one 320×180 CPU worker surface | **34.3–34.8 ms** p95 completion interval. [Phase 5](docs/PHASE-5.md#current-full-physical-qualification-2026-10-31) |
+| Galaxy A04s, four 640×360 WebGL2 outputs below the fold | **13.5–16.3 ms** p95 batch time. [Phase 6](docs/PHASE-6.md#recorded-results) |
+| Apple M4 Mac, four adapters running a dynamic worker workload | **30 minutes**, more than 53,000 completed frames per adapter, and **34.9 ms** p95 completion interval. [Phase 11](docs/PHASE-11.md#physical-results-recorded-on-3-november-2026) |
+
+Frame intervals and age help teams budget for jitter and stale pixels. Image
+storage and cleanup checks help size multi-panel layouts and catch resource
+retention across navigation. These are historical workload measurements.
+SwiftShader and later A04s runs missed timing limits, and broad device
+qualification remains open.
+
+[Benchmark methods, limits, and reproduction commands](docs/PERFORMANCE.md) ·
+[Performance on the showcase](https://namipsg.github.io/liquid-glass-forge/#performance)
 
 ## Packages
 

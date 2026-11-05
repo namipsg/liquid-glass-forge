@@ -66,6 +66,46 @@
 <a data-site-glass class="example-card music-preview" href="./examples.html?example=music"><div class="card-art"><img class="mini-album" src="./media/slow-light-studio.jpg" alt="Recording studio album artwork" loading="lazy"><div class="mini-music-controls"><strong>Slow Light</strong><small>Forge Sessions</small><div>≪　▷　≫</div></div></div><div class="card-copy"><span><strong>Music</strong><small>Original audio · live player</small></span><span aria-hidden="true">↗</span></div></a>
 <a data-site-glass class="example-card maps-preview" href="./examples.html?example=maps"><div class="card-art"><img src="./media/port-meridian-streets.svg" alt="Street map of the fictional Port Meridian waterfront" loading="lazy"></div><div class="card-copy"><span><strong>Maps</strong><small>Pan · search · find a route</small></span><span aria-hidden="true">↗</span></div></a>
 </div></section>
+    <section class="performance-section wrap" id="performance" aria-labelledby="performance-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">BENCHMARKS</p><h2 id="performance-title">Performance and reliability.</h2></div>
+        <p>Frame timing, image storage and cleanup are measured on named workloads so teams can compare them with their own requirements.</p>
+      </div>
+      <div class="performance-grid">
+        <article class="performance-card">
+          <h3>CPU worker on Galaxy A04s</h3>
+          <p class="performance-stat">34.3–34.8 <span>ms</span></p>
+          <p class="performance-metric">p95 completion interval</p>
+          <p>One 320×180 surface in Android Chrome. Both worker repeats were within the 35 ms budget for this Phase 5 workload.</p>
+          <a href="https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-5.md#current-full-physical-qualification-2026-10-31">CPU benchmark results ↗</a>
+        </article>
+        <article class="performance-card">
+          <h3>WebGL2 on Galaxy A04s</h3>
+          <p class="performance-stat">13.5–16.3 <span>ms</span></p>
+          <p class="performance-metric">p95 batch time</p>
+          <p>Four 640×360 outputs in a below-the-fold test layout on the Mali-G52. Source acquisition was timed separately.</p>
+          <a href="https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-6.md#recorded-results">WebGL benchmark results ↗</a>
+        </article>
+        <article class="performance-card">
+          <h3>Worker soak on Apple M4 Mac</h3>
+          <p class="performance-stat">30 <span>min</span></p>
+          <p class="performance-metric">Vanilla JS, React, Vue and Angular in Chrome</p>
+          <p>Each adapter completed over 53,000 frames and 100 lifecycle cycles. Tracked workers and subscriptions returned to zero.</p>
+          <a href="https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PHASE-11.md#physical-results-recorded-on-3-november-2026">Soak and lifecycle results ↗</a>
+        </article>
+      </div>
+      <div class="performance-notes">
+        <div>
+          <h3>What this measures</h3>
+          <p>p95 shows how long the slower updates take. Completion age helps teams catch stale glass, while image storage and lifecycle checks help them plan for dashboards and repeated navigation.</p>
+        </div>
+        <div>
+          <h3>Where qualification stands</h3>
+          <p>SwiftShader and later A04s runs missed timing limits. Sustained GPU and mobile coverage remain open. These numbers apply to the test campaigns listed above.</p>
+        </div>
+      </div>
+      <a class="text-link performance-guide" href="https://github.com/namipsg/liquid-glass-forge/blob/main/docs/PERFORMANCE.md">Read the methods and reproduction commands <span aria-hidden="true">↗</span></a>
+    </section>
     <section class="support-section wrap" id="support" aria-labelledby="support-title"><div class="section-heading"><div><p class="eyebrow">FRAMEWORKS &amp; DEVICES</p><h2 id="support-title">Your stack.<br><em>The same material.</em></h2></div><p>Four framework integrations, one source and material system.<br>Experimental packages are available now.</p></div><div class="framework-support-grid">
       <a href="#developers" data-select-code="vanilla" class="framework-support-card" data-site-glass><span class="framework-glyph" aria-hidden="true"><img src="./frameworks/vanilla.svg" alt="" width="23" height="23"></span><strong>Vanilla</strong><p>Semantic HTML.<br>The DOM scene API.</p><span>View integration ↗</span></a><a href="#developers" data-select-code="react" class="framework-support-card" data-site-glass><span class="framework-glyph" aria-hidden="true"><img src="./frameworks/react.svg" alt="" width="23" height="23"></span><strong>React</strong><p>Providers and surfaces.<br>Your native content.</p><span>View integration ↗</span></a><a href="#developers" data-select-code="vue" class="framework-support-card" data-site-glass><span class="framework-glyph" aria-hidden="true"><img src="./frameworks/vue.svg" alt="" width="23" height="23"></span><strong>Vue</strong><p>Familiar components.<br>A shared material engine.</p><span>View integration ↗</span></a><a href="#developers" data-select-code="angular" class="framework-support-card" data-site-glass><span class="framework-glyph" aria-hidden="true"><img src="./frameworks/angular.svg" alt="" width="23" height="23"></span><strong>Angular</strong><p>Scene directives.<br>Application-owned controls.</p><span>View integration ↗</span></a>
       </div><div class="support-note"><p><strong>Experimental packages on npm</strong><br>Framework availability and physical-device qualification are separate. The studio also includes renderer work ahead of the npm preview.</p><a class="text-link" href="./support.html" data-site-glass>Read the full support guide <span aria-hidden="true">↗</span></a></div>
@@ -147,6 +187,7 @@
           <h2 id="footer-project">Project</h2>
           <ul>
             <li><a href="#project">About Forge</a></li>
+            <li><a href="#performance">Performance benchmarks</a></li>
             <li><a href="./support.html">Framework and device support</a></li>
             <li><a href="https://www.npmjs.com/org/liquid-glass-forge">Browse npm packages ↗</a></li>
             <li><a href="#enui">ENUI announcement</a></li>
