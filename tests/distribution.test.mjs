@@ -62,6 +62,6 @@ test('partial publication can resume only for byte-identical already-published v
 test('the active rehearsal workflow cannot acquire publishing credentials or publish',()=>{
   const workflow=readFileSync('.github/workflows/release-rehearsal.yml','utf8');
   assert.match(workflow,/workflow_dispatch:/);assert.doesNotMatch(workflow,/\b(push|pull_request|schedule):|id-token:|npm publish|publish-approved|dist-tag/);
-  const actions=[...workflow.matchAll(/uses: ([^\n]+)/g)].map(m=>m[1]);assert.ok(actions.length>=3);assert.ok(actions.every(a=>/@[a-f0-9]{40}$/.test(a)));
+  const actions=[...workflow.matchAll(/uses: ([^\n]+)/g)].map(m=>m[1]);assert.ok(actions.length>=3);assert.ok(actions.every(a=>/@[a-f0-9]{40}(?: +# [^\n]+)?$/.test(a)));
   const draft=readFileSync('docs/release/publish-candidate.yml.example','utf8');assert.match(draft,/environment: npm-release/);assert.match(draft,/--release/);assert.match(draft,/--approved-manifest-sha256/);
 });
