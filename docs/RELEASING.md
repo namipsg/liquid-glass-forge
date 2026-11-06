@@ -24,11 +24,13 @@ review with the `next` tag. The qualified-release policy below remains separate.
    environment to `main`.
 2. Synchronize the workspace and all package versions and internal dependencies
    before preparing a release. Run the workflow on `main` with `operation=prepare`.
-   It runs focused software checks, builds and packs twice, and uploads the seven
-   tarballs and their manifest. The workflow summary provides the manifest digest.
+   It runs focused software checks, builds and packs twice, and tests the frozen
+   tarballs in the production consumers before uploading the seven packages and
+   their manifest. A feature-branch prepare run is available for review only. The workflow summary provides the manifest digest.
 3. Review the tarballs and copy the successful run ID and manifest digest.
-   Dispatch `operation=stage` on the same `main` commit. It checks the digest,
-   commit, package bytes, and registry version availability before submitting.
+   Dispatch `operation=stage` on the same `main` commit. It requires a successful
+   preparation run from the same workflow and commit on `main`, then checks the
+   reviewed digest, package bytes and registry version availability.
 4. Review all seven staged packages on npm and approve them with 2FA in
    dependency order (core, cpu, dom, webgl, react, vue, angular).
    If staging stops partway, compare the receipt with npm’s staged list before
@@ -77,9 +79,10 @@ source packages in this mode. Ordinary suites retain their existing pack mode.
 
 The manually dispatched [rehearsal workflow](../.github/workflows/release-rehearsal.yml)
 has read-only repository permissions, pinned actions/toolchains, no OIDC credential
-permission and no publication step. It produces an immutable artifact for its
-exact commit. No hosted execution or repository protection configuration is
-claimed by merely committing that workflow.
+permission and no publication step. Dispatch it on a branch in this repository to run the
+software suite and the frozen consumer suite. A successful run uploads the
+immutable artifact for that commit and publishes its manifest digest in the run
+summary. Consumer logs and receipts are a separate review artifact.
 
 ## Before qualified-candidate publication
 

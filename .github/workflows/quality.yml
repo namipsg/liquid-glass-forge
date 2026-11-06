@@ -24,14 +24,27 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm install --global pnpm@10.34.5 --ignore-scripts
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      - run: node scripts/build.mjs --base
-        if: matrix.node == '20.19.6'
-      - run: pnpm build
-        if: matrix.node == '24.21.0'
-      - name: Align ephemeral container home ownership for Firefox
-        run: chown "$(id -u):$(id -g)" "$HOME"
+      - name: Configure the browser container and verify checkout
+        run: |
+          chown "$(id -u):$(id -g)" "$HOME"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
       - run: xvfb-run -a pnpm test:base
         if: matrix.node == '20.19.6'
       - run: xvfb-run -a pnpm test
         if: matrix.node == '24.21.0'
       - run: node --test spikes/phase-1/cpu.test.mjs spikes/phase-1/admission.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: contracts-${{ matrix.node }}-${{ github.sha }}
+          path: |
+            private/phase-6/browser/*/receipt.json
+            private/phase-7/consumer/*/receipt.json
+            private/phase-8/consumer/*/receipt.json
+            private/phase-9/consumer/*/receipt.json
+            private/phase-10/opaque/*/receipt.json
+            private/phase-10/integration/*/receipt.json
+            private/phase-10/integration/*/*-events.json
+          if-no-files-found: ignore
+          retention-days: 14

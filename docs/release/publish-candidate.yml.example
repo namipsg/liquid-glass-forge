@@ -65,6 +65,8 @@ jobs:
       image: mcr.microsoft.com/playwright@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
       options: --init --ipc=host
     timeout-minutes: 30
+    env:
+      LGF_FIREFOX_XVFB: '1'
     permissions:
       contents: read
       actions: read
@@ -77,14 +79,17 @@ jobs:
           node-version: '24.21.0'
       - run: npm install --global npm@11.19.0 pnpm@10.34.5 --ignore-scripts
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      - name: Align ephemeral container home ownership for Firefox
-        run: chown "$(id -u):$(id -g)" "$HOME"
+      - name: Configure the browser container and verify checkout
+        run: |
+          chown "$(id -u):$(id -g)" "$HOME"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: distribution-${{ github.sha }}
           path: private/phase-12/approved
           run-id: ${{ inputs.rehearsal_run_id }}
           github-token: ${{ github.token }}
-      - run: pnpm test:registry --manifest private/phase-12/approved/manifest.json
+      - run: xvfb-run -a pnpm test:registry --manifest private/phase-12/approved/manifest.json
 # Deliberately no recommended-tag promotion. Review the exact-registry receipt
 # and provenance before an independently approved dist-tag operation.

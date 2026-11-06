@@ -34,6 +34,11 @@ node scripts/showcase-build.mjs --preview private/preview/<release>/manifest.jso
 
 The build installs physical tarballs into a temporary consumer, compares every
 installed package file with its packed bytes, and emits `showcase/dist/`.
+The GitHub Pages workflow can build and smoke-test a branch through manual
+dispatch. Its deployment job is restricted to `main`. The test loads the
+project-path build, checks keyboard and preference behavior, and verifies that
+the support page and installer agree on the published package version.
+
 Upload that directory to any static host. Relative asset paths support deployment
 under a project subdirectory. No API server or external image/font service is used.
 

@@ -29,6 +29,12 @@ Track known regressions as reproducible fixtures. Numerical or visual baseline u
 - Broader qualification: Windows/macOS browsers, exact advertised framework/browser version endpoints, worker/CSP variants, zoom/DPR and lifecycle cases.
 - Release candidates: actual Safari and physical iPhone/iPad/Android devices, named desktop GPU configurations, sustained performance and resource checks.
 
+The hosted contract matrix runs the base suite on Node 20.19.6 and the full
+suite on Node 24.21.0. On Linux CI, the required Firefox WebGL lane runs under
+Xvfb with software OpenGL. The Firefox fixtures still assert the effective
+backend and optical tolerances. The hosted rehearsal and npm prepare workflows
+apply the same Firefox configuration to the frozen-artifact consumers.
+
 A required WebGL lane fails if it falls back. Label software-WebGL evidence separately from hardware GPU results. Missing required hardware is missing validation, not a pass.
 
 Playwright WebKit is not branded Safari, and mobile emulation does not establish physical-device behavior. Maintain environment-specific visual baselines. [Playwright browsers](https://playwright.dev/docs/browsers), [Emulation](https://playwright.dev/docs/emulation), [Visual comparisons](https://playwright.dev/docs/test-snapshots)

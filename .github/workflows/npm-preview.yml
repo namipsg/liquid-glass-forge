@@ -20,9 +20,14 @@ permissions:
 
 jobs:
   prepare:
-    if: github.repository == 'namipsg/liquid-glass-forge' && github.ref == 'refs/heads/main' && inputs.operation == 'prepare'
+    if: github.repository == 'namipsg/liquid-glass-forge' && startsWith(github.ref, 'refs/heads/') && inputs.operation == 'prepare'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
+      options: --init --ipc=host
+    timeout-minutes: 30
+    env:
+      LGF_FIREFOX_XVFB: '1'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -33,9 +38,15 @@ jobs:
           package-manager-cache: false
       - run: npm install --global npm@11.19.0 pnpm@10.34.5 --ignore-scripts
       - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Configure the browser container and verify checkout
+        run: |
+          chown "$(id -u):$(id -g)" "$HOME"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
       - run: pnpm check && pnpm test:unit && pnpm test:cpu && pnpm test:webgl && pnpm test:qualification
       - run: pnpm release:prepare --output private/npm-stage
       - run: pnpm release:verify --manifest private/npm-stage/manifest.json
+      - run: xvfb-run -a pnpm release:consumers --manifest private/npm-stage/manifest.json
       - name: Record review digest
         run: sha256sum private/npm-stage/manifest.json | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -43,6 +54,22 @@ jobs:
           name: npm-preview-${{ github.sha }}
           path: private/npm-stage/
           if-no-files-found: error
+          retention-days: 14
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: npm-preview-evidence-${{ github.sha }}
+          path: |
+            private/npm-stage/*.txt
+            private/npm-stage/manifest.json
+            private/phase-12/consumers/
+            private/phase-7/consumer/*/receipt.json
+            private/phase-8/consumer/*/receipt.json
+            private/phase-9/consumer/*/receipt.json
+            private/phase-10/integration/*/receipt.json
+            private/phase-10/integration/*/*-events.json
+          if-no-files-found: ignore
           retention-days: 14
 
   stage:
@@ -66,6 +93,21 @@ jobs:
           node-version: '24.21.0'
           package-manager-cache: false
       - run: npm install --global npm@11.19.0 --ignore-scripts
+      - name: Verify the successful main preparation run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREPARATION_RUN: ${{ inputs.preparation_run }}
+          MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+        shell: bash
+        run: |
+          [[ "$PREPARATION_RUN" =~ ^[0-9]+$ && "$MANIFEST_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PREPARATION_RUN" |
+            jq -e --arg sha "$GITHUB_SHA" --arg repo "$GITHUB_REPOSITORY" '
+              .head_sha == $sha and .head_repository.full_name == $repo and
+              .head_branch == "main" and .event == "workflow_dispatch" and
+              .path == ".github/workflows/npm-preview.yml" and .conclusion == "success"'
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PREPARATION_RUN/jobs" |
+            jq -e 'any(.jobs[]; .name == "prepare" and .conclusion == "success")'
       - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           github-token: ${{ github.token }}

@@ -16,4 +16,5 @@ These are references, not current runtime dependencies. The phase 1 spike and ph
 
 The npm organization `@liquid-glass-forge` was created on 3 November 2026 under
 `namipsg`. Registry ownership does not establish trademark clearance, a trademark
-license or endorsement. Package publication remains held; see [the release procedure](RELEASING.md).
+license or endorsement. The [experimental npm preview](PREVIEW.md) is public.
+[Qualified publication](RELEASING.md) remains held.

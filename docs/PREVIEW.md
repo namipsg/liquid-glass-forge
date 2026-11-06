@@ -19,7 +19,17 @@ All seven packages were published on **4 November 2026**, version
 The exact registry tarball bytes match the sealed local artifacts (SHA-256 and
 SHA-512), and every `next` tag resolves to this version. The private operation
 receipt is `private/preview/release-EGW9vy/publication.json`. These are publication
-receipts; consumer and physical-device qualification remain deferred.
+receipts. To recheck the initial preview against its sealed local manifest, run
+the following with the pinned release toolchain and installed Playwright engines:
+
+```sh
+pnpm test:registry --preview --manifest private/preview/release-EGW9vy/manifest.json
+```
+
+This mode checks npm metadata, the `next` tags, both archive digests, physical
+registry installs and production consumers using the downloaded tarballs. The
+initial preview carries no CI provenance claim. Qualified candidates use the
+separate strict registry verification in [RELEASING.md](RELEASING.md).
 
 The registry also exposes a `latest` alias for this prerelease. After successful
 owner authentication, npm rejected `npm dist-tag rm ... latest` with HTTP 400;
@@ -45,8 +55,8 @@ records the working-tree source hashes and exact tarball bytes.
   candidate, but GPU cadence exceeded its limit over RDP. An interrupted CPU soak
   also exceeded its cadence limit. Neither establishes full release qualification.
 - Physical tests for the current preview remain deferred.
-- Trusted-publisher setup, protected CI publication, registry provenance/consumer
-  qualification and any stable release remain later release work.
+- Trusted-publisher setup, protected CI publication, qualified-candidate registry
+  provenance and any stable release remain later release work.
 
 ## Showcase
 

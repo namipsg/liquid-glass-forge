@@ -5,12 +5,14 @@ permissions:
   contents: read
 jobs:
   rehearse:
-    if: github.repository == 'namipsg/liquid-glass-forge' && github.ref == 'refs/heads/main'
+    if: github.repository == 'namipsg/liquid-glass-forge' && startsWith(github.ref, 'refs/heads/')
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
       options: --init --ipc=host
     timeout-minutes: 45
+    env:
+      LGF_FIREFOX_XVFB: '1'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
@@ -20,15 +22,37 @@ jobs:
           node-version: '24.21.0'
       - run: npm install --global npm@11.19.0 pnpm@10.34.5 --ignore-scripts
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      - name: Align ephemeral container home ownership for Firefox
-        run: chown "$(id -u):$(id -g)" "$HOME"
-      - run: pnpm test
+      - name: Configure the browser container and verify checkout
+        run: |
+          chown "$(id -u):$(id -g)" "$HOME"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - run: xvfb-run -a pnpm test
       - run: pnpm release:prepare --output private/phase-12/ci
-      - run: pnpm release:consumers --manifest private/phase-12/ci/manifest.json
       - run: pnpm release:verify --manifest private/phase-12/ci/manifest.json
+      - run: xvfb-run -a pnpm release:consumers --manifest private/phase-12/ci/manifest.json
+      - name: Record manifest digest
+        run: sha256sum private/phase-12/ci/manifest.json | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: distribution-${{ github.sha }}
           path: private/phase-12/ci/
           if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: rehearsal-evidence-${{ github.sha }}
+          path: |
+            private/phase-12/ci/*.txt
+            private/phase-12/ci/manifest.json
+            private/phase-12/consumers/
+            private/phase-6/browser/*/receipt.json
+            private/phase-7/consumer/*/receipt.json
+            private/phase-8/consumer/*/receipt.json
+            private/phase-9/consumer/*/receipt.json
+            private/phase-10/opaque/*/receipt.json
+            private/phase-10/integration/*/receipt.json
+            private/phase-10/integration/*/*-events.json
+          if-no-files-found: ignore
           retention-days: 14

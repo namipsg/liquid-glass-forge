@@ -33,9 +33,15 @@ export function inspectTarball(file, name, version) {
   return { manifest, files, fileSha256:Object.fromEntries(files.map(entry => [entry, digest(contents(entry))])) };
 }
 
-export function loadDistribution(manifestFile) {
+export function loadDistribution(manifestFile, { preview = false } = {}) {
   const file = path.resolve(manifestFile), bundle = readJson(file);
-  invariant(bundle.schemaVersion === 1 && ['private-rehearsal','release-candidate'].includes(bundle.kind), 'Unsupported distribution manifest');
+  if (preview) {
+    invariant(bundle.schemaVersion === 1 && bundle.kind === 'experimental-preview' && bundle.version === '0.1.0-rc.1' &&
+      bundle.tag === 'next' && bundle.qualified === false && bundle.testsDeferred === true,
+    'Expected the explicitly unqualified owner-directed preview');
+  } else {
+    invariant(bundle.schemaVersion === 1 && ['private-rehearsal','release-candidate'].includes(bundle.kind), 'Unsupported distribution manifest');
+  }
   invariant(typeof bundle.version === 'string' && /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/.test(bundle.version), 'Expected exact synchronized version');
   const names = Object.keys(packageFiles);
   invariant(bundle.artifacts?.length === names.length && new Set(bundle.artifacts.map(a=>a.name)).size === names.length && bundle.artifacts.every(a=>names.includes(a.name)), 'Exact seven-package set is required');
@@ -44,16 +50,24 @@ export function loadDistribution(manifestFile) {
     const tarball = path.join(path.dirname(file), artifact.tarball), bytes = readFileSync(tarball);
     invariant(digest(bytes) === artifact.sha256 && integrity(bytes) === artifact.integrity, 'Artifact bytes changed: ' + artifact.name);
     const inspected = inspectTarball(tarball, artifact.name, bundle.version);
-    invariant(artifact.private === (inspected.manifest.private === true), 'Private package status was misreported');
+    if (preview) {
+      invariant(inspected.manifest.private === false && !inspected.manifest.gitHead, 'Expected a public working-tree preview without gitHead');
+    } else {
+      invariant(artifact.private === (inspected.manifest.private === true), 'Private package status was misreported');
+    }
     invariant(JSON.stringify(inspected.fileSha256) === JSON.stringify(artifact.fileSha256), 'Packed file hashes changed: ' + artifact.name);
   }
   return { file, bundle };
 }
 
+function loadConsumerDistribution(file) {
+  return loadDistribution(file, { preview: process.env.LGF_DISTRIBUTION_PREVIEW === '1' });
+}
+
 export function distributionVersions() {
   const selected = process.env.LGF_DISTRIBUTION_MANIFEST;
   if (selected) {
-    const { bundle } = loadDistribution(selected);
+    const { bundle } = loadConsumerDistribution(selected);
     return Object.fromEntries(bundle.artifacts.map(a => ['@liquid-glass-forge/' + a.name, bundle.version]));
   }
   return Object.fromEntries(Object.keys(packageFiles).map(name => { const m=readJson(path.join(root,'packages',name,'package.json')); return [m.name,m.version]; }));
@@ -64,7 +78,7 @@ export function consumerPackage(name, destination) {
   if (!process.env.LGF_DISTRIBUTION_MANIFEST) return JSON.parse(execFileSync('npm', ['pack','--json','--ignore-scripts','--pack-destination',destination], {
     cwd:path.join(root,'packages',name,name==='angular'?'dist':''), encoding:'utf8', timeout:30000
   }))[0];
-  const { file, bundle } = loadDistribution(process.env.LGF_DISTRIBUTION_MANIFEST);
+  const { file, bundle } = loadConsumerDistribution(process.env.LGF_DISTRIBUTION_MANIFEST);
   const artifact = bundle.artifacts.find(a => a.name === name);
   invariant(artifact, 'Selected distribution lacks package ' + name);
   const target = path.join(destination, artifact.tarball);

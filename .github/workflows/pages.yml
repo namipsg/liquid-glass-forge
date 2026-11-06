@@ -9,13 +9,16 @@ permissions:
   contents: read
 
 concurrency:
-  group: github-pages
+  group: github-pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build:
-    if: github.ref == 'refs/heads/main'
+    if: github.repository == 'namipsg/liquid-glass-forge' && startsWith(github.ref, 'refs/heads/')
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
+      options: --init --ipc=host
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -24,16 +27,30 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '24.21.0'
-      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - run: npm install --global pnpm@10.34.5 --ignore-scripts
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: node scripts/build.mjs --base
       - run: pnpm showcase:build --pages
+      - name: Verify project-path showcase build
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          node scripts/test-showcase-pages.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: showcase-evidence-${{ github.sha }}
+          path: |
+            private/showcase/build-*/receipt.json
+            private/showcase/build-*/package-lock.json
+            private/showcase/pages-smoke.json
+          if-no-files-found: ignore
+          retention-days: 14
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: showcase/dist
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 10
