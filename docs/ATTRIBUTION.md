@@ -6,6 +6,8 @@ The project's independently authored materials are covered by the [MIT License](
 
 The showcase player and its poster use *Sprite Fright* by Blender Studio, © Blender Foundation. Forge re-encoded the film for web playback and extracted the poster from it. [Project license and credits](https://studio.blender.org/projects/sprite-fright/pages/about/) · [Media manifest](../showcase/public/media/sprite-fright.json).
 
+The player’s English dialogue subtitles were contributed by Pacha Tchernof and Gabldotink on Wikimedia Commons. Forge converted them to WebVTT and adjusted cue placement for the custom player. The subtitle track is distributed under CC BY-SA 4.0. [Source revision](https://commons.wikimedia.org/w/index.php?oldid=1067494470) · [Subtitle license](https://creativecommons.org/licenses/by-sa/4.0/)
+
 ## Design and implementation references
 
 - [Apple's Liquid Glass introduction](https://www.apple.com/newsroom/2025/06/apple-introduces-a-delightful-and-elegant-new-software-design/) and [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines) inform the material/component direction.

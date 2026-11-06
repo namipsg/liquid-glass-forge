@@ -2,6 +2,8 @@ const spriteFright = {
   title: 'Sprite Fright',
   file: './media/sprite-fright.mp4',
   poster: './media/sprite-fright-poster.jpg',
+  subtitles: './media/sprite-fright.en.vtt',
+  subtitleCredits: 'https://commons.wikimedia.org/w/index.php?oldid=1067494470',
   duration: 629.84,
   start: 16,
   reencoded: true,

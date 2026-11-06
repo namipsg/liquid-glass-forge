@@ -10,6 +10,17 @@
   "posterSeconds": 16,
   "files": {
     "sprite-fright.mp4": "1ca4faed32406aca7d80c9856ae154b91d9e17f5fe2cbee9b6bb311e10286e3d",
-    "sprite-fright-poster.jpg": "8adc52bfd55221206c8ab676698c6e92020947dea3b69daecf07a1171e449fda"
+    "sprite-fright-poster.jpg": "8adc52bfd55221206c8ab676698c6e92020947dea3b69daecf07a1171e449fda",
+    "sprite-fright.en.vtt": "ede2df4ea2dc5fa477133024a5fe2425d3594358bf7e58e7cb6b830e3a59995c"
+  },
+  "subtitles": {
+    "language": "en",
+    "file": "sprite-fright.en.vtt",
+    "source": "https://commons.wikimedia.org/w/index.php?oldid=1067494470",
+    "sourceSha256": "ba6bea9769990ea8e91c9c32d76a6c4f94e93e52627bf7ff9eba4c82dfe8b302",
+    "attribution": "Pacha Tchernof and Gabldotink (Wikimedia Commons)",
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Converted from SRT to WebVTT and positioned for the custom player.",
+    "coverage": "Dialogue subtitles."
   }
 }

@@ -26,6 +26,8 @@ try {
 
   const film = JSON.parse(await readFile('showcase/dist/media/sprite-fright.json'));
   assert.equal(film.license, 'https://creativecommons.org/licenses/by/1.0/');
+  assert.equal(film.subtitles.license, 'https://creativecommons.org/licenses/by-sa/4.0/');
+  assert.ok(film.files[film.subtitles.file], 'Subtitle bytes must be covered by the media manifest');
   for (const [name, sha256] of Object.entries(film.files)) {
     assert.equal(createHash('sha256').update(await readFile('showcase/dist/media/' + name)).digest('hex'), sha256, name);
   }
@@ -69,6 +71,33 @@ try {
   const credits = page.getByRole('link', { name: 'CC BY 1.0 and credits' });
   await credits.waitFor();
   assert.equal(await credits.getAttribute('href'), film.credits);
+  assert.equal(await page.getByRole('link', { name: 'English subtitles' }).getAttribute('href'), film.subtitles.source);
+  const subtitleButton = page.getByRole('button', { name: 'English subtitles' });
+  assert.equal(await subtitleButton.getAttribute('aria-pressed'), 'false');
+  await subtitleButton.press('Space');
+  assert.equal(await subtitleButton.getAttribute('aria-pressed'), 'true');
+  await page.waitForFunction(() => {
+    const video = document.querySelector('#demo-video');
+    const track = video?.textTracks[0];
+    return video?.readyState >= 1 && !video.seeking && track?.mode === 'hidden' && track.cues?.length > 0;
+  });
+  const cues = await page.locator('#demo-video').evaluate(video => {
+    const { cues } = video.textTracks[0];
+    video.currentTime = (cues[0].startTime + cues[0].endTime) / 2;
+    return cues.length;
+  });
+  await page.waitForFunction(() => {
+    const video = document.querySelector('#demo-video');
+    return !video.seeking && video.textTracks[0].activeCues?.[0] === video.textTracks[0].cues[0];
+  });
+  const subtitleLine = page.getByRole('group', { name: 'English subtitles' });
+  await subtitleLine.waitFor();
+  assert.ok((await subtitleLine.textContent()).trim(), 'The active cue must be visible below the player');
+  await subtitleButton.press('Space');
+  assert.equal(await subtitleButton.getAttribute('aria-pressed'), 'false');
+  assert.equal(await subtitleLine.isVisible(), false);
+  assert.equal(await page.locator('#video-subtitle-track').evaluate(element => element.track.mode), 'disabled');
+  report.subtitles = { language: film.subtitles.language, cues, keyboardToggle: true, activeCueAfterSeek: true };
   assert.deepEqual(report.failedRequests, []);
   assert.deepEqual(report.pageErrors, []);
   report.release = release;

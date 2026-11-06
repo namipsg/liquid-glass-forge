@@ -5,7 +5,7 @@ import {pipeline} from 'node:stream/promises';
 import path from 'node:path';
 
 const root=path.resolve('showcase/dist'),port=Number(process.env.PORT??4173);
-const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.json':'application/json','.jpg':'image/jpeg','.mp4':'video/mp4','.wav':'audio/wav'};
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.json':'application/json','.jpg':'image/jpeg','.mp4':'video/mp4','.vtt':'text/vtt; charset=utf-8','.wav':'audio/wav'};
 const server=createServer((req,res)=>{void(async()=>{
   const url=new URL(req.url,'http://localhost'),relative=decodeURIComponent(url.pathname).slice(1)||'index.html';
   if(relative.split('/').includes('..')||relative.includes('\\')){res.writeHead(404).end();return;}

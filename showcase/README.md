@@ -146,7 +146,9 @@ output, and leaves the input file in place. The landscape player displays the
 film’s source and credit. All builds default to the same 720p web encode,
 paused at 00:16. [Blender Studio's project page](https://studio.blender.org/projects/sprite-fright/pages/about/)
 documents the film’s CC BY 1.0 license. The [media manifest](public/media/sprite-fright.json)
-records the source and web asset checksums.
+records the source and web asset checksums. Use the English subtitles button
+to enable the Wikimedia Commons dialogue track. Sound effects and music
+descriptions remain open. [Subtitle source and license](../docs/ATTRIBUTION.md)
 
 `docs/SHOWCASE-EXAMPLES.md` retains acceptance criteria, including simulator pixel
 parity as an open measured target. Native reference screenshots may be installed

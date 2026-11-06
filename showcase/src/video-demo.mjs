@@ -23,7 +23,9 @@ export async function createVideoDemo({ stage, scope, localMedia, optical, icon,
   stage.innerHTML = `<figure class="video-figure">
     <div class="video-device" style="aspect-ratio:${caseWidth}/${caseHeight};${screenBox}">
       <div class="video-player demo-root" aria-label="${film.title} landscape player">
-        <video id="demo-video" playsinline preload="metadata" poster="${film.poster}" src="${film.file}" aria-label="${film.title}"></video>
+        <video id="demo-video" playsinline preload="metadata" poster="${film.poster}" src="${film.file}" aria-label="${film.title}">
+          <track id="video-subtitle-track" kind="subtitles" srclang="en" label="English" src="${film.subtitles}">
+        </video>
         <div class="video-controls">
           <div class="glass player-glass player-close" data-glass>${button('video-close', 'Hide playback controls', 'close')}</div>
           <div class="glass player-glass player-output" data-glass>${button('video-pip', 'Picture in picture', 'pip')}${button('video-fullscreen', 'Enter full screen', 'display')}</div>
@@ -35,7 +37,7 @@ export async function createVideoDemo({ stage, scope, localMedia, optical, icon,
           </div>
           <div class="glass player-glass player-options" data-glass>
             <label class="player-rate">${icon('speed')}<select id="video-rate" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
-            ${button('video-captions', 'Subtitles unavailable for this file', 'captions', 'disabled')}
+            ${button('video-captions', 'English subtitles', 'captions', 'aria-pressed="false"')}
           </div>
           <div class="glass player-glass player-seek" data-glass><span id="video-time">${filmTime(film.start).padStart(5, '0')}</span><input id="video-seek" type="range" min="0" max="${film.duration}" step="0.05" value="${film.start}" aria-label="Video position"><span id="video-remaining">−${filmTime(Math.ceil(film.duration - film.start))}</span></div>
         </div>
@@ -43,7 +45,8 @@ export async function createVideoDemo({ stage, scope, localMedia, optical, icon,
       </div>
       <img class="video-device-frame" src="./devices/${frame.file}" style="width:${caseHeight / caseWidth * 100}%;height:${caseWidth / caseHeight * 100}%" alt="" draggable="false">
     </div>
-    <figcaption class="video-credit"><a href="https://studio.blender.org/films/sprite-fright/">Sprite Fright</a> · © Blender Foundation / Blender Studio · <a href="https://studio.blender.org/projects/sprite-fright/pages/about/">CC BY 1.0 and credits</a>${film.reencoded ? ' · Re-encoded for web playback' : ''}</figcaption>
+    <div class="video-subtitle-line" role="group" aria-label="English subtitles" hidden></div>
+    <figcaption class="video-credit"><a href="https://studio.blender.org/films/sprite-fright/">Sprite Fright</a> · © Blender Foundation / Blender Studio · <a href="https://studio.blender.org/projects/sprite-fright/pages/about/">CC BY 1.0 and credits</a>${film.reencoded ? ' · Re-encoded for web playback' : ''} · <a href="${film.subtitleCredits}">English subtitles</a> by Pacha Tchernof and Gabldotink · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption>
     <p id="video-message" class="video-message" role="status"></p>
   </figure>`;
 
@@ -56,6 +59,9 @@ export async function createVideoDemo({ stage, scope, localMedia, optical, icon,
   const volume = get('video-volume');
   const pip = get('video-pip');
   const fullscreen = get('video-fullscreen');
+  const subtitles = get('video-captions');
+  const subtitleTrack = get('video-subtitle-track');
+  const subtitleLine = stage.querySelector('.video-subtitle-line');
   const controls = root.querySelector('.video-controls');
   const reopen = root.querySelector('.player-reopen');
   const message = stage.querySelector('#video-message');
@@ -158,6 +164,42 @@ export async function createVideoDemo({ stage, scope, localMedia, optical, icon,
   });
   scope.on(get('video-rate'), 'change', event => { video.playbackRate = Number(event.target.value); });
 
+  function renderSubtitles() {
+    const cues = Array.from(subtitleTrack.track.activeCues ?? []);
+    subtitleLine.replaceChildren(...cues.map(cue => {
+      const line = document.createElement('div');
+      line.append(cue.getCueAsHTML());
+      return line;
+    }));
+  }
+
+  function syncSubtitles() {
+    const mode = subtitleTrack.track.mode;
+    subtitles.setAttribute('aria-pressed', String(mode !== 'disabled'));
+    subtitleLine.hidden = mode !== 'hidden';
+    renderSubtitles();
+  }
+
+  function setSubtitles(enabled) {
+    const nativePresentation = document.fullscreenElement === root || document.pictureInPictureElement === video;
+    subtitleTrack.track.mode = enabled ? (nativePresentation ? 'showing' : 'hidden') : 'disabled';
+    syncSubtitles();
+  }
+
+  const updateSubtitlePresentation = () => setSubtitles(subtitleTrack.track.mode !== 'disabled');
+  scope.on(subtitles, 'click', () => setSubtitles(subtitleTrack.track.mode === 'disabled'));
+  scope.on(video.textTracks, 'change', syncSubtitles);
+  scope.on(subtitleTrack.track, 'cuechange', renderSubtitles);
+  scope.on(video, 'enterpictureinpicture', updateSubtitlePresentation);
+  scope.on(video, 'leavepictureinpicture', updateSubtitlePresentation);
+  scope.on(subtitleTrack, 'error', () => {
+    setSubtitles(false);
+    subtitles.disabled = true;
+    subtitles.setAttribute('aria-label', 'English subtitles unavailable');
+    message.textContent = 'English subtitles could not load.';
+  });
+  syncSubtitles();
+
   pip.disabled = !document.pictureInPictureEnabled;
   const airPlay = typeof video.webkitShowPlaybackTargetPicker === 'function';
   fullscreen.disabled = !airPlay && !document.fullscreenEnabled;
@@ -180,6 +222,7 @@ export async function createVideoDemo({ stage, scope, localMedia, optical, icon,
   });
   scope.on(document, 'fullscreenchange', () => {
     if (!airPlay) fullscreen.setAttribute('aria-label', document.fullscreenElement === root ? 'Exit full screen' : 'Enter full screen');
+    updateSubtitlePresentation();
     paint();
   });
   scope.on(get('video-close'), 'click', async () => {
