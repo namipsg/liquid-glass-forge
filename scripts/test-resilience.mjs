@@ -11,6 +11,7 @@ import { consumerPackage, distributionVersions } from './distribution-artifacts.
 import { integrationServers } from '../tests/integration-server.mjs';
 import { configure, frame, opaqueCheck, staleCheck, lifecycleChecks, accessChecks } from '../tests/integration-checks.mjs';
 import { regressionMutations } from '../tests/integration-mutations.mjs';
+import { browserLaunchOptions } from '../tests/browser-launch.mjs';
 
 const root = process.cwd(), sha = b => createHash('sha256').update(b).digest('hex');
 const prepareOnly = process.argv.includes('--prepare-only');
@@ -141,7 +142,9 @@ try {
   else {
   server = await integrationServers(www);
   for (const [engineName, engine] of Object.entries({ chromium, firefox, webkit })) {
-    browser = await engine.launch();
+    const options = browserLaunchOptions(engineName);
+    browser = await engine.launch(options);
+    if (options.headless === false) receipt.firefoxGraphics = 'Xvfb with software OpenGL';
     for (const adapter of ['vanilla', 'react', 'vue', 'angular']) {
       console.log(engineName + ' / ' + adapter + ' forced backends, lifecycle and faults');
       const lane = await attachPage(browser, adapter, engineName), { page } = lane;
