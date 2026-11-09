@@ -7,6 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { releaseBlockers,digest,integrity,inspectTarball,loadDistribution } from '../scripts/distribution-artifacts.mjs';
 import { provenanceIdentity,verifiedRegistryIdentities } from '../scripts/registry-provenance.mjs';
 import { publicationPlan } from '../scripts/publish-approved.mjs';
+import { releasePreview } from '../scripts/release-npm-preview.mjs';
 const names=['core','cpu','dom','webgl','react','vue','angular'];
 function approved(){
   const policy={...JSON.parse(readFileSync('release/policy.json')),publicationEnabled:true,scopeOwnershipVerified:true,trustedPublishersVerified:true,environmentProtectionVerified:true,publicRepositoryVerified:true};
@@ -59,6 +60,73 @@ test('partial publication can resume only for byte-identical already-published v
   await assert.rejects(publicationPlan(artifacts,'0.1.0-rc.1',async()=>({version:'0.1.0-rc.1',dist:{integrity:'different'}})),/collision/);
   await assert.rejects(publicationPlan(artifacts,'0.1.0-rc.1',async()=>{throw Error('HTTP 503');}),/HTTP 503/);
 });
+
+function previewRegistry() {
+  const version = '0.1.0-rc.3';
+  const packages = names.map(name => ({ fullName: '@liquid-glass-forge/' + name, sha256: name }));
+  const versions = new Set();
+  const tags = Object.fromEntries(packages.map(pkg => [pkg.fullName, { next: '0.1.0-rc.2', latest: '0.1.0-rc.2' }]));
+  const writes = [];
+  const registry = {
+    tags: async pkg => ({ ...tags[pkg.fullName] }),
+    hasApprovedVersion: async pkg => versions.has(pkg.fullName),
+    async publish(pkg, tag) {
+      writes.push(['publish', pkg.fullName, tag]);
+      versions.add(pkg.fullName);
+      tags[pkg.fullName][tag] = version;
+    },
+    async tag(pkg, target, tag) {
+      assert.equal(versions.size, packages.length);
+      writes.push([tag, pkg.fullName, target]);
+      tags[pkg.fullName][tag] = target;
+    },
+    async removeTag(pkg, tag) {
+      writes.push(['remove', pkg.fullName, tag]);
+      delete tags[pkg.fullName][tag];
+    },
+  };
+  return { version, packages, registry, tags, writes };
+}
+
+test('preview resume verifies existing versions and moves both tags after every package exists', async () => {
+  const fixture = previewRegistry();
+  const { registry, packages, version, tags, writes } = fixture;
+  const publish = registry.publish;
+  registry.publish = async (pkg, tag) => {
+    if (pkg === packages[1]) throw Error('Interrupted publish');
+    await publish(pkg, tag);
+  };
+  const events = [];
+  const run = () => releasePreview(fixture, registry, event => events.push(event));
+  await assert.rejects(run(), /Interrupted publish/);
+  assert.deepEqual(writes, [['publish', packages[0].fullName, 'preview-' + version]]);
+  registry.publish = publish;
+  await run();
+  assert.deepEqual(writes.map(([action]) => action),
+    ['publish', 'next', 'latest', 'remove'].flatMap(action => packages.map(() => action)));
+  assert.ok(events.some(event => event.package === packages[0].fullName && event.alreadyPublished));
+  for (const pkg of packages) assert.deepEqual(tags[pkg.fullName], { next: version, latest: version });
+  writes.length = 0;
+  await run();
+  assert.deepEqual(writes, []);
+});
+
+test('preview rejects a version collision or newer or stable tags before writing', async () => {
+  for (const latest of ['0.1.0-rc.10', '0.1.0']) {
+    const fixture = previewRegistry();
+    fixture.tags[fixture.packages.at(-1).fullName].latest = latest;
+    await assert.rejects(releasePreview(fixture, fixture.registry, () => {}), /Refusing to replace/);
+    assert.deepEqual(fixture.writes, []);
+  }
+  const fixture = previewRegistry();
+  fixture.registry.hasApprovedVersion = async pkg => {
+    if (pkg === fixture.packages.at(-1)) throw Error('Registry version collision');
+    return false;
+  };
+  await assert.rejects(releasePreview(fixture, fixture.registry, () => {}), /Registry version collision/);
+  assert.deepEqual(fixture.writes, []);
+});
+
 test('the active rehearsal workflow cannot acquire publishing credentials or publish',()=>{
   const workflow=readFileSync('.github/workflows/release-rehearsal.yml','utf8');
   assert.match(workflow,/workflow_dispatch:/);assert.doesNotMatch(workflow,/\b(push|pull_request|schedule):|id-token:|npm publish|publish-approved|dist-tag/);
