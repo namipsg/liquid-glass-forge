@@ -44,6 +44,34 @@ homepage when the staged version is approved and processed. See
 [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) and
 [npm staged publishing](https://docs.npmjs.com/staged-publishing/).
 
+## GitHub-approved experimental releases
+
+Run the same preparation on `main`, then dispatch
+`npm-preview-release.yml` with the preparation run ID and exact manifest
+SHA-256. Check the workflow summary for the commit, manifest and all seven
+tarball digests before approving the `npm-preview-release` deployment once
+in GitHub. The publishing job checks the owner's approval record and the
+current `main` tip before submitting any packages.
+
+The `npm-preview-release` environment restricts deployment to `main` and
+requires review by `namipsg`. The owner can trigger and approve the same run.
+For each package, add a separate npm GitHub Actions trusted publisher for
+`namipsg/liquid-glass-forge`, workflow `npm-preview-release.yml`, environment
+`npm-preview-release`. Enable `npm publish` and `npm dist-tag`. Register the
+connections close to the first approved publish. npm expires unvalidated
+connections after two days.
+
+The workflow publishes the reviewed tarballs in dependency order under a
+temporary version-specific tag. It verifies the public bytes of all seven
+before moving `next` and `latest`, confirms both tags and removes the
+temporary tag. If interrupted, use the receipt and rerun with the same
+manifest. Matching published bytes and completed tag moves are reused.
+A collision or a newer or stable target stops the preview job.
+
+This approval applies to experimental previews. The stage-only workflow
+remains available for npm's per-package review. Qualified releases follow
+the separate policy below.
+
 ## Build and review immutable artifacts
 
 Use Node **24.21.0**, npm **11.19.0** and pnpm **10.34.5**. From a clean identified
